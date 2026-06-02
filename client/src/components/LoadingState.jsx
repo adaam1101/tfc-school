@@ -1,3 +1,5 @@
+import React from "react";
+
 export default function LoadingState({ label = "Loading" }) {
   return (
     <div className="flex min-h-[220px] items-center justify-center text-sm text-slate-500">

@@ -1,3 +1,5 @@
+import React from "react";
+
 export default function StatTile({ icon: Icon, label, value, tone = "slate" }) {
   const tones = {
     slate: "bg-slate-50 text-slate-700",

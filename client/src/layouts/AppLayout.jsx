@@ -1,3 +1,4 @@
+import React from "react";
 import { LogOut } from "lucide-react";
 import { Link } from "react-router-dom";
 import { schoolLogo } from "../config/branding.js";

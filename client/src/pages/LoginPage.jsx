@@ -1,3 +1,4 @@
+import React from "react";
 import { GraduationCap, LockKeyhole, Mail, ShieldCheck, UserRound } from "lucide-react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
