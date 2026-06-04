@@ -3,6 +3,7 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import LoginPage from "./pages/LoginPage.jsx";
 import AdminDashboard from "./pages/admin/AdminDashboard.jsx";
+import RFIDAttendance from "./pages/RFIDAttendance.jsx";
 import TeacherDashboard from "./pages/teacher/TeacherDashboard.jsx";
 import StudentDashboard from "./pages/student/StudentDashboard.jsx";
 import NotFound from "./pages/NotFound.jsx";
@@ -36,6 +37,14 @@ export default function App() {
         element={
           <ProtectedRoute role="student">
             <StudentDashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/rfid-attendance"
+        element={
+          <ProtectedRoute roles={["admin", "teacher"]}>
+            <RFIDAttendance />
           </ProtectedRoute>
         }
       />

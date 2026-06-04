@@ -20,6 +20,8 @@ const studentProfileSchema = new Schema(
     parentEmail: { type: String, trim: true, lowercase: true },
     parentPhone: { type: String, trim: true },
     mark: { type: String, trim: true },
+    rfidCardHash: { type: String, index: true, select: false },
+    rfidCardLast4: { type: String, trim: true },
     teacher: { type: Schema.Types.ObjectId, ref: "User" },
     enrollmentDate: { type: Date, default: Date.now }
   },
@@ -67,6 +69,9 @@ userSchema.methods.matchPassword = function matchPassword(candidatePassword) {
 userSchema.set("toJSON", {
   transform: (_doc, ret) => {
     delete ret.password;
+    if (ret.studentProfile) {
+      delete ret.studentProfile.rfidCardHash;
+    }
     return ret;
   }
 });

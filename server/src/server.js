@@ -11,6 +11,7 @@ import { connectDB } from "./config/db.js";
 import { errorHandler, notFound } from "./middleware/errorHandler.js";
 import { adminRouter } from "./routes/adminRoutes.js";
 import { authRouter } from "./routes/authRoutes.js";
+import { rfidRouter } from "./routes/rfidRoutes.js";
 import { studentRouter } from "./routes/studentRoutes.js";
 import { teacherRouter } from "./routes/teacherRoutes.js";
 import { demoRouter } from "./demo/demoRoutes.js";
@@ -63,6 +64,7 @@ if (demoMode) {
 } else {
   app.use("/api/auth", authRouter);
   app.use("/api/admin", adminRouter);
+  app.use("/api/rfid", rfidRouter);
   app.use("/api/teacher", teacherRouter);
   app.use("/api/student", studentRouter);
 }

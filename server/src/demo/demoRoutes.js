@@ -7,11 +7,13 @@ import {
   demoAttendance,
   demoLogin,
   demoUsers,
+  findDemoStudentByRfidCardId,
   findDemoUserById,
   populateAttendance,
   publicDemoUser,
   updateDemoUser,
-  upsertDemoAttendance
+  upsertDemoAttendance,
+  upsertDemoRfidAttendance
 } from "./demoStore.js";
 import { dateKey, daysAgo } from "../utils/dates.js";
 
@@ -183,6 +185,38 @@ demoRouter.post("/teacher/attendance", protectDemo, allowDemoRoles("teacher"), (
   });
 
   res.json({ attendance });
+});
+
+demoRouter.post("/rfid/scan", protectDemo, allowDemoRoles("admin", "teacher"), (req, res) => {
+  const student = findDemoStudentByRfidCardId(req.body.cardId);
+
+  if (!student) {
+    return res.status(404).json({ message: "No active student is assigned to this RFID card." });
+  }
+
+  if (
+    req.user.role === "teacher" &&
+    !assignedStudentsForTeacher(req.user._id).some((assigned) => assigned._id === student._id)
+  ) {
+    return res.status(403).json({
+      message: "This RFID card belongs to a student who is not assigned to you."
+    });
+  }
+
+  const { record, alreadyMarkedPresent } = upsertDemoRfidAttendance({
+    studentId: student._id,
+    markedById: req.user._id,
+    date: req.body.date
+  });
+
+  res.json({
+    student: publicDemoUser(student),
+    attendance: record,
+    alreadyMarkedPresent,
+    message: alreadyMarkedPresent
+      ? `${student.name} was already marked present today.`
+      : `${student.name} marked present.`
+  });
 });
 
 demoRouter.get("/student/profile", protectDemo, allowDemoRoles("student"), (req, res) => {

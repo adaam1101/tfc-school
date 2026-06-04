@@ -8,6 +8,7 @@ const attendanceSchema = new Schema(
     teacher: { type: Schema.Types.ObjectId, ref: "User", required: true, index: true },
     date: { type: String, required: true, index: true },
     status: { type: String, enum: ["Present", "Absent"], required: true },
+    source: { type: String, enum: ["manual", "rfid"], default: "manual" },
     note: { type: String, trim: true, maxlength: 500 },
     parentNotification: {
       sent: { type: Boolean, default: false },

@@ -89,6 +89,7 @@ teacherRouter.post("/attendance", validate(attendanceSchema), async (req, res, n
     attendance.status = status;
     attendance.note = note;
     attendance.teacher = req.user._id;
+    attendance.source = "manual";
 
     if (status === "Present") {
       attendance.parentNotification = { sent: false, channel: "none", error: undefined };

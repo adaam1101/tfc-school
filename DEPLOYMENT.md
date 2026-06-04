@@ -93,3 +93,23 @@ https://YOUR-RENDER-SITE.onrender.com/admin/login
 ```
 
 After the manager logs in, change the default admin password by editing the admin user or creating a new admin account and deleting the test one.
+
+## 7. RFID Attendance Setup
+
+Use a USB RFID reader that supports HID keyboard-wedge mode. The reader must be connected to the school computer where the attendance page is open.
+
+Live RFID route:
+
+```text
+https://YOUR-RENDER-SITE.onrender.com/rfid-attendance
+```
+
+Register cards from the Admin dashboard:
+
+1. Open Admin dashboard.
+2. Edit a student.
+3. Click the `RFID card` field.
+4. Tap the student's card.
+5. Save the student profile.
+
+Then open `/rfid-attendance`, tap the card, and the student is marked Present for the day.

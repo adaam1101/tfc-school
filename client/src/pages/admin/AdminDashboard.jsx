@@ -3,6 +3,7 @@ import {
   BookOpen,
   CheckCircle2,
   ClipboardList,
+  CreditCard,
   Pencil,
   Plus,
   RefreshCcw,
@@ -38,6 +39,8 @@ const emptyForm = {
     parentEmail: "",
     parentPhone: "",
     mark: "",
+    rfidCardId: "",
+    rfidCardLast4: "",
     teacher: ""
   }
 };
@@ -174,6 +177,8 @@ export default function AdminDashboard() {
         parentEmail: user.studentProfile?.parentEmail || "",
         parentPhone: user.studentProfile?.parentPhone || "",
         mark: user.studentProfile?.mark || "",
+        rfidCardId: "",
+        rfidCardLast4: user.studentProfile?.rfidCardLast4 || "",
         teacher: user.studentProfile?.teacher?._id || user.studentProfile?.teacher || ""
       }
     });
@@ -405,6 +410,23 @@ export default function AdminDashboard() {
                     />
                   </label>
                   <label className="field sm:col-span-2">
+                    RFID card
+                    <span className="relative">
+                      <CreditCard className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                      <input
+                        className="input pl-10"
+                        value={form.studentProfile.rfidCardId}
+                        onChange={(event) => updateForm("studentProfile.rfidCardId", event.target.value)}
+                        placeholder={
+                          form.studentProfile.rfidCardLast4
+                            ? `Card assigned, ending ${form.studentProfile.rfidCardLast4}. Tap new card to replace.`
+                            : "Tap RFID card or type card code"
+                        }
+                        autoComplete="off"
+                      />
+                    </span>
+                  </label>
+                  <label className="field sm:col-span-2">
                     Assigned teacher
                     <select
                       className="input"
@@ -475,6 +497,11 @@ export default function AdminDashboard() {
                         {user.role === "student"
                           ? user.studentProfile?.parentEmail || user.studentProfile?.parentPhone
                           : user.phone || user.teacherProfile?.contactInfo || "No contact"}
+                        {user.role === "student" && user.studentProfile?.rfidCardLast4 ? (
+                          <span className="mt-1 block text-xs text-teal-700">
+                            RFID card ending {user.studentProfile.rfidCardLast4}
+                          </span>
+                        ) : null}
                       </td>
                       <td className="px-3 py-3">
                         <div className="flex flex-wrap gap-2">

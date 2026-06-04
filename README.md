@@ -38,6 +38,7 @@ tfc-school-platform/
 - SMTP email notification hook when a student is marked absent.
 - One-service deployment support with Render.
 - Configurable school logo through `VITE_SCHOOL_LOGO`.
+- RFID attendance station for card-based presence marking.
 
 ## Local Setup
 
@@ -98,6 +99,25 @@ See [DEPLOYMENT.md](DEPLOYMENT.md) for the live deployment steps.
 | Admin | `/admin/login` | `admin@tfcschool.dz` | `Admin@12345` |
 | Teacher | `/teacher/login` | `teacher.english@tfcschool.dz` | `Teacher@12345` |
 | Student | `/student/login` | `student.amine@tfcschool.dz` | `Student@12345` |
+
+## RFID Attendance
+
+The app supports USB RFID readers that work in keyboard-wedge / HID mode. The reader types the card code into the active field.
+
+Routes:
+
+- `/rfid-attendance` for admin/teacher card scans
+- `POST /api/rfid/scan` for marking a card as Present
+
+Demo card codes:
+
+```text
+TFC1001
+TFC1002
+TFC1003
+```
+
+To register a real card, log in as Admin, edit a student profile, focus the `RFID card` field, tap the card, then save. The platform stores a hashed card value and only displays the last 4 characters.
 
 ## Notifications
 

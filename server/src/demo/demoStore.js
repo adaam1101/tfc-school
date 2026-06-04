@@ -1,5 +1,6 @@
 import { signToken } from "../utils/jwt.js";
 import { dateKey, daysAgo } from "../utils/dates.js";
+import { applyRfidCardToProfile, hashRfidCardId, normalizeRfidCardId } from "../utils/rfid.js";
 
 const ids = {
   admin: "665f00000000000000000001",
@@ -52,6 +53,8 @@ export const demoUsers = [
       parentEmail: "parent.amine@example.com",
       parentPhone: "+213555100001",
       mark: "B+",
+      rfidDemoCardId: "TFC1001",
+      rfidCardLast4: "1001",
       teacher: ids.teacher
     }
   },
@@ -68,6 +71,8 @@ export const demoUsers = [
       parentEmail: "parent.lina@example.com",
       parentPhone: "+213555100002",
       mark: "A",
+      rfidDemoCardId: "TFC1002",
+      rfidCardLast4: "1002",
       teacher: ids.teacher
     }
   },
@@ -84,6 +89,8 @@ export const demoUsers = [
       parentEmail: "parent.yacine@example.com",
       parentPhone: "+213555100003",
       mark: "B",
+      rfidDemoCardId: "TFC1003",
+      rfidCardLast4: "1003",
       teacher: ids.teacher
     }
   }
@@ -127,7 +134,12 @@ export const findDemoUserById = (id) => demoUsers.find((user) => user._id === id
 
 export const publicDemoUser = (user) => {
   if (!user) return null;
-  return JSON.parse(JSON.stringify(user));
+  const safeUser = JSON.parse(JSON.stringify(user));
+  if (safeUser.studentProfile) {
+    delete safeUser.studentProfile.rfidCardHash;
+    delete safeUser.studentProfile.rfidDemoCardId;
+  }
+  return safeUser;
 };
 
 export const demoLogin = ({ email, password, role }) => {
@@ -173,6 +185,7 @@ export const upsertDemoAttendance = ({ studentId, teacherId, status, note, date 
       teacher: teacherId,
       date,
       status,
+      source: "manual",
       note: note || "",
       parentNotification: { sent: false, channel: "none" }
     };
@@ -181,6 +194,7 @@ export const upsertDemoAttendance = ({ studentId, teacherId, status, note, date 
 
   record.teacher = teacherId;
   record.status = status;
+  record.source = "manual";
   record.note = note || "";
   record.parentNotification =
     status === "Absent"
@@ -196,6 +210,9 @@ export const upsertDemoAttendance = ({ studentId, teacherId, status, note, date 
 
 export const createDemoUser = (payload) => {
   const id = `${Date.now()}${Math.floor(Math.random() * 1000)}`;
+  if (payload.studentProfile) {
+    payload.studentProfile = applyRfidCardToProfile(payload.studentProfile);
+  }
   const user = { _id: id, status: "active", ...payload };
   demoUsers.push(user);
 
@@ -216,6 +233,13 @@ export const updateDemoUser = (id, payload) => {
   const user = findDemoUserById(id);
   if (!user) return null;
 
+  if (payload.studentProfile) {
+    payload.studentProfile = {
+      ...(user.studentProfile || {}),
+      ...applyRfidCardToProfile(payload.studentProfile)
+    };
+  }
+
   if (payload.password) {
     passwords.set(id, payload.password);
     delete payload.password;
@@ -223,6 +247,48 @@ export const updateDemoUser = (id, payload) => {
 
   Object.assign(user, payload);
   return publicDemoUser(user);
+};
+
+export const findDemoStudentByRfidCardId = (cardId) => {
+  const normalized = normalizeRfidCardId(cardId);
+  const cardHash = hashRfidCardId(normalizeRfidCardId(cardId));
+  return demoUsers.find(
+    (user) =>
+      user.role === "student" &&
+      user.status === "active" &&
+      (user.studentProfile?.rfidCardHash === cardHash ||
+        normalizeRfidCardId(user.studentProfile?.rfidDemoCardId) === normalized)
+  );
+};
+
+export const upsertDemoRfidAttendance = ({ studentId, markedById, date = dateKey() }) => {
+  const student = findDemoUserById(studentId);
+  let record = demoAttendance.find((item) => item.student === studentId && item.date === date);
+  const alreadyMarkedPresent = record?.status === "Present";
+
+  if (!record) {
+    record = {
+      _id: `${Date.now()}`,
+      student: studentId,
+      teacher: student?.studentProfile?.teacher || markedById,
+      date,
+      status: "Present",
+      source: "rfid",
+      note: `Marked present by RFID scan from ${findDemoUserById(markedById)?.name || "kiosk"}.`,
+      parentNotification: { sent: false, channel: "none" }
+    };
+    demoAttendance.push(record);
+  }
+
+  record.teacher = student?.studentProfile?.teacher || markedById;
+  record.status = "Present";
+  record.source = "rfid";
+  record.parentNotification = { sent: false, channel: "none" };
+  if (!record.note || !alreadyMarkedPresent) {
+    record.note = `Marked present by RFID scan from ${findDemoUserById(markedById)?.name || "kiosk"}.`;
+  }
+
+  return { record, alreadyMarkedPresent };
 };
 
 export const deleteDemoUser = (id) => {

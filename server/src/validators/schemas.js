@@ -35,6 +35,7 @@ const studentProfile = z
     parentEmail: optionalEmail,
     parentPhone: optionalText(40),
     mark: optionalText(80),
+    rfidCardId: optionalText(120),
     teacher: z.preprocess(
       (value) => (value === "" || value === null ? undefined : value),
       mongoId.optional()
@@ -99,5 +100,12 @@ export const attendanceReportSchema = z.object({
     to: dateString.optional(),
     status: attendanceStatus.optional(),
     studentId: mongoId.optional()
+  })
+});
+
+export const rfidScanSchema = z.object({
+  body: z.object({
+    cardId: z.string().trim().min(2).max(120),
+    date: dateString.optional()
   })
 });

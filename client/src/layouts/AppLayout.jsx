@@ -1,5 +1,5 @@
 import React from "react";
-import { LogOut } from "lucide-react";
+import { LogOut, ScanLine } from "lucide-react";
 import { Link } from "react-router-dom";
 import { schoolLogo } from "../config/branding.js";
 import { useAuth } from "../context/AuthContext.jsx";
@@ -20,6 +20,12 @@ export default function AppLayout({ title, subtitle, children }) {
           </Link>
 
           <div className="flex flex-wrap items-center gap-3">
+            {user?.role === "admin" || user?.role === "teacher" ? (
+              <Link to="/rfid-attendance" className="btn-secondary">
+                <ScanLine className="h-4 w-4" aria-hidden="true" />
+                RFID
+              </Link>
+            ) : null}
             <div className="text-sm">
               <p className="font-medium">{user?.name}</p>
               <p className="capitalize text-slate-500">{user?.role}</p>

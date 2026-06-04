@@ -4,6 +4,7 @@ import { validate } from "../middleware/validate.js";
 import { Attendance } from "../models/Attendance.js";
 import { User } from "../models/User.js";
 import { dateKey, daysAgo } from "../utils/dates.js";
+import { applyRfidCardToProfile } from "../utils/rfid.js";
 import {
   attendanceReportSchema,
   createUserSchema,
@@ -119,6 +120,10 @@ adminRouter.get("/users", async (req, res, next) => {
 
 adminRouter.post("/users", validate(createUserSchema), async (req, res, next) => {
   try {
+    if (req.body.studentProfile) {
+      req.body.studentProfile = applyRfidCardToProfile(req.body.studentProfile);
+    }
+
     ensureRoleProfile(req.body);
 
     const user = await User.create(req.body);
@@ -159,6 +164,7 @@ adminRouter.put("/users/:id", validate(updateUserSchema), async (req, res, next)
     }
 
     if (payload.studentProfile) {
+      payload.studentProfile = applyRfidCardToProfile(payload.studentProfile);
       payload.studentProfile = {
         ...(existing.studentProfile?.toObject?.() || {}),
         ...payload.studentProfile

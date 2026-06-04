@@ -3,6 +3,7 @@ import { connectDB } from "../src/config/db.js";
 import { Attendance } from "../src/models/Attendance.js";
 import { User } from "../src/models/User.js";
 import { dateKey } from "../src/utils/dates.js";
+import { applyRfidCardToProfile } from "../src/utils/rfid.js";
 
 dotenv.config();
 
@@ -49,13 +50,16 @@ const seed = async () => {
       email: "student.amine@tfcschool.dz",
       password: password.student,
       studentProfile: {
-        age: 14,
-        course: "English",
-        parentName: "Karim Haddad",
-        parentEmail: "parent.amine@example.com",
-        parentPhone: "+213555100001",
-        mark: "B+",
-        teacher: teacher._id
+        ...applyRfidCardToProfile({
+          age: 14,
+          course: "English",
+          parentName: "Karim Haddad",
+          parentEmail: "parent.amine@example.com",
+          parentPhone: "+213555100001",
+          mark: "B+",
+          rfidCardId: "TFC1001",
+          teacher: teacher._id
+        })
       }
     },
     {
@@ -64,13 +68,16 @@ const seed = async () => {
       email: "student.lina@tfcschool.dz",
       password: password.student,
       studentProfile: {
-        age: 13,
-        course: "English",
-        parentName: "Samira Saidi",
-        parentEmail: "parent.lina@example.com",
-        parentPhone: "+213555100002",
-        mark: "A",
-        teacher: teacher._id
+        ...applyRfidCardToProfile({
+          age: 13,
+          course: "English",
+          parentName: "Samira Saidi",
+          parentEmail: "parent.lina@example.com",
+          parentPhone: "+213555100002",
+          mark: "A",
+          rfidCardId: "TFC1002",
+          teacher: teacher._id
+        })
       }
     },
     {
@@ -79,13 +86,16 @@ const seed = async () => {
       email: "student.yacine@tfcschool.dz",
       password: password.student,
       studentProfile: {
-        age: 15,
-        course: "English",
-        parentName: "Noureddine Merabet",
-        parentEmail: "parent.yacine@example.com",
-        parentPhone: "+213555100003",
-        mark: "B",
-        teacher: teacher._id
+        ...applyRfidCardToProfile({
+          age: 15,
+          course: "English",
+          parentName: "Noureddine Merabet",
+          parentEmail: "parent.yacine@example.com",
+          parentPhone: "+213555100003",
+          mark: "B",
+          rfidCardId: "TFC1003",
+          teacher: teacher._id
+        })
       }
     }
   ]);
