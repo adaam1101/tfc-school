@@ -2,9 +2,11 @@ import React from "react";
 
 export default function LoadingState({ label = "Loading" }) {
   return (
-    <div className="flex min-h-[220px] items-center justify-center text-sm text-slate-500">
-      <div className="mr-3 h-5 w-5 animate-spin rounded-full border-2 border-slate-200 border-t-teal-700" />
-      {label}
+    <div className="flex min-h-[280px] flex-col items-center justify-center gap-4 text-sm text-slate-500">
+      <div className="relative h-12 w-12">
+        <div className="absolute inset-0 animate-spin rounded-full border-4 border-slate-100 border-t-teal-600" />
+      </div>
+      <p className="font-medium text-slate-600">{label}…</p>
     </div>
   );
 }
