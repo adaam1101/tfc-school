@@ -19,13 +19,11 @@ import { enrollmentRouter } from "./routes/enrollmentRoutes.js";
 import { paymentRouter } from "./routes/paymentRoutes.js";
 import { announcementRouter } from "./routes/announcementRoutes.js";
 import { auditRouter } from "./routes/auditRoutes.js";
-import { demoRouter } from "./demo/demoRoutes.js";
 
 dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 5000;
-const demoMode = process.env.DEMO_MODE === "true";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const allowedOrigins = [
@@ -40,22 +38,18 @@ app.use(express.json({ limit: "1mb" }));
 app.use(morgan("dev"));
 app.use(rateLimit({ windowMs: 15 * 60 * 1000, max: 300, standardHeaders: true, legacyHeaders: false }));
 
-app.get("/api/health", (_req, res) => { res.json({ status: "ok", app: "TFC School API", demoMode }); });
+app.get("/api/health", (_req, res) => { res.json({ status: "ok", app: "TFC School API" }); });
 
-if (demoMode) {
-  app.use("/api", demoRouter);
-} else {
-  app.use("/api/auth", authRouter);
-  app.use("/api/admin", adminRouter);
-  app.use("/api/rfid", rfidRouter);
-  app.use("/api/teacher", teacherRouter);
-  app.use("/api/student", studentRouter);
-  app.use("/api/ratings", ratingRouter);
-  app.use("/api/enrollments", enrollmentRouter);
-  app.use("/api/payments", paymentRouter);
-  app.use("/api/announcements", announcementRouter);
-  app.use("/api/audit", auditRouter);
-}
+app.use("/api/auth", authRouter);
+app.use("/api/admin", adminRouter);
+app.use("/api/rfid", rfidRouter);
+app.use("/api/teacher", teacherRouter);
+app.use("/api/student", studentRouter);
+app.use("/api/ratings", ratingRouter);
+app.use("/api/enrollments", enrollmentRouter);
+app.use("/api/payments", paymentRouter);
+app.use("/api/announcements", announcementRouter);
+app.use("/api/audit", auditRouter);
 
 const clientDistCandidates = [
   path.resolve(__dirname, "../../client/dist"),
@@ -72,8 +66,4 @@ if (clientDist) {
 app.use(notFound);
 app.use(errorHandler);
 
-if (demoMode) {
-  app.listen(port, () => { console.log(`TFC School API running in demo mode on http://localhost:${port}`); });
-} else {
-  connectDB().then(() => { app.listen(port, () => { console.log(`TFC School API running on http://localhost:${port}`); }); }).catch((error) => { console.error("Failed to start server:", error.message); process.exit(1); });
-}
+connectDB().then(() => { app.listen(port, () => { console.log(`TFC School API running on http://localhost:${port}`); }); }).catch((error) => { console.error("Failed to start server:", error.message); process.exit(1); });
