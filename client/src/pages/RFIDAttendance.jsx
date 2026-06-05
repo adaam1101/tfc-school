@@ -98,14 +98,14 @@ export default function RFIDAttendance() {
   /* Ring + icon styles by status */
   const zoneConfig = {
     idle: {
-      ring: "border-teal-300/60",
-      bg: "bg-teal-50/60",
-      icon: "text-teal-500",
+      ring: "border-sky-300/60",
+      bg: "bg-sky-50/60",
+      icon: "text-sky-500",
       label: "Ready to scan",
       sub: "Hold RFID card near reader",
-      ringClass: "scan-ring-1 border-teal-400/50 bg-teal-400/10",
-      ringClass2: "scan-ring-2 border-teal-400/30 bg-transparent",
-      ringClass3: "scan-ring-3 border-teal-400/20 bg-transparent"
+      ringClass: "scan-ring-1 border-sky-400/50 bg-sky-400/10",
+      ringClass2: "scan-ring-2 border-sky-400/30 bg-transparent",
+      ringClass3: "scan-ring-3 border-sky-400/20 bg-transparent"
     },
     scanning: {
       ring: "border-sky-400",
@@ -151,7 +151,7 @@ export default function RFIDAttendance() {
         {/* ── Left: Scan Station ── */}
         <section className="card p-6">
           <div className="mb-6 flex items-center gap-3">
-            <div className="rounded-xl bg-gradient-to-br from-teal-500 to-emerald-600 p-2.5 shadow-sm">
+            <div className="rounded-xl bg-gradient-to-br from-sky-500 to-emerald-600 p-2.5 shadow-sm">
               <ScanLine className="h-5 w-5 text-white" aria-hidden="true" />
             </div>
             <div>
@@ -273,7 +273,7 @@ export default function RFIDAttendance() {
                 <button
                   key={demoCard}
                   type="button"
-                  className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition-all duration-200 hover:border-teal-300 hover:bg-teal-50 hover:text-teal-800 hover:shadow-md"
+                  className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition-all duration-200 hover:border-sky-300 hover:bg-sky-50 hover:text-sky-800 hover:shadow-md"
                   onClick={() => submitScan(demoCard)}
                   disabled={loading}
                 >
@@ -295,10 +295,10 @@ export default function RFIDAttendance() {
             </h2>
 
             {lastStudent && scanStatus !== "error" ? (
-              <div className="animate-success-pop rounded-2xl bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-200 p-5">
+              <div className="animate-success-pop rounded-2xl bg-gradient-to-br from-emerald-50 to-sky-50 border border-emerald-200 p-5">
                 {/* Avatar */}
                 <div className="flex items-center gap-4">
-                  <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-teal-500 to-emerald-600 text-2xl font-bold text-white shadow-md">
+                  <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-500 to-emerald-600 text-2xl font-bold text-white shadow-md">
                     {lastStudent.name?.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()}
                   </div>
                   <div className="flex-1">

@@ -40,7 +40,7 @@ export default function EnrollModal({ onClose }) {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
       <div className="max-h-[90vh] w-full max-w-lg animate-fade-slide-up overflow-y-auto rounded-3xl bg-white shadow-2xl">
         {/* Header */}
-        <div className="sticky top-0 flex items-center justify-between bg-gradient-to-r from-teal-600 to-emerald-700 px-6 py-4 text-white">
+        <div className="sticky top-0 flex items-center justify-between bg-gradient-to-r from-sky-600 to-emerald-700 px-6 py-4 text-white">
           <h2 className="flex items-center gap-2 text-lg font-black">
             <GraduationCap className="h-5 w-5" />
             Apply to TFC

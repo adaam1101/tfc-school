@@ -46,7 +46,7 @@ export default function IDCardModal({ user, student, onClose }) {
       <div className="w-full max-w-md animate-fade-slide-up rounded-3xl bg-white p-6 shadow-2xl">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="flex items-center gap-2 text-lg font-bold text-slate-900">
-            <CreditCard className="h-5 w-5 text-teal-600" />
+            <CreditCard className="h-5 w-5 text-sky-600" />
             {isTeacher ? "Teacher ID Card" : "Student ID Card"}
           </h2>
           <button onClick={onClose} className="rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700">

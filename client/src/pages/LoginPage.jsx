@@ -11,39 +11,18 @@ const roleConfig = {
     title: "Admin Portal",
     subtitle: "Authorized personnel only",
     icon: ShieldCheck,
-    gradient: "from-[#0a1628] via-[#0f1f35] to-[#1a3a5c]",
-    btnGradient: "from-violet-600 to-purple-700",
-    accentBg: "bg-violet-900/30",
-    accentBorder: "border-violet-500/30",
-    accentText: "text-violet-300",
-    ringColor: "focus:ring-violet-500/30",
-    badgeBg: "bg-violet-600",
     placeholder: "admin@tfcschool.dz"
   },
   teacher: {
     title: "Teacher Portal",
     subtitle: "Welcome back, educator",
     icon: GraduationCap,
-    gradient: "from-[#0a1628] via-[#0d1e38] to-[#0f2d4a]",
-    btnGradient: "from-sky-600 to-blue-700",
-    accentBg: "bg-sky-900/30",
-    accentBorder: "border-sky-500/30",
-    accentText: "text-sky-300",
-    ringColor: "focus:ring-sky-500/30",
-    badgeBg: "bg-sky-600",
     placeholder: "teacher@tfcschool.dz"
   },
   student: {
     title: "Student Portal",
     subtitle: "Ready to learn today?",
     icon: UserRound,
-    gradient: "from-[#0a1a20] via-[#0d2530] to-[#0f2d38]",
-    btnGradient: "from-teal-600 to-emerald-700",
-    accentBg: "bg-teal-900/30",
-    accentBorder: "border-teal-500/30",
-    accentText: "text-teal-300",
-    ringColor: "focus:ring-teal-500/30",
-    badgeBg: "bg-teal-600",
     placeholder: "student@tfcschool.dz"
   }
 };
@@ -92,35 +71,38 @@ export default function LoginPage({ role }) {
     }
   };
 
+  const inputClass =
+    "w-full rounded-2xl border border-sky-200 bg-sky-50/60 py-3.5 pl-11 pr-4 text-sm text-slate-900 placeholder-slate-400 outline-none transition focus:border-sky-400 focus:bg-white focus:ring-2 focus:ring-sky-200";
+
   return (
-    <div className={`min-h-screen bg-gradient-to-br ${cfg.gradient} flex items-center justify-center px-4 py-12`}>
+    <div className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-sky-100 via-blue-50 to-sky-200 px-4 py-12">
       {/* Background glow */}
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div className="absolute -top-40 -left-40 h-[500px] w-[500px] rounded-full bg-white/3 blur-3xl" />
-        <div className="absolute -bottom-40 -right-40 h-[400px] w-[400px] rounded-full bg-white/3 blur-3xl" />
+        <div className="absolute -top-40 -left-40 h-[500px] w-[500px] rounded-full bg-sky-300/30 blur-3xl" />
+        <div className="absolute -bottom-40 -right-40 h-[400px] w-[400px] rounded-full bg-blue-300/30 blur-3xl" />
       </div>
 
       <div className="relative w-full max-w-md animate-fade-slide-up">
         {/* Back to home */}
         <Link
           to="/"
-          className="mb-6 inline-flex items-center gap-2 text-sm font-medium text-white/50 transition hover:text-white/80"
+          className="mb-6 inline-flex items-center gap-2 text-sm font-medium text-sky-700 transition hover:text-sky-900"
         >
           <ArrowLeft className="h-4 w-4" />
           Back to home
         </Link>
 
         {/* Card */}
-        <div className="overflow-hidden rounded-3xl bg-white/5 ring-1 ring-white/10 backdrop-blur-xl shadow-2xl">
+        <div className="overflow-hidden rounded-3xl bg-white ring-1 ring-sky-100 shadow-2xl shadow-sky-200/50">
           {/* Top bar */}
-          <div className={`bg-gradient-to-r ${cfg.btnGradient} p-6 text-white`}>
+          <div className="bg-gradient-to-r from-sky-500 to-blue-600 p-6 text-white">
             <div className="flex items-center gap-4">
               <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/20 ring-2 ring-white/30">
                 <Icon className="h-7 w-7" />
               </div>
               <div>
                 <p className="text-xl font-black">{cfg.title}</p>
-                <p className="text-sm opacity-80">{cfg.subtitle}</p>
+                <p className="text-sm opacity-90">{cfg.subtitle}</p>
               </div>
             </div>
           </div>
@@ -129,10 +111,10 @@ export default function LoginPage({ role }) {
           <div className="p-8">
             {/* School identity */}
             <div className="mb-8 flex items-center gap-3">
-              <img src={schoolLogo} alt="TFC" className="h-10 w-10 rounded-xl object-contain opacity-80" />
+              <img src={schoolLogo} alt="TFC" className="h-10 w-10 rounded-xl object-contain ring-1 ring-sky-100" />
               <div>
-                <p className="text-sm font-bold text-white">{schoolInfo.name}</p>
-                <p className="text-xs text-white/40">{schoolInfo.city}</p>
+                <p className="text-sm font-bold text-slate-900">{schoolInfo.name}</p>
+                <p className="text-xs text-slate-500">{schoolInfo.city}</p>
               </div>
             </div>
 
@@ -142,17 +124,17 @@ export default function LoginPage({ role }) {
             <form className="grid gap-5" onSubmit={handleSubmit}>
               {/* Email */}
               <div>
-                <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-white/60">
+                <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-sky-700">
                   Email address
                 </label>
                 <div className="relative">
-                  <Mail className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-white/30" />
+                  <Mail className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-sky-400" />
                   <input
                     type="email"
                     value={form.email}
                     onChange={(e) => setForm((c) => ({ ...c, email: e.target.value }))}
                     placeholder={cfg.placeholder}
-                    className={`w-full rounded-2xl border ${cfg.accentBorder} ${cfg.accentBg} py-3.5 pl-11 pr-4 text-sm text-white placeholder-white/25 outline-none transition ${cfg.ringColor} focus:ring-2 focus:border-transparent`}
+                    className={inputClass}
                     required
                     autoComplete="email"
                   />
@@ -161,24 +143,24 @@ export default function LoginPage({ role }) {
 
               {/* Password */}
               <div>
-                <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-white/60">
+                <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-sky-700">
                   Password
                 </label>
                 <div className="relative">
-                  <LockKeyhole className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-white/30" />
+                  <LockKeyhole className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-sky-400" />
                   <input
                     type={showPwd ? "text" : "password"}
                     value={form.password}
                     onChange={(e) => setForm((c) => ({ ...c, password: e.target.value }))}
                     placeholder="Enter your password"
-                    className={`w-full rounded-2xl border ${cfg.accentBorder} ${cfg.accentBg} py-3.5 pl-11 pr-12 text-sm text-white placeholder-white/25 outline-none transition ${cfg.ringColor} focus:ring-2 focus:border-transparent`}
+                    className={`${inputClass} pr-12`}
                     required
                     minLength={8}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPwd((v) => !v)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60 transition"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-sky-400 hover:text-sky-700 transition"
                   >
                     {showPwd ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
@@ -188,7 +170,7 @@ export default function LoginPage({ role }) {
               <button
                 type="submit"
                 disabled={loading}
-                className={`mt-2 flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r ${cfg.btnGradient} py-4 text-sm font-black text-white shadow-lg transition-all duration-200 hover:opacity-90 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-white/20 disabled:opacity-60 disabled:cursor-not-allowed`}
+                className="mt-2 flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-sky-500 to-blue-600 py-4 text-sm font-black text-white shadow-lg shadow-sky-300/50 transition-all duration-200 hover:from-sky-400 hover:to-blue-500 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-sky-300 disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 <LockKeyhole className="h-4 w-4" />
                 {loading ? "Signing in…" : `Sign in to ${cfg.title}`}
@@ -196,7 +178,7 @@ export default function LoginPage({ role }) {
 
               <Link
                 to="/forgot-password"
-                className="-mt-1 text-center text-xs font-medium text-white/40 transition hover:text-white/70"
+                className="-mt-1 text-center text-xs font-medium text-slate-400 transition hover:text-sky-700"
               >
                 Forgot your password?
               </Link>
@@ -205,12 +187,12 @@ export default function LoginPage({ role }) {
 
             {step === "twofa" && (
             <form className="grid gap-5" onSubmit={handleVerify}>
-              <p className="text-sm text-white/60">
-                We emailed a 6-digit code to <span className="font-semibold text-white/90">{form.email}</span>.
+              <p className="text-sm text-slate-600">
+                We emailed a 6-digit code to <span className="font-semibold text-slate-900">{form.email}</span>.
                 Enter it below to finish signing in.
               </p>
               <div>
-                <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-white/60">
+                <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-sky-700">
                   Verification code
                 </label>
                 <input
@@ -220,14 +202,14 @@ export default function LoginPage({ role }) {
                   value={code}
                   onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
                   placeholder="000000"
-                  className={`w-full rounded-2xl border ${cfg.accentBorder} ${cfg.accentBg} py-3.5 text-center text-2xl font-bold tracking-[0.5em] text-white placeholder-white/20 outline-none transition ${cfg.ringColor} focus:ring-2 focus:border-transparent`}
+                  className="w-full rounded-2xl border border-sky-200 bg-sky-50/60 py-3.5 text-center text-2xl font-bold tracking-[0.5em] text-slate-900 placeholder-slate-300 outline-none transition focus:border-sky-400 focus:bg-white focus:ring-2 focus:ring-sky-200"
                   required
                 />
               </div>
               <button
                 type="submit"
                 disabled={loading || code.length !== 6}
-                className={`flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r ${cfg.btnGradient} py-4 text-sm font-black text-white shadow-lg transition-all duration-200 hover:opacity-90 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-white/20 disabled:opacity-60 disabled:cursor-not-allowed`}
+                className="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-sky-500 to-blue-600 py-4 text-sm font-black text-white shadow-lg shadow-sky-300/50 transition-all duration-200 hover:from-sky-400 hover:to-blue-500 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-sky-300 disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 <ShieldCheck className="h-4 w-4" />
                 {loading ? "Verifying…" : "Verify & sign in"}
@@ -235,14 +217,14 @@ export default function LoginPage({ role }) {
               <button
                 type="button"
                 onClick={() => { setStep("credentials"); setCode(""); setError(""); }}
-                className="text-center text-xs font-medium text-white/40 transition hover:text-white/70"
+                className="text-center text-xs font-medium text-slate-400 transition hover:text-sky-700"
               >
                 Back to login
               </button>
             </form>
             )}
 
-            <p className="mt-6 text-center text-xs text-white/25">
+            <p className="mt-6 text-center text-xs text-slate-400">
               {schoolInfo.credit} · {schoolInfo.city}
             </p>
           </div>

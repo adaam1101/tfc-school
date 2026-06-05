@@ -39,15 +39,15 @@ export default function ResetPasswordPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0a1628] via-[#0f1f35] to-[#1a3a5c] flex items-center justify-center px-4 py-12">
+    <div className="min-h-screen bg-gradient-to-br from-sky-100 via-blue-50 to-sky-200 flex items-center justify-center px-4 py-12">
       <div className="relative w-full max-w-md animate-fade-slide-up">
-        <Link to="/" className="mb-6 inline-flex items-center gap-2 text-sm font-medium text-white/50 transition hover:text-white/80">
+        <Link to="/" className="mb-6 inline-flex items-center gap-2 text-sm font-medium text-sky-700 transition hover:text-sky-900">
           <ArrowLeft className="h-4 w-4" />
           Back to home
         </Link>
 
-        <div className="overflow-hidden rounded-3xl bg-white/5 ring-1 ring-white/10 backdrop-blur-xl shadow-2xl">
-          <div className="bg-gradient-to-r from-violet-600 to-purple-700 p-6 text-white">
+        <div className="overflow-hidden rounded-3xl bg-white ring-1 ring-sky-100 shadow-2xl shadow-sky-200/50">
+          <div className="bg-gradient-to-r from-sky-500 to-blue-600 p-6 text-white">
             <div className="flex items-center gap-4">
               <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/20 ring-2 ring-white/30">
                 <LockKeyhole className="h-7 w-7" />
@@ -61,24 +61,24 @@ export default function ResetPasswordPage() {
 
           <div className="p-8">
             <div className="mb-8 flex items-center gap-3">
-              <img src={schoolLogo} alt="TFC" className="h-10 w-10 rounded-xl object-contain opacity-80" />
+              <img src={schoolLogo} alt="TFC" className="h-10 w-10 rounded-xl object-contain ring-1 ring-sky-100" />
               <div>
-                <p className="text-sm font-bold text-white">{schoolInfo.name}</p>
-                <p className="text-xs text-white/40">{schoolInfo.city}</p>
+                <p className="text-sm font-bold text-slate-900">{schoolInfo.name}</p>
+                <p className="text-xs text-slate-500">{schoolInfo.city}</p>
               </div>
             </div>
 
             {done ? (
               <div className="grid gap-4 text-center">
-                <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-500/20 ring-2 ring-emerald-400/30">
-                  <CheckCircle2 className="h-7 w-7 text-emerald-300" />
+                <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-100 ring-2 ring-emerald-200">
+                  <CheckCircle2 className="h-7 w-7 text-emerald-600" />
                 </div>
-                <p className="text-sm text-white/70">Password updated! Redirecting you to login…</p>
+                <p className="text-sm text-slate-700">Password updated! Redirecting you to login…</p>
               </div>
             ) : !token ? (
               <div className="grid gap-4 text-center">
-                <p className="text-sm text-rose-300">This reset link is missing or invalid.</p>
-                <Link to="/forgot-password" className="text-sm font-semibold text-violet-300 hover:text-violet-200">
+                <p className="text-sm text-rose-500">This reset link is missing or invalid.</p>
+                <Link to="/forgot-password" className="text-sm font-semibold text-sky-600 hover:text-sky-700">
                   Request a new link
                 </Link>
               </div>
@@ -87,41 +87,41 @@ export default function ResetPasswordPage() {
                 <ErrorAlert message={error} />
                 <form className="grid gap-5" onSubmit={handleSubmit}>
                   <div>
-                    <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-white/60">
+                    <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-sky-700">
                       New password
                     </label>
                     <div className="relative">
-                      <LockKeyhole className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-white/30" />
+                      <LockKeyhole className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-sky-400" />
                       <input
                         type={showPwd ? "text" : "password"}
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         placeholder="At least 8 characters"
-                        className="w-full rounded-2xl border border-violet-500/30 bg-violet-900/30 py-3.5 pl-11 pr-12 text-sm text-white placeholder-white/25 outline-none transition focus:ring-2 focus:ring-violet-500/30 focus:border-transparent"
+                        className="w-full rounded-2xl border border-sky-200 bg-sky-50/60 py-3.5 pl-11 pr-12 text-sm text-slate-900 placeholder-slate-400 outline-none transition focus:border-sky-400 focus:bg-white focus:ring-2 focus:ring-sky-200"
                         required
                         minLength={8}
                       />
                       <button
                         type="button"
                         onClick={() => setShowPwd((v) => !v)}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60 transition"
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-sky-400 hover:text-sky-700 transition"
                       >
                         {showPwd ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                       </button>
                     </div>
                   </div>
                   <div>
-                    <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-white/60">
+                    <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-sky-700">
                       Confirm password
                     </label>
                     <div className="relative">
-                      <LockKeyhole className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-white/30" />
+                      <LockKeyhole className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-sky-400" />
                       <input
                         type={showPwd ? "text" : "password"}
                         value={confirm}
                         onChange={(e) => setConfirm(e.target.value)}
                         placeholder="Re-enter password"
-                        className="w-full rounded-2xl border border-violet-500/30 bg-violet-900/30 py-3.5 pl-11 pr-4 text-sm text-white placeholder-white/25 outline-none transition focus:ring-2 focus:ring-violet-500/30 focus:border-transparent"
+                        className="w-full rounded-2xl border border-sky-200 bg-sky-50/60 py-3.5 pl-11 pr-4 text-sm text-slate-900 placeholder-slate-400 outline-none transition focus:border-sky-400 focus:bg-white focus:ring-2 focus:ring-sky-200"
                         required
                         minLength={8}
                       />
@@ -130,7 +130,7 @@ export default function ResetPasswordPage() {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-violet-600 to-purple-700 py-4 text-sm font-black text-white shadow-lg transition-all duration-200 hover:opacity-90 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-white/20 disabled:opacity-60 disabled:cursor-not-allowed"
+                    className="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-sky-500 to-blue-600 py-4 text-sm font-black text-white shadow-lg shadow-sky-300/50 transition-all duration-200 hover:from-sky-400 hover:to-blue-500 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-sky-300 disabled:opacity-60 disabled:cursor-not-allowed"
                   >
                     <LockKeyhole className="h-4 w-4" />
                     {loading ? "Updating…" : "Update password"}
@@ -139,7 +139,7 @@ export default function ResetPasswordPage() {
               </>
             )}
 
-            <p className="mt-6 text-center text-xs text-white/25">
+            <p className="mt-6 text-center text-xs text-slate-400">
               {schoolInfo.credit} · {schoolInfo.city}
             </p>
           </div>

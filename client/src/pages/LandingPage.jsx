@@ -25,7 +25,7 @@ const features = [
     icon: Wifi,
     title: "RFID Smart Attendance",
     desc: "Instant attendance tracking with RFID card readers. Students tap their card — the system does the rest.",
-    color: "from-teal-500 to-emerald-600"
+    color: "from-sky-500 to-emerald-600"
   },
   {
     icon: BarChart3,
@@ -83,8 +83,8 @@ const portals = [
     label: "Student Portal",
     sub: "View your profile & attendance",
     icon: UserRound,
-    gradient: "from-teal-600 to-emerald-700",
-    shadow: "shadow-teal-200",
+    gradient: "from-sky-600 to-emerald-700",
+    shadow: "shadow-sky-200",
     link: "/student/login"
   }
 ];
@@ -146,7 +146,7 @@ export default function LandingPage() {
           <div className="hidden items-center gap-2 md:flex">
             <button
               onClick={() => setShowEnroll(true)}
-              className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-teal-500 to-emerald-600 px-4 py-2 text-xs font-bold text-white shadow-sm transition-all hover:opacity-90 hover:shadow-md"
+              className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-sky-500 to-emerald-600 px-4 py-2 text-xs font-bold text-white shadow-sm transition-all hover:opacity-90 hover:shadow-md"
             >
               <GraduationCap className="h-3.5 w-3.5" />
               Enroll
@@ -170,7 +170,7 @@ export default function LandingPage() {
         {/* Decorative circles */}
         <div className="pointer-events-none absolute inset-0">
           <div className="absolute -top-32 -left-32 h-[500px] w-[500px] rounded-full bg-blue-600/10 blur-3xl" />
-          <div className="absolute -bottom-32 -right-32 h-[400px] w-[400px] rounded-full bg-teal-500/10 blur-3xl" />
+          <div className="absolute -bottom-32 -right-32 h-[400px] w-[400px] rounded-full bg-sky-500/10 blur-3xl" />
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[300px] w-[300px] rounded-full bg-violet-600/5 blur-3xl" />
         </div>
 
@@ -185,7 +185,7 @@ export default function LandingPage() {
             <h1 className="mt-3 text-5xl font-black leading-tight tracking-tight sm:text-6xl lg:text-7xl">
               Training Formation
               <br />
-              <span className="bg-gradient-to-r from-blue-400 to-teal-400 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-blue-400 to-sky-400 bg-clip-text text-transparent">
                 Center
               </span>
             </h1>
@@ -194,7 +194,7 @@ export default function LandingPage() {
             </p>
             <button
               onClick={() => setShowEnroll(true)}
-              className="mt-8 inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-teal-500 to-emerald-600 px-8 py-4 text-base font-black text-white shadow-lg shadow-teal-900/40 transition-all hover:-translate-y-0.5 hover:shadow-xl"
+              className="mt-8 inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-sky-500 to-emerald-600 px-8 py-4 text-base font-black text-white shadow-lg shadow-sky-900/40 transition-all hover:-translate-y-0.5 hover:shadow-xl"
             >
               <GraduationCap className="h-5 w-5" />
               Apply / Enroll Now
@@ -261,10 +261,10 @@ export default function LandingPage() {
         <div className="mx-auto max-w-7xl px-6">
           <div className="grid gap-16 lg:grid-cols-2 lg:items-center">
             <div>
-              <p className="text-sm font-bold uppercase tracking-widest text-teal-600">About TFC</p>
+              <p className="text-sm font-bold uppercase tracking-widest text-sky-600">About TFC</p>
               <h2 className="mt-3 text-4xl font-black leading-tight text-slate-900">
                 Building Futures in
-                <span className="text-teal-600"> Annaba</span>
+                <span className="text-sky-600"> Annaba</span>
               </h2>
               <p className="mt-6 text-lg text-slate-600 leading-relaxed">
                 {schoolInfo.description}
@@ -286,7 +286,7 @@ export default function LandingPage() {
 
             <div className="grid grid-cols-2 gap-4">
               {[
-                { icon: Users,        label: "Active students",   value: "200+",  color: "from-teal-500 to-emerald-600" },
+                { icon: Users,        label: "Active students",   value: "200+",  color: "from-sky-500 to-emerald-600" },
                 { icon: GraduationCap,label: "Expert teachers",   value: "15+",   color: "from-sky-500 to-blue-600"     },
                 { icon: BookOpen,     label: "Courses offered",   value: "12+",   color: "from-violet-500 to-purple-600" },
                 { icon: Award,        label: "Years of excellence",value: "10+",  color: "from-amber-500 to-orange-500" }
@@ -445,7 +445,7 @@ export default function LandingPage() {
       <section id="contact" className="bg-white py-24">
         <div className="mx-auto max-w-7xl px-6">
           <div className="text-center">
-            <p className="text-sm font-bold uppercase tracking-widest text-teal-600">Get in touch</p>
+            <p className="text-sm font-bold uppercase tracking-widest text-sky-600">Get in touch</p>
             <h2 className="mt-3 text-4xl font-black text-slate-900">Contact Us</h2>
             <p className="mt-4 text-slate-500">We're here to answer your questions.</p>
           </div>
@@ -465,7 +465,7 @@ export default function LandingPage() {
                 label: "Phone 1",
                 value: schoolInfo.phones[0],
                 sub: "Call us anytime",
-                color: "from-teal-500 to-emerald-600",
+                color: "from-sky-500 to-emerald-600",
                 href: `tel:${schoolInfo.phones[0].replace(/\s/g, "")}`
               },
               {
@@ -473,7 +473,7 @@ export default function LandingPage() {
                 label: "Phone 2",
                 value: schoolInfo.phones[1],
                 sub: "Alternative line",
-                color: "from-teal-500 to-emerald-600",
+                color: "from-sky-500 to-emerald-600",
                 href: `tel:${schoolInfo.phones[1].replace(/\s/g, "")}`
               },
               {
@@ -491,7 +491,7 @@ export default function LandingPage() {
                 </div>
                 <p className="text-xs font-bold uppercase tracking-wider text-slate-500">{label}</p>
                 {href ? (
-                  <a href={href} className="mt-2 block text-sm font-bold text-slate-900 hover:text-teal-600 transition-colors break-all">
+                  <a href={href} className="mt-2 block text-sm font-bold text-slate-900 hover:text-sky-600 transition-colors break-all">
                     {value}
                   </a>
                 ) : (

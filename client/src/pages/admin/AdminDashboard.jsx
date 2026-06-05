@@ -93,7 +93,7 @@ const roleLabel  = { admin: "Admin", teacher: "Teacher", student: "Student" };
 const roleBadge  = {
   admin:   "bg-violet-100 text-violet-800",
   teacher: "bg-sky-100 text-sky-800",
-  student: "bg-teal-100 text-teal-800"
+  student: "bg-sky-100 text-sky-800"
 };
 
 export default function AdminDashboard() {
@@ -290,7 +290,7 @@ export default function AdminDashboard() {
           <div className="card p-6">
             <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
               <div className="flex items-center gap-3">
-                <div className={`rounded-xl p-2.5 shadow-sm ${editingId ? "bg-gradient-to-br from-amber-500 to-orange-500" : "bg-gradient-to-br from-teal-500 to-emerald-600"}`}>
+                <div className={`rounded-xl p-2.5 shadow-sm ${editingId ? "bg-gradient-to-br from-amber-500 to-orange-500" : "bg-gradient-to-br from-sky-500 to-emerald-600"}`}>
                   {editingId ? <Pencil className="h-5 w-5 text-white" /> : <Plus className="h-5 w-5 text-white" />}
                 </div>
                 <div>
@@ -518,7 +518,7 @@ export default function AdminDashboard() {
                           ? user.studentProfile?.parentEmail || user.studentProfile?.parentPhone || "–"
                           : user.phone || user.teacherProfile?.contactInfo || "–"}
                         {user.role === "student" && user.studentProfile?.rfidCardLast4 ? (
-                          <span className="mt-1 flex items-center gap-1 text-teal-700">
+                          <span className="mt-1 flex items-center gap-1 text-sky-700">
                             <CreditCard className="h-3 w-3" />
                             …{user.studentProfile.rfidCardLast4}
                           </span>

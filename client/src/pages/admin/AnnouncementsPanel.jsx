@@ -5,7 +5,7 @@ import ErrorAlert from "../../components/ErrorAlert.jsx";
 
 const audienceBadge = {
   all: "bg-slate-100 text-slate-600",
-  students: "bg-teal-100 text-teal-700",
+  students: "bg-sky-100 text-sky-700",
   teachers: "bg-sky-100 text-sky-700"
 };
 

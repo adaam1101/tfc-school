@@ -123,7 +123,7 @@ export default function TeacherDashboard() {
         <section className="card p-6">
           <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-3">
-              <div className="rounded-xl bg-gradient-to-br from-teal-500 to-emerald-600 p-2.5 shadow-sm">
+              <div className="rounded-xl bg-gradient-to-br from-sky-500 to-emerald-600 p-2.5 shadow-sm">
                 <ClipboardCheck className="h-5 w-5 text-white" aria-hidden="true" />
               </div>
               <div>

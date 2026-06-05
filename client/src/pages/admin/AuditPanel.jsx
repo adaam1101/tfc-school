@@ -14,7 +14,7 @@ const actionColor = {
 const roleColor = {
   admin: "from-violet-500 to-purple-600",
   teacher: "from-sky-500 to-blue-600",
-  student: "from-teal-500 to-emerald-600"
+  student: "from-sky-500 to-emerald-600"
 };
 
 export default function AuditPanel() {
