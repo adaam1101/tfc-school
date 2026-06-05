@@ -1,0 +1,39 @@
+services:
+  - type: web
+    name: tfc-school
+    runtime: node
+    plan: free
+    buildCommand: npm install --prefix server && npm install --prefix client && npm run build --prefix client
+    startCommand: npm start --prefix server
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: 20
+      - key: DEMO_MODE
+        value: false
+      - key: MONGO_URI
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      - key: SCHOOL_TIMEZONE
+        value: Africa/Algiers
+      - key: VITE_API_URL
+        value: /api
+      - key: VITE_SCHOOL_LOGO
+        value: /tfc-logo.png
+      - key: NOTIFICATIONS_ENABLED
+        value: false
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        value: 587
+      - key: SMTP_SECURE
+        value: false
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false
+      - key: SMTP_FROM
+        value: TFC School <no-reply@tfcschool.dz>
