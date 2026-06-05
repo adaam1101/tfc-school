@@ -21,7 +21,7 @@ ratingRouter.get("/recent", async (_req, res, next) => {
   } catch (err) { next(err); }
 });
 
-ratingRouter.post("/", protect(), async (req, res, next) => {
+ratingRouter.post("/", protect, async (req, res, next) => {
   try {
     const { stars, comment = "" } = req.body;
     if (!stars || stars < 1 || stars > 5) return res.status(400).json({ message: "Stars must be 1–5." });
@@ -34,7 +34,7 @@ ratingRouter.post("/", protect(), async (req, res, next) => {
   } catch (err) { next(err); }
 });
 
-ratingRouter.get("/mine", protect(), async (req, res, next) => {
+ratingRouter.get("/mine", protect, async (req, res, next) => {
   try {
     const rating = await Rating.findOne({ user: req.user._id });
     res.json({ rating: rating || null });
