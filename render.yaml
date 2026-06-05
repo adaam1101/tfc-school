@@ -17,6 +17,10 @@ services:
         value: 7d
       - key: SCHOOL_TIMEZONE
         value: Africa/Algiers
+      - key: CLIENT_URL
+        value: https://tfcschool.com
+      - key: CLIENT_URLS
+        value: https://www.tfcschool.com,https://tfc-school.onrender.com
       - key: VITE_API_URL
         value: /api
       - key: VITE_SCHOOL_LOGO
