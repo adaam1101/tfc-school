@@ -58,46 +58,59 @@ export default function IDCardModal({ user, student, onClose }) {
         <div ref={cardRef}>
           <div
             style={{ width: "420px", maxWidth: "100%" }}
-            className="mx-auto overflow-hidden rounded-2xl bg-gradient-to-br from-[#0a1628] via-[#0f1f35] to-[#1a3a5c] text-white shadow-xl"
+            className="relative mx-auto overflow-hidden rounded-2xl bg-gradient-to-br from-sky-100 via-blue-50 to-sky-200 shadow-xl"
           >
+            {/* Watermark logo */}
+            <img
+              src={schoolLogo}
+              alt=""
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 m-auto h-56 w-56 object-contain opacity-[0.07] select-none"
+            />
+
+            {/* Top accent bar */}
+            <div className="h-2 w-full bg-gradient-to-r from-sky-500 via-blue-600 to-sky-500" />
+
             {/* Header: logo + school name */}
-            <div className="flex items-center gap-3 border-b border-white/10 px-5 py-3">
-              <img src={schoolLogo} alt="TFC" className="h-11 w-11 rounded-lg bg-white/10 object-contain" />
+            <div className="relative flex items-center gap-3 border-b border-sky-200 px-5 py-3">
+              <img src={schoolLogo} alt="TFC" className="h-11 w-11 rounded-lg bg-white/80 object-contain shadow-sm ring-1 ring-sky-200" />
               <div>
-                <p className="text-sm font-black leading-tight">{schoolInfo.name}</p>
-                <p className="text-[10px] uppercase tracking-widest text-blue-300">{roleLabel}</p>
+                <p className="text-sm font-black leading-tight text-sky-900">{schoolInfo.name}</p>
+                <p className="text-[10px] uppercase tracking-widest text-sky-600">{roleLabel}</p>
+              </div>
+              <div className="ml-auto text-right">
+                <p className="text-[9px] uppercase tracking-wider text-sky-500">Official ID</p>
+                <p className="font-mono text-[11px] font-bold text-sky-800">{idPrefix}-{idNumber}</p>
               </div>
             </div>
 
             {/* Body: photo + details */}
-            <div className="flex items-start gap-4 px-5 py-5">
+            <div className="relative flex items-start gap-4 px-5 py-5">
               {/* Photo */}
               {photo ? (
                 <img
                   src={photo}
                   alt={person?.name}
-                  className="h-24 w-20 shrink-0 rounded-xl object-cover ring-2 ring-white/20 shadow-lg"
+                  className="h-24 w-20 shrink-0 rounded-xl object-cover shadow-md ring-2 ring-sky-300"
                 />
               ) : (
-                <div className="flex h-24 w-20 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-teal-500 to-emerald-600 text-3xl font-black shadow-lg ring-2 ring-white/20">
+                <div className="flex h-24 w-20 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-sky-500 to-blue-600 text-3xl font-black text-white shadow-md ring-2 ring-sky-300">
                   {initials}
                 </div>
               )}
 
               <div className="min-w-0 flex-1">
-                <p className="truncate text-lg font-black leading-tight">{person?.name}</p>
-                <p className="mb-2 text-sm text-blue-200">{courseOrSubject || "—"}</p>
-                <div className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-[11px] text-blue-200/80">
-                  <span className="text-blue-400">ID No.</span>
-                  <span className="font-mono font-bold text-white">{idPrefix}-{idNumber}</span>
-                  <span className="text-blue-400">Date of birth</span>
-                  <span className="font-semibold text-white">{profile.dateOfBirth || "—"}</span>
-                  <span className="text-blue-400">{courseLabel}</span>
-                  <span className="font-semibold text-white">{courseOrSubject || "—"}</span>
+                <p className="truncate text-lg font-black leading-tight text-sky-900">{person?.name}</p>
+                <p className="mb-2 text-sm font-medium text-sky-600">{courseOrSubject || "—"}</p>
+                <div className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-[11px]">
+                  <span className="text-sky-500">Date of birth</span>
+                  <span className="font-semibold text-sky-900">{profile.dateOfBirth || "—"}</span>
+                  <span className="text-sky-500">{courseLabel}</span>
+                  <span className="font-semibold text-sky-900">{courseOrSubject || "—"}</span>
                   {!isTeacher && profile.rfidCardLast4 && (
                     <>
-                      <span className="text-blue-400">RFID</span>
-                      <span className="font-mono font-semibold text-white">…{profile.rfidCardLast4}</span>
+                      <span className="text-sky-500">RFID</span>
+                      <span className="font-mono font-semibold text-sky-900">…{profile.rfidCardLast4}</span>
                     </>
                   )}
                 </div>
@@ -105,10 +118,13 @@ export default function IDCardModal({ user, student, onClose }) {
             </div>
 
             {/* Footer */}
-            <div className="flex items-center justify-between bg-white/5 px-5 py-2.5 text-[10px] text-blue-300">
+            <div className="relative flex items-center justify-between border-t border-sky-200 bg-sky-100/70 px-5 py-2.5 text-[10px] text-sky-600">
               <span>{schoolInfo.address}</span>
               <span>{schoolInfo.phones?.[0]}</span>
             </div>
+
+            {/* Bottom accent bar */}
+            <div className="h-1.5 w-full bg-gradient-to-r from-sky-500 via-blue-600 to-sky-500" />
           </div>
         </div>
 
