@@ -50,23 +50,43 @@ const roleConfig = {
 
 export default function LoginPage({ role }) {
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login, verifyTwoFactor } = useAuth();
   const cfg = roleConfig[role];
   const Icon = cfg.icon;
   const [form, setForm] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPwd, setShowPwd] = useState(false);
+  const [step, setStep] = useState("credentials"); // credentials | twofa
+  const [code, setCode] = useState("");
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     setError("");
     setLoading(true);
     try {
-      await login({ ...form, role });
-      navigate(`/${role}`, { replace: true });
+      const result = await login({ ...form, role });
+      if (result?.twoFactorRequired) {
+        setStep("twofa");
+      } else {
+        navigate(`/${role}`, { replace: true });
+      }
     } catch (loginError) {
       setError(getApiError(loginError));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleVerify = async (event) => {
+    event.preventDefault();
+    setError("");
+    setLoading(true);
+    try {
+      await verifyTwoFactor({ email: form.email, code });
+      navigate(`/${role}`, { replace: true });
+    } catch (verifyError) {
+      setError(getApiError(verifyError));
     } finally {
       setLoading(false);
     }
@@ -118,6 +138,7 @@ export default function LoginPage({ role }) {
 
             <ErrorAlert message={error} />
 
+            {step === "credentials" && (
             <form className="grid gap-5" onSubmit={handleSubmit}>
               {/* Email */}
               <div>
@@ -172,7 +193,54 @@ export default function LoginPage({ role }) {
                 <LockKeyhole className="h-4 w-4" />
                 {loading ? "Signing in…" : `Sign in to ${cfg.title}`}
               </button>
+
+              <Link
+                to="/forgot-password"
+                className="-mt-1 text-center text-xs font-medium text-white/40 transition hover:text-white/70"
+              >
+                Forgot your password?
+              </Link>
             </form>
+            )}
+
+            {step === "twofa" && (
+            <form className="grid gap-5" onSubmit={handleVerify}>
+              <p className="text-sm text-white/60">
+                We emailed a 6-digit code to <span className="font-semibold text-white/90">{form.email}</span>.
+                Enter it below to finish signing in.
+              </p>
+              <div>
+                <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-white/60">
+                  Verification code
+                </label>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  autoFocus
+                  value={code}
+                  onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                  placeholder="000000"
+                  className={`w-full rounded-2xl border ${cfg.accentBorder} ${cfg.accentBg} py-3.5 text-center text-2xl font-bold tracking-[0.5em] text-white placeholder-white/20 outline-none transition ${cfg.ringColor} focus:ring-2 focus:border-transparent`}
+                  required
+                />
+              </div>
+              <button
+                type="submit"
+                disabled={loading || code.length !== 6}
+                className={`flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r ${cfg.btnGradient} py-4 text-sm font-black text-white shadow-lg transition-all duration-200 hover:opacity-90 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-white/20 disabled:opacity-60 disabled:cursor-not-allowed`}
+              >
+                <ShieldCheck className="h-4 w-4" />
+                {loading ? "Verifying…" : "Verify & sign in"}
+              </button>
+              <button
+                type="button"
+                onClick={() => { setStep("credentials"); setCode(""); setError(""); }}
+                className="text-center text-xs font-medium text-white/40 transition hover:text-white/70"
+              >
+                Back to login
+              </button>
+            </form>
+            )}
 
             <p className="mt-6 text-center text-xs text-white/25">
               {schoolInfo.credit} · {schoolInfo.city}

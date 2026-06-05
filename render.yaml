@@ -27,6 +27,8 @@ services:
         value: /tfc-logo.png
       - key: NOTIFICATIONS_ENABLED
         value: false
+      - key: TWO_FACTOR_ENABLED
+        value: false
       - key: SMTP_HOST
         sync: false
       - key: SMTP_PORT

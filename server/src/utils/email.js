@@ -21,6 +21,50 @@ const createTransport = () => {
   });
 };
 
+/** True when SMTP is configured well enough to actually send mail. */
+export const emailReady = () =>
+  notificationsEnabled() && Boolean(process.env.SMTP_HOST && process.env.SMTP_FROM);
+
+/** Generic sender. Throws if email is not configured. */
+export const sendEmail = async ({ to, subject, text, html }) => {
+  if (!emailReady()) {
+    throw new Error("Email is not configured. Set NOTIFICATIONS_ENABLED=true and SMTP_HOST/SMTP_FROM.");
+  }
+  const transporter = createTransport();
+  await transporter.sendMail({
+    from: process.env.SMTP_FROM || "TFC School <no-reply@tfcschool.dz>",
+    to,
+    subject,
+    text,
+    html
+  });
+};
+
+export const sendTwoFactorCode = async ({ user, code }) => {
+  const subject = "Your TFC School login code";
+  const text = [
+    `Hello ${user.name},`,
+    "",
+    `Your verification code is: ${code}`,
+    "",
+    "It expires in 10 minutes. If you did not try to sign in, you can ignore this email."
+  ].join("\n");
+  await sendEmail({ to: user.email, subject, text });
+};
+
+export const sendPasswordResetEmail = async ({ user, resetUrl }) => {
+  const subject = "Reset your TFC School password";
+  const text = [
+    `Hello ${user.name},`,
+    "",
+    "We received a request to reset your password. Open the link below to choose a new one:",
+    resetUrl,
+    "",
+    "This link expires in 30 minutes. If you did not request this, you can ignore this email."
+  ].join("\n");
+  await sendEmail({ to: user.email, subject, text });
+};
+
 export const sendAbsenceNotification = async ({ student, teacher, attendance }) => {
   const parentEmail = student.studentProfile?.parentEmail;
   const missingSmtp = ["SMTP_HOST", "SMTP_FROM"].filter((key) => !process.env[key]);
