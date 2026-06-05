@@ -4,3 +4,5 @@ dist/
 *.log
 __pycache__/
 *.pyc
+card_bg.png
+tfc_card_preview.png
