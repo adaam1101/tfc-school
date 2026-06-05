@@ -10,7 +10,6 @@ const toneMap = {
 
 export default function StatTile({ icon: Icon, label, value, tone = "slate" }) {
   const t = toneMap[tone] || toneMap.slate;
-
   return (
     <div className={`card-hover border p-5 ${t.border}`}>
       <div className="flex items-start justify-between gap-3">

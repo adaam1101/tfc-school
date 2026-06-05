@@ -3,8 +3,8 @@ services:
     name: tfc-school
     runtime: node
     plan: free
-    buildCommand: npm install && npm run install:all && npm run build
-    startCommand: npm start
+    buildCommand: npm install --prefix server && npm install --prefix client && npm run build --prefix client
+    startCommand: npm start --prefix server
     healthCheckPath: /api/health
     envVars:
       - key: NODE_VERSION
@@ -22,7 +22,7 @@ services:
       - key: VITE_API_URL
         value: /api
       - key: VITE_SCHOOL_LOGO
-        value: /tfc-school-mark.svg
+        value: /tfc-logo.png
       - key: NOTIFICATIONS_ENABLED
         value: false
       - key: SMTP_HOST

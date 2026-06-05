@@ -14,6 +14,7 @@ import { authRouter } from "./routes/authRoutes.js";
 import { rfidRouter } from "./routes/rfidRoutes.js";
 import { studentRouter } from "./routes/studentRoutes.js";
 import { teacherRouter } from "./routes/teacherRoutes.js";
+import { ratingRouter } from "./routes/ratingRoutes.js";
 import { demoRouter } from "./demo/demoRoutes.js";
 
 dotenv.config();
@@ -27,37 +28,15 @@ const allowedOrigins = [
   process.env.CLIENT_URL,
   ...(process.env.CLIENT_URLS || "").split(","),
   "http://localhost:5173"
-]
-  .map((origin) => origin?.trim())
-  .filter(Boolean);
+].map((origin) => origin?.trim()).filter(Boolean);
 
 app.use(helmet());
-app.use(
-  cors({
-    origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) {
-        return callback(null, true);
-      }
-
-      return callback(new Error("Origin is not allowed by CORS."));
-    },
-    credentials: true
-  })
-);
+app.use(cors({ origin: (origin, callback) => { if (!origin || allowedOrigins.includes(origin)) return callback(null, true); return callback(new Error("Origin is not allowed by CORS.")); }, credentials: true }));
 app.use(express.json({ limit: "1mb" }));
 app.use(morgan("dev"));
-app.use(
-  rateLimit({
-    windowMs: 15 * 60 * 1000,
-    max: 300,
-    standardHeaders: true,
-    legacyHeaders: false
-  })
-);
+app.use(rateLimit({ windowMs: 15 * 60 * 1000, max: 300, standardHeaders: true, legacyHeaders: false }));
 
-app.get("/api/health", (_req, res) => {
-  res.json({ status: "ok", app: "TFC School API", demoMode });
-});
+app.get("/api/health", (_req, res) => { res.json({ status: "ok", app: "TFC School API", demoMode }); });
 
 if (demoMode) {
   app.use("/api", demoRouter);
@@ -67,6 +46,7 @@ if (demoMode) {
   app.use("/api/rfid", rfidRouter);
   app.use("/api/teacher", teacherRouter);
   app.use("/api/student", studentRouter);
+  app.use("/api/ratings", ratingRouter);
 }
 
 const clientDistCandidates = [
@@ -78,31 +58,14 @@ const clientDist = clientDistCandidates.find((candidate) => existsSync(candidate
 
 if (clientDist) {
   app.use(express.static(clientDist));
-  app.get("*", (req, res, next) => {
-    if (req.path.startsWith("/api")) {
-      return next();
-    }
-
-    res.sendFile(path.join(clientDist, "index.html"));
-  });
+  app.get("*", (req, res, next) => { if (req.path.startsWith("/api")) return next(); res.sendFile(path.join(clientDist, "index.html")); });
 }
 
 app.use(notFound);
 app.use(errorHandler);
 
 if (demoMode) {
-  app.listen(port, () => {
-    console.log(`TFC School API running in demo mode on http://localhost:${port}`);
-  });
+  app.listen(port, () => { console.log(`TFC School API running in demo mode on http://localhost:${port}`); });
 } else {
-  connectDB()
-    .then(() => {
-      app.listen(port, () => {
-        console.log(`TFC School API running on http://localhost:${port}`);
-      });
-    })
-    .catch((error) => {
-      console.error("Failed to start server:", error.message);
-      process.exit(1);
-    });
+  connectDB().then(() => { app.listen(port, () => { console.log(`TFC School API running on http://localhost:${port}`); }); }).catch((error) => { console.error("Failed to start server:", error.message); process.exit(1); });
 }

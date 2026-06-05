@@ -1,6 +1,7 @@
 import React from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
+import LandingPage from "./pages/LandingPage.jsx";
 import LoginPage from "./pages/LoginPage.jsx";
 import AdminDashboard from "./pages/admin/AdminDashboard.jsx";
 import RFIDAttendance from "./pages/RFIDAttendance.jsx";
@@ -11,44 +12,14 @@ import NotFound from "./pages/NotFound.jsx";
 export default function App() {
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/admin/login" replace />} />
-      <Route path="/admin/login" element={<LoginPage role="admin" />} />
+      <Route path="/" element={<LandingPage />} />
+      <Route path="/admin/login"   element={<LoginPage role="admin"   />} />
       <Route path="/teacher/login" element={<LoginPage role="teacher" />} />
       <Route path="/student/login" element={<LoginPage role="student" />} />
-
-      <Route
-        path="/admin"
-        element={
-          <ProtectedRoute role="admin">
-            <AdminDashboard />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/teacher"
-        element={
-          <ProtectedRoute role="teacher">
-            <TeacherDashboard />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/student"
-        element={
-          <ProtectedRoute role="student">
-            <StudentDashboard />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/rfid-attendance"
-        element={
-          <ProtectedRoute roles={["admin", "teacher"]}>
-            <RFIDAttendance />
-          </ProtectedRoute>
-        }
-      />
-
+      <Route path="/admin"   element={<ProtectedRoute role="admin">   <AdminDashboard />   </ProtectedRoute>} />
+      <Route path="/teacher" element={<ProtectedRoute role="teacher"> <TeacherDashboard /> </ProtectedRoute>} />
+      <Route path="/student" element={<ProtectedRoute role="student"> <StudentDashboard /> </ProtectedRoute>} />
+      <Route path="/rfid-attendance" element={<ProtectedRoute roles={["admin", "teacher"]}><RFIDAttendance /></ProtectedRoute>} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );

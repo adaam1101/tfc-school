@@ -25,7 +25,6 @@ textarea {
   font: inherit;
 }
 
-/* ── Keyframe animations ── */
 @keyframes pulse-ring {
   0%   { transform: scale(0.85); opacity: 0.7; }
   70%  { transform: scale(1);    opacity: 0.4; }
@@ -58,12 +57,6 @@ textarea {
   to   { transform: rotate(360deg); }
 }
 
-@keyframes shimmer {
-  0%   { background-position: -200% 0; }
-  100% { background-position:  200% 0; }
-}
-
-/* ── Animation utilities ── */
 .animate-pulse-ring   { animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
 .animate-scan-ring    { animation: scan-ring  1.6s ease-out infinite; }
 .animate-fade-slide-up{ animation: fade-slide-up 0.35s ease-out both; }
@@ -71,7 +64,6 @@ textarea {
 .animate-success-pop  { animation: success-pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
 .animate-spin-slow    { animation: spin-slow 3s linear infinite; }
 
-/* ── Scan zone rings ── */
 .scan-ring-1 { animation: scan-ring 1.6s ease-out 0s    infinite; }
 .scan-ring-2 { animation: scan-ring 1.6s ease-out 0.53s infinite; }
 .scan-ring-3 { animation: scan-ring 1.6s ease-out 1.06s infinite; }
@@ -81,7 +73,6 @@ textarea {
 .scan-ring-fast-3 { animation: scan-ring 0.8s ease-out 0.54s infinite; }
 
 @layer components {
-  /* ── Inputs ── */
   .input {
     @apply w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-950
            outline-none shadow-sm transition-all duration-200 placeholder:text-slate-400
@@ -93,7 +84,6 @@ textarea {
     @apply grid gap-2 text-sm font-medium text-slate-700;
   }
 
-  /* ── Buttons ── */
   .btn-primary {
     @apply inline-flex min-h-10 items-center gap-2 rounded-xl bg-gradient-to-br from-teal-600 to-teal-700
            px-5 py-2.5 text-sm font-semibold text-white shadow-sm shadow-teal-200
@@ -140,7 +130,6 @@ textarea {
            focus:outline-none focus:ring-2 focus:ring-rose-100;
   }
 
-  /* ── Cards ── */
   .card {
     @apply rounded-2xl border border-slate-200/80 bg-white shadow-sm transition-all duration-200;
   }
