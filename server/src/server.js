@@ -27,6 +27,10 @@ const app = express();
 const port = process.env.PORT || 5000;
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
+// Render (and most hosts) put the app behind a reverse proxy. Trusting the first
+// proxy hop lets express-rate-limit read the real client IP from X-Forwarded-For.
+app.set("trust proxy", 1);
+
 const allowedOrigins = [
   process.env.CLIENT_URL,
   ...(process.env.CLIENT_URLS || "").split(","),
