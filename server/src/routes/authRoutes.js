@@ -24,6 +24,7 @@ const sensitiveLimiter = rateLimit({
   max: 20,
   standardHeaders: true,
   legacyHeaders: false,
+  validate: { xForwardedForHeader: false },
   message: { message: "Too many attempts. Please wait a few minutes and try again." }
 });
 

@@ -41,7 +41,7 @@ app.use(helmet());
 app.use(cors({ origin: (origin, callback) => { if (!origin || allowedOrigins.includes(origin)) return callback(null, true); return callback(new Error("Origin is not allowed by CORS.")); }, credentials: true }));
 app.use(express.json({ limit: "1mb" }));
 app.use(morgan("dev"));
-app.use(rateLimit({ windowMs: 15 * 60 * 1000, max: 300, standardHeaders: true, legacyHeaders: false }));
+app.use(rateLimit({ windowMs: 15 * 60 * 1000, max: 300, standardHeaders: true, legacyHeaders: false, validate: { xForwardedForHeader: false } }));
 
 app.get("/api/health", (_req, res) => { res.json({ status: "ok", app: "TFC School API" }); });
 
