@@ -87,13 +87,13 @@ export default function StudentDashboard() {
           <div className="card p-6">
             {/* Avatar header */}
             <div className="mb-6 flex flex-col items-center text-center">
-              <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-500 to-emerald-600 text-3xl font-bold text-white shadow-lg">
+              <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-brand-500 to-emerald-600 text-3xl font-bold text-white shadow-lg">
                 {student?.name?.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase() || "?"}
               </div>
               <h2 className="mt-4 text-xl font-bold text-slate-900">{student?.name}</h2>
               <p className="mt-0.5 text-sm text-slate-500">{student?.email}</p>
               {details.rfidCardLast4 && (
-                <span className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-sky-50 px-3 py-1 text-xs font-semibold text-sky-700 ring-1 ring-sky-200">
+                <span className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold text-brand-700 ring-1 ring-brand-200">
                   <CreditCard className="h-3 w-3" />
                   RFID card …{details.rfidCardLast4}
                 </span>
@@ -113,7 +113,7 @@ export default function StudentDashboard() {
                   <div
                     className={`h-full rounded-full transition-all duration-700 ${
                       summary.rate >= 75
-                        ? "bg-gradient-to-r from-sky-400 to-emerald-500"
+                        ? "bg-gradient-to-r from-brand-400 to-emerald-500"
                         : "bg-gradient-to-r from-rose-400 to-red-500"
                     }`}
                     style={{ width: `${summary.rate}%` }}
@@ -150,7 +150,7 @@ export default function StudentDashboard() {
           {/* Attendance history */}
           <div className="card p-6">
             <div className="mb-5 flex items-center gap-3">
-              <div className="rounded-xl bg-gradient-to-br from-sky-500 to-blue-600 p-2.5 shadow-sm">
+              <div className="rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 p-2.5 shadow-sm">
                 <CalendarDays className="h-5 w-5 text-white" aria-hidden="true" />
               </div>
               <div>
@@ -201,7 +201,7 @@ export default function StudentDashboard() {
           {/* My fees */}
           <div className="card p-6">
             <div className="mb-5 flex items-center gap-3">
-              <div className="rounded-xl bg-gradient-to-br from-emerald-500 to-sky-600 p-2.5 shadow-sm">
+              <div className="rounded-xl bg-gradient-to-br from-emerald-500 to-brand-600 p-2.5 shadow-sm">
                 <Wallet className="h-5 w-5 text-white" />
               </div>
               <div>

@@ -107,7 +107,7 @@ export default function TeacherDashboard() {
         <ErrorAlert message={error} />
 
         {message && (
-          <div className="animate-fade-slide-up rounded-xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm font-medium text-sky-800">
+          <div className="animate-fade-slide-up rounded-xl border border-brand-200 bg-brand-50 px-4 py-3 text-sm font-medium text-brand-800">
             {message}
           </div>
         )}
@@ -123,7 +123,7 @@ export default function TeacherDashboard() {
         <section className="card p-6">
           <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-3">
-              <div className="rounded-xl bg-gradient-to-br from-sky-500 to-emerald-600 p-2.5 shadow-sm">
+              <div className="rounded-xl bg-gradient-to-br from-brand-500 to-emerald-600 p-2.5 shadow-sm">
                 <ClipboardCheck className="h-5 w-5 text-white" aria-hidden="true" />
               </div>
               <div>

@@ -51,7 +51,7 @@ export default function EnrollmentsPanel() {
     <div className="card p-6">
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <div className="rounded-xl bg-gradient-to-br from-sky-500 to-emerald-600 p-2.5 shadow-sm">
+          <div className="rounded-xl bg-gradient-to-br from-brand-500 to-emerald-600 p-2.5 shadow-sm">
             <Inbox className="h-5 w-5 text-white" />
           </div>
           <div>
@@ -88,8 +88,8 @@ export default function EnrollmentsPanel() {
                   </div>
                   <p className="mt-0.5 text-sm text-slate-600">{e.course}{e.age ? ` · age ${e.age}` : ""}</p>
                   <div className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-500">
-                    <a href={`tel:${e.phone}`} className="flex items-center gap-1 hover:text-sky-700"><Phone className="h-3 w-3" />{e.phone}</a>
-                    {e.email && <a href={`mailto:${e.email}`} className="flex items-center gap-1 hover:text-sky-700"><Mail className="h-3 w-3" />{e.email}</a>}
+                    <a href={`tel:${e.phone}`} className="flex items-center gap-1 hover:text-brand-700"><Phone className="h-3 w-3" />{e.phone}</a>
+                    {e.email && <a href={`mailto:${e.email}`} className="flex items-center gap-1 hover:text-brand-700"><Mail className="h-3 w-3" />{e.email}</a>}
                     {e.parentName && <span>Parent: {e.parentName} {e.parentPhone}</span>}
                   </div>
                   {e.message && <p className="mt-2 rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-600">{e.message}</p>}

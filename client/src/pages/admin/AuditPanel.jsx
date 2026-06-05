@@ -5,7 +5,7 @@ import ErrorAlert from "../../components/ErrorAlert.jsx";
 
 const actionColor = {
   create: "bg-emerald-100 text-emerald-700",
-  update: "bg-sky-100 text-sky-700",
+  update: "bg-brand-100 text-brand-700",
   delete: "bg-rose-100 text-rose-700",
   approved: "bg-emerald-100 text-emerald-700",
   rejected: "bg-rose-100 text-rose-700"
@@ -13,8 +13,8 @@ const actionColor = {
 
 const roleColor = {
   admin: "from-violet-500 to-purple-600",
-  teacher: "from-sky-500 to-blue-600",
-  student: "from-sky-500 to-emerald-600"
+  teacher: "from-brand-500 to-brand-700",
+  student: "from-brand-500 to-emerald-600"
 };
 
 export default function AuditPanel() {

@@ -98,24 +98,24 @@ export default function RFIDAttendance() {
   /* Ring + icon styles by status */
   const zoneConfig = {
     idle: {
-      ring: "border-sky-300/60",
-      bg: "bg-sky-50/60",
-      icon: "text-sky-500",
+      ring: "border-brand-300/60",
+      bg: "bg-brand-50/60",
+      icon: "text-brand-500",
       label: "Ready to scan",
       sub: "Hold RFID card near reader",
-      ringClass: "scan-ring-1 border-sky-400/50 bg-sky-400/10",
-      ringClass2: "scan-ring-2 border-sky-400/30 bg-transparent",
-      ringClass3: "scan-ring-3 border-sky-400/20 bg-transparent"
+      ringClass: "scan-ring-1 border-brand-400/50 bg-brand-400/10",
+      ringClass2: "scan-ring-2 border-brand-400/30 bg-transparent",
+      ringClass3: "scan-ring-3 border-brand-400/20 bg-transparent"
     },
     scanning: {
-      ring: "border-sky-400",
-      bg: "bg-sky-50",
-      icon: "text-sky-500 animate-spin-slow",
+      ring: "border-brand-400",
+      bg: "bg-brand-50",
+      icon: "text-brand-500 animate-spin-slow",
       label: "Scanning…",
       sub: "Reading card data",
-      ringClass: "scan-ring-fast-1 border-sky-400/60 bg-sky-400/10",
-      ringClass2: "scan-ring-fast-2 border-sky-400/40 bg-transparent",
-      ringClass3: "scan-ring-fast-3 border-sky-400/20 bg-transparent"
+      ringClass: "scan-ring-fast-1 border-brand-400/60 bg-brand-400/10",
+      ringClass2: "scan-ring-fast-2 border-brand-400/40 bg-transparent",
+      ringClass3: "scan-ring-fast-3 border-brand-400/20 bg-transparent"
     },
     success: {
       ring: "border-emerald-400",
@@ -151,7 +151,7 @@ export default function RFIDAttendance() {
         {/* ── Left: Scan Station ── */}
         <section className="card p-6">
           <div className="mb-6 flex items-center gap-3">
-            <div className="rounded-xl bg-gradient-to-br from-sky-500 to-emerald-600 p-2.5 shadow-sm">
+            <div className="rounded-xl bg-gradient-to-br from-brand-500 to-emerald-600 p-2.5 shadow-sm">
               <ScanLine className="h-5 w-5 text-white" aria-hidden="true" />
             </div>
             <div>
@@ -202,7 +202,7 @@ export default function RFIDAttendance() {
             <p className={`text-lg font-bold transition-all duration-300 ${
               scanStatus === "success" ? "text-emerald-700"
               : scanStatus === "error" ? "text-rose-700"
-              : scanStatus === "scanning" ? "text-sky-700"
+              : scanStatus === "scanning" ? "text-brand-700"
               : "text-slate-700"
             }`}>
               {z.label}
@@ -273,7 +273,7 @@ export default function RFIDAttendance() {
                 <button
                   key={demoCard}
                   type="button"
-                  className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition-all duration-200 hover:border-sky-300 hover:bg-sky-50 hover:text-sky-800 hover:shadow-md"
+                  className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition-all duration-200 hover:border-brand-300 hover:bg-brand-50 hover:text-brand-800 hover:shadow-md"
                   onClick={() => submitScan(demoCard)}
                   disabled={loading}
                 >
@@ -295,10 +295,10 @@ export default function RFIDAttendance() {
             </h2>
 
             {lastStudent && scanStatus !== "error" ? (
-              <div className="animate-success-pop rounded-2xl bg-gradient-to-br from-emerald-50 to-sky-50 border border-emerald-200 p-5">
+              <div className="animate-success-pop rounded-2xl bg-gradient-to-br from-emerald-50 to-brand-50 border border-emerald-200 p-5">
                 {/* Avatar */}
                 <div className="flex items-center gap-4">
-                  <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-500 to-emerald-600 text-2xl font-bold text-white shadow-md">
+                  <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-brand-500 to-emerald-600 text-2xl font-bold text-white shadow-md">
                     {lastStudent.name?.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()}
                   </div>
                   <div className="flex-1">

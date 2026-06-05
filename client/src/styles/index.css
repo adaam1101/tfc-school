@@ -13,7 +13,7 @@
 body {
   margin: 0;
   min-width: 320px;
-  background: #f0f4f8;
+  background: #EEF6FB;
   font-feature-settings: "cv11", "ss01";
   -webkit-font-smoothing: antialiased;
 }
@@ -76,7 +76,7 @@ textarea {
   .input {
     @apply w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-950
            outline-none shadow-sm transition-all duration-200 placeholder:text-slate-400
-           focus:border-sky-500 focus:ring-2 focus:ring-sky-100
+           focus:border-brand-500 focus:ring-2 focus:ring-brand-100
            disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400;
   }
 
@@ -85,18 +85,18 @@ textarea {
   }
 
   .btn-primary {
-    @apply inline-flex min-h-10 items-center gap-2 rounded-xl bg-gradient-to-br from-sky-500 to-blue-600
-           px-5 py-2.5 text-sm font-semibold text-white shadow-sm shadow-sky-200
-           transition-all duration-200 hover:from-sky-400 hover:to-blue-500 hover:shadow-md hover:shadow-sky-200
-           focus:outline-none focus:ring-2 focus:ring-sky-300
+    @apply inline-flex min-h-10 items-center gap-2 rounded-xl bg-gradient-to-br from-brand-500 to-brand-700
+           px-5 py-2.5 text-sm font-semibold text-white shadow-sm shadow-brand-200
+           transition-all duration-200 hover:from-brand-400 hover:to-brand-600 hover:shadow-md hover:shadow-brand-200
+           focus:outline-none focus:ring-2 focus:ring-brand-300
            disabled:cursor-not-allowed disabled:opacity-60 disabled:shadow-none;
   }
 
   .btn-secondary {
     @apply inline-flex min-h-10 items-center gap-2 rounded-xl border border-slate-200 bg-white
            px-5 py-2.5 text-sm font-semibold text-slate-700 shadow-sm
-           transition-all duration-200 hover:border-sky-200 hover:bg-sky-50 hover:text-sky-800
-           focus:outline-none focus:ring-2 focus:ring-sky-100
+           transition-all duration-200 hover:border-brand-200 hover:bg-brand-50 hover:text-brand-800
+           focus:outline-none focus:ring-2 focus:ring-brand-100
            disabled:cursor-not-allowed disabled:opacity-60;
   }
 
@@ -119,8 +119,8 @@ textarea {
   .icon-btn {
     @apply inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white
            text-slate-500 shadow-sm transition-all duration-200
-           hover:border-sky-200 hover:bg-sky-50 hover:text-sky-700
-           focus:outline-none focus:ring-2 focus:ring-sky-100;
+           hover:border-brand-200 hover:bg-brand-50 hover:text-brand-700
+           focus:outline-none focus:ring-2 focus:ring-brand-100;
   }
 
   .icon-btn-danger {

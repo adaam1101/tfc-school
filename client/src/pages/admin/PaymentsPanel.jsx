@@ -97,7 +97,7 @@ export default function PaymentsPanel({ students = [] }) {
         </div>
         <div className="card p-5">
           <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Fully paid</p>
-          <p className="mt-1 text-2xl font-black text-sky-600">{totals.paid.count}</p>
+          <p className="mt-1 text-2xl font-black text-brand-600">{totals.paid.count}</p>
           <p className="text-xs text-slate-400">records settled</p>
         </div>
       </div>
@@ -106,7 +106,7 @@ export default function PaymentsPanel({ students = [] }) {
         {/* Record payment */}
         <div className="card p-6">
           <div className="mb-5 flex items-center gap-3">
-            <div className="rounded-xl bg-gradient-to-br from-emerald-500 to-sky-600 p-2.5 shadow-sm">
+            <div className="rounded-xl bg-gradient-to-br from-emerald-500 to-brand-600 p-2.5 shadow-sm">
               <DollarSign className="h-5 w-5 text-white" />
             </div>
             <div>

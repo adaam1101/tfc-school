@@ -46,7 +46,7 @@ export default function IDCardModal({ user, student, onClose }) {
       <div className="w-full max-w-md animate-fade-slide-up rounded-3xl bg-white p-6 shadow-2xl">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="flex items-center gap-2 text-lg font-bold text-slate-900">
-            <CreditCard className="h-5 w-5 text-sky-600" />
+            <CreditCard className="h-5 w-5 text-brand-600" />
             {isTeacher ? "Teacher ID Card" : "Student ID Card"}
           </h2>
           <button onClick={onClose} className="rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700">
@@ -58,7 +58,7 @@ export default function IDCardModal({ user, student, onClose }) {
         <div ref={cardRef}>
           <div
             style={{ width: "420px", maxWidth: "100%" }}
-            className="relative mx-auto overflow-hidden rounded-2xl bg-gradient-to-br from-sky-100 via-blue-50 to-sky-200 shadow-xl"
+            className="relative mx-auto overflow-hidden rounded-2xl bg-gradient-to-br from-brand-100 via-brand-50 to-brand-200 shadow-xl"
           >
             {/* Watermark logo */}
             <img
@@ -69,18 +69,18 @@ export default function IDCardModal({ user, student, onClose }) {
             />
 
             {/* Top accent bar */}
-            <div className="h-2 w-full bg-gradient-to-r from-sky-500 via-blue-600 to-sky-500" />
+            <div className="h-2 w-full bg-gradient-to-r from-brand-500 via-brand-700 to-brand-500" />
 
             {/* Header: logo + school name */}
-            <div className="relative flex items-center gap-3 border-b border-sky-200 px-5 py-3">
-              <img src={schoolLogo} alt="TFC" className="h-11 w-11 rounded-lg bg-white/80 object-contain shadow-sm ring-1 ring-sky-200" />
+            <div className="relative flex items-center gap-3 border-b border-brand-200 px-5 py-3">
+              <img src={schoolLogo} alt="TFC" className="h-11 w-11 rounded-lg bg-white/80 object-contain shadow-sm ring-1 ring-brand-200" />
               <div>
-                <p className="text-sm font-black leading-tight text-sky-900">{schoolInfo.name}</p>
-                <p className="text-[10px] uppercase tracking-widest text-sky-600">{roleLabel}</p>
+                <p className="text-sm font-black leading-tight text-brand-900">{schoolInfo.name}</p>
+                <p className="text-[10px] uppercase tracking-widest text-brand-600">{roleLabel}</p>
               </div>
               <div className="ml-auto text-right">
-                <p className="text-[9px] uppercase tracking-wider text-sky-500">Official ID</p>
-                <p className="font-mono text-[11px] font-bold text-sky-800">{idPrefix}-{idNumber}</p>
+                <p className="text-[9px] uppercase tracking-wider text-brand-500">Official ID</p>
+                <p className="font-mono text-[11px] font-bold text-brand-800">{idPrefix}-{idNumber}</p>
               </div>
             </div>
 
@@ -91,26 +91,26 @@ export default function IDCardModal({ user, student, onClose }) {
                 <img
                   src={photo}
                   alt={person?.name}
-                  className="h-24 w-20 shrink-0 rounded-xl object-cover shadow-md ring-2 ring-sky-300"
+                  className="h-24 w-20 shrink-0 rounded-xl object-cover shadow-md ring-2 ring-brand-300"
                 />
               ) : (
-                <div className="flex h-24 w-20 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-sky-500 to-blue-600 text-3xl font-black text-white shadow-md ring-2 ring-sky-300">
+                <div className="flex h-24 w-20 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 text-3xl font-black text-white shadow-md ring-2 ring-brand-300">
                   {initials}
                 </div>
               )}
 
               <div className="min-w-0 flex-1">
-                <p className="truncate text-lg font-black leading-tight text-sky-900">{person?.name}</p>
-                <p className="mb-2 text-sm font-medium text-sky-600">{courseOrSubject || "—"}</p>
+                <p className="truncate text-lg font-black leading-tight text-brand-900">{person?.name}</p>
+                <p className="mb-2 text-sm font-medium text-brand-600">{courseOrSubject || "—"}</p>
                 <div className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-[11px]">
-                  <span className="text-sky-500">Date of birth</span>
-                  <span className="font-semibold text-sky-900">{profile.dateOfBirth || "—"}</span>
-                  <span className="text-sky-500">{courseLabel}</span>
-                  <span className="font-semibold text-sky-900">{courseOrSubject || "—"}</span>
+                  <span className="text-brand-500">Date of birth</span>
+                  <span className="font-semibold text-brand-900">{profile.dateOfBirth || "—"}</span>
+                  <span className="text-brand-500">{courseLabel}</span>
+                  <span className="font-semibold text-brand-900">{courseOrSubject || "—"}</span>
                   {!isTeacher && profile.rfidCardLast4 && (
                     <>
-                      <span className="text-sky-500">RFID</span>
-                      <span className="font-mono font-semibold text-sky-900">…{profile.rfidCardLast4}</span>
+                      <span className="text-brand-500">RFID</span>
+                      <span className="font-mono font-semibold text-brand-900">…{profile.rfidCardLast4}</span>
                     </>
                   )}
                 </div>
@@ -118,13 +118,13 @@ export default function IDCardModal({ user, student, onClose }) {
             </div>
 
             {/* Footer */}
-            <div className="relative flex items-center justify-between border-t border-sky-200 bg-sky-100/70 px-5 py-2.5 text-[10px] text-sky-600">
+            <div className="relative flex items-center justify-between border-t border-brand-200 bg-brand-100/70 px-5 py-2.5 text-[10px] text-brand-600">
               <span>{schoolInfo.address}</span>
               <span>{schoolInfo.phones?.[0]}</span>
             </div>
 
             {/* Bottom accent bar */}
-            <div className="h-1.5 w-full bg-gradient-to-r from-sky-500 via-blue-600 to-sky-500" />
+            <div className="h-1.5 w-full bg-gradient-to-r from-brand-500 via-brand-700 to-brand-500" />
           </div>
         </div>
 

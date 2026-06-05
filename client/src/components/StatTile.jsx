@@ -2,8 +2,8 @@ import React from "react";
 
 const toneMap = {
   slate: { icon: "bg-slate-100 text-slate-600",  border: "border-slate-100", num: "text-slate-900" },
-  teal:  { icon: "bg-gradient-to-br from-sky-500 to-emerald-600 text-white",  border: "border-sky-100",  num: "text-sky-900"  },
-  sky:   { icon: "bg-gradient-to-br from-sky-500 to-blue-600 text-white",   border: "border-sky-100",   num: "text-sky-900"   },
+  teal:  { icon: "bg-gradient-to-br from-brand-500 to-emerald-600 text-white",  border: "border-brand-100",  num: "text-brand-900"  },
+  sky:   { icon: "bg-gradient-to-br from-brand-500 to-brand-700 text-white",   border: "border-brand-100",   num: "text-brand-900"   },
   rose:  { icon: "bg-gradient-to-br from-rose-500 to-red-600 text-white",  border: "border-rose-100",  num: "text-rose-900"  },
   amber: { icon: "bg-gradient-to-br from-amber-500 to-orange-500 text-white", border: "border-amber-100", num: "text-amber-900" }
 };

@@ -72,30 +72,30 @@ export default function LoginPage({ role }) {
   };
 
   const inputClass =
-    "w-full rounded-2xl border border-sky-200 bg-sky-50/60 py-3.5 pl-11 pr-4 text-sm text-slate-900 placeholder-slate-400 outline-none transition focus:border-sky-400 focus:bg-white focus:ring-2 focus:ring-sky-200";
+    "w-full rounded-2xl border border-brand-200 bg-brand-50/60 py-3.5 pl-11 pr-4 text-sm text-slate-900 placeholder-slate-400 outline-none transition focus:border-brand-400 focus:bg-white focus:ring-2 focus:ring-brand-200";
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-sky-100 via-blue-50 to-sky-200 px-4 py-12">
+    <div className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-brand-100 via-brand-50 to-brand-200 px-4 py-12">
       {/* Background glow */}
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div className="absolute -top-40 -left-40 h-[500px] w-[500px] rounded-full bg-sky-300/30 blur-3xl" />
-        <div className="absolute -bottom-40 -right-40 h-[400px] w-[400px] rounded-full bg-blue-300/30 blur-3xl" />
+        <div className="absolute -top-40 -left-40 h-[500px] w-[500px] rounded-full bg-brand-300/30 blur-3xl" />
+        <div className="absolute -bottom-40 -right-40 h-[400px] w-[400px] rounded-full bg-brand-400/30 blur-3xl" />
       </div>
 
       <div className="relative w-full max-w-md animate-fade-slide-up">
         {/* Back to home */}
         <Link
           to="/"
-          className="mb-6 inline-flex items-center gap-2 text-sm font-medium text-sky-700 transition hover:text-sky-900"
+          className="mb-6 inline-flex items-center gap-2 text-sm font-medium text-brand-700 transition hover:text-brand-900"
         >
           <ArrowLeft className="h-4 w-4" />
           Back to home
         </Link>
 
         {/* Card */}
-        <div className="overflow-hidden rounded-3xl bg-white ring-1 ring-sky-100 shadow-2xl shadow-sky-200/50">
+        <div className="overflow-hidden rounded-3xl bg-white ring-1 ring-brand-100 shadow-2xl shadow-brand-200/50">
           {/* Top bar */}
-          <div className="bg-gradient-to-r from-sky-500 to-blue-600 p-6 text-white">
+          <div className="bg-gradient-to-r from-brand-500 to-brand-700 p-6 text-white">
             <div className="flex items-center gap-4">
               <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/20 ring-2 ring-white/30">
                 <Icon className="h-7 w-7" />
@@ -111,7 +111,7 @@ export default function LoginPage({ role }) {
           <div className="p-8">
             {/* School identity */}
             <div className="mb-8 flex items-center gap-3">
-              <img src={schoolLogo} alt="TFC" className="h-10 w-10 rounded-xl object-contain ring-1 ring-sky-100" />
+              <img src={schoolLogo} alt="TFC" className="h-10 w-10 rounded-xl object-contain ring-1 ring-brand-100" />
               <div>
                 <p className="text-sm font-bold text-slate-900">{schoolInfo.name}</p>
                 <p className="text-xs text-slate-500">{schoolInfo.city}</p>
@@ -124,11 +124,11 @@ export default function LoginPage({ role }) {
             <form className="grid gap-5" onSubmit={handleSubmit}>
               {/* Email */}
               <div>
-                <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-sky-700">
+                <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-brand-700">
                   Email address
                 </label>
                 <div className="relative">
-                  <Mail className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-sky-400" />
+                  <Mail className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-brand-400" />
                   <input
                     type="email"
                     value={form.email}
@@ -143,11 +143,11 @@ export default function LoginPage({ role }) {
 
               {/* Password */}
               <div>
-                <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-sky-700">
+                <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-brand-700">
                   Password
                 </label>
                 <div className="relative">
-                  <LockKeyhole className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-sky-400" />
+                  <LockKeyhole className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-brand-400" />
                   <input
                     type={showPwd ? "text" : "password"}
                     value={form.password}
@@ -160,7 +160,7 @@ export default function LoginPage({ role }) {
                   <button
                     type="button"
                     onClick={() => setShowPwd((v) => !v)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-sky-400 hover:text-sky-700 transition"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-brand-400 hover:text-brand-700 transition"
                   >
                     {showPwd ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
@@ -170,7 +170,7 @@ export default function LoginPage({ role }) {
               <button
                 type="submit"
                 disabled={loading}
-                className="mt-2 flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-sky-500 to-blue-600 py-4 text-sm font-black text-white shadow-lg shadow-sky-300/50 transition-all duration-200 hover:from-sky-400 hover:to-blue-500 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-sky-300 disabled:opacity-60 disabled:cursor-not-allowed"
+                className="mt-2 flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-brand-500 to-brand-700 py-4 text-sm font-black text-white shadow-lg shadow-brand-300/50 transition-all duration-200 hover:from-brand-400 hover:to-brand-600 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-brand-300 disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 <LockKeyhole className="h-4 w-4" />
                 {loading ? "Signing in…" : `Sign in to ${cfg.title}`}
@@ -178,7 +178,7 @@ export default function LoginPage({ role }) {
 
               <Link
                 to="/forgot-password"
-                className="-mt-1 text-center text-xs font-medium text-slate-400 transition hover:text-sky-700"
+                className="-mt-1 text-center text-xs font-medium text-slate-400 transition hover:text-brand-700"
               >
                 Forgot your password?
               </Link>
@@ -192,7 +192,7 @@ export default function LoginPage({ role }) {
                 Enter it below to finish signing in.
               </p>
               <div>
-                <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-sky-700">
+                <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-brand-700">
                   Verification code
                 </label>
                 <input
@@ -202,14 +202,14 @@ export default function LoginPage({ role }) {
                   value={code}
                   onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
                   placeholder="000000"
-                  className="w-full rounded-2xl border border-sky-200 bg-sky-50/60 py-3.5 text-center text-2xl font-bold tracking-[0.5em] text-slate-900 placeholder-slate-300 outline-none transition focus:border-sky-400 focus:bg-white focus:ring-2 focus:ring-sky-200"
+                  className="w-full rounded-2xl border border-brand-200 bg-brand-50/60 py-3.5 text-center text-2xl font-bold tracking-[0.5em] text-slate-900 placeholder-slate-300 outline-none transition focus:border-brand-400 focus:bg-white focus:ring-2 focus:ring-brand-200"
                   required
                 />
               </div>
               <button
                 type="submit"
                 disabled={loading || code.length !== 6}
-                className="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-sky-500 to-blue-600 py-4 text-sm font-black text-white shadow-lg shadow-sky-300/50 transition-all duration-200 hover:from-sky-400 hover:to-blue-500 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-sky-300 disabled:opacity-60 disabled:cursor-not-allowed"
+                className="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-brand-500 to-brand-700 py-4 text-sm font-black text-white shadow-lg shadow-brand-300/50 transition-all duration-200 hover:from-brand-400 hover:to-brand-600 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-brand-300 disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 <ShieldCheck className="h-4 w-4" />
                 {loading ? "Verifying…" : "Verify & sign in"}
@@ -217,7 +217,7 @@ export default function LoginPage({ role }) {
               <button
                 type="button"
                 onClick={() => { setStep("credentials"); setCode(""); setError(""); }}
-                className="text-center text-xs font-medium text-slate-400 transition hover:text-sky-700"
+                className="text-center text-xs font-medium text-slate-400 transition hover:text-brand-700"
               >
                 Back to login
               </button>
