@@ -101,17 +101,23 @@ authRouter.post("/forgot-password", sensitiveLimiter, validate(forgotPasswordSch
     const user = await User.findOne({ email });
 
     // Always respond the same way so we never reveal which emails exist.
-    if (user && emailReady()) {
+    if (!user) {
+      console.log(`[forgot-password] No account found for ${email}`);
+    } else if (!emailReady()) {
+      console.log("[forgot-password] Email is NOT configured (NOTIFICATIONS_ENABLED / SMTP_* missing).");
+    } else {
       const rawToken = user.createPasswordResetToken();
       await user.save();
       const base = process.env.CLIENT_URL || req.headers.origin || "";
       const resetUrl = `${base}/reset-password?token=${rawToken}`;
       try {
         await sendPasswordResetEmail({ user, resetUrl });
+        console.log(`[forgot-password] Reset email sent to ${user.email}`);
       } catch (mailError) {
         user.passwordResetToken = undefined;
         user.passwordResetExpires = undefined;
         await user.save();
+        console.error(`[forgot-password] Email send FAILED: ${mailError.message}`);
       }
     }
 
