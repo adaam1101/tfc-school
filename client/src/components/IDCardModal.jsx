@@ -26,15 +26,37 @@ export default function IDCardModal({ user, student, onClose }) {
     if (!html) return;
     const win = window.open("", "_blank", "width=560,height=380");
     if (!win) return;
+    // The on-screen card is 420px wide. A real CR80 ID card is 85.6mm × 54mm.
+    // 420px @96dpi ≈ 111.1mm, so we scale it down to the true card footprint.
+    const scale = 85.6 / 111.1; // ≈ 0.77
     win.document.write(`
       <html>
         <head>
           <title>TFC ID — ${person?.name || ""}</title>
           <script src="https://cdn.tailwindcss.com"></script>
+          <style>
+            * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+            @page { size: 85.6mm 54mm; margin: 0; }
+            html, body { margin: 0; padding: 0; }
+            .print-stage {
+              display: flex; align-items: center; justify-content: center;
+              min-height: 100vh; background: #e2e8f0; font-family: system-ui, sans-serif;
+            }
+            .card-scale { transform: scale(${scale}); transform-origin: center; }
+            @media print {
+              .print-stage { min-height: auto; background: #fff; }
+              .card-scale {
+                width: 85.6mm; height: 54mm;
+                display: flex; align-items: center; justify-content: center;
+              }
+            }
+          </style>
         </head>
-        <body style="margin:0;display:flex;align-items:center;justify-content:center;min-height:100vh;background:#e2e8f0;font-family:system-ui,sans-serif;">
-          ${html}
-          <script>window.onload = () => { setTimeout(() => { window.print(); }, 500); };</script>
+        <body>
+          <div class="print-stage">
+            <div class="card-scale">${html}</div>
+          </div>
+          <script>window.onload = () => { setTimeout(() => { window.print(); }, 600); };</script>
         </body>
       </html>
     `);
