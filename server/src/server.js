@@ -8,6 +8,7 @@ import rateLimit from "express-rate-limit";
 import helmet from "helmet";
 import morgan from "morgan";
 import { connectDB } from "./config/db.js";
+import { bootstrapAdmin } from "./config/bootstrapAdmin.js";
 import { errorHandler, notFound } from "./middleware/errorHandler.js";
 import { adminRouter } from "./routes/adminRoutes.js";
 import { authRouter } from "./routes/authRoutes.js";
@@ -66,4 +67,4 @@ if (clientDist) {
 app.use(notFound);
 app.use(errorHandler);
 
-connectDB().then(() => { app.listen(port, () => { console.log(`TFC School API running on http://localhost:${port}`); }); }).catch((error) => { console.error("Failed to start server:", error.message); process.exit(1); });
+connectDB().then(async () => { await bootstrapAdmin(); app.listen(port, () => { console.log(`TFC School API running on http://localhost:${port}`); }); }).catch((error) => { console.error("Failed to start server:", error.message); process.exit(1); });
