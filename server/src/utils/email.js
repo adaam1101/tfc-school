@@ -7,10 +7,16 @@ const createTransport = () => {
     return null;
   }
 
+  const port = Number(process.env.SMTP_PORT || 587);
   return nodemailer.createTransport({
     host: process.env.SMTP_HOST,
-    port: Number(process.env.SMTP_PORT || 587),
-    secure: process.env.SMTP_SECURE === "true",
+    port,
+    // Port 465 = implicit SSL; anything else (587) = STARTTLS. Derive automatically
+    // unless explicitly overridden, so a mismatched SMTP_SECURE can't cause hangs.
+    secure: process.env.SMTP_SECURE ? process.env.SMTP_SECURE === "true" : port === 465,
+    connectionTimeout: 10000,
+    greetingTimeout: 10000,
+    socketTimeout: 15000,
     auth:
       process.env.SMTP_USER && process.env.SMTP_PASS
         ? {
