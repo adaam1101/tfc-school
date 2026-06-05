@@ -120,23 +120,23 @@ export default function LandingPage() {
     <div className="min-h-screen bg-white text-slate-900">
 
       {/* ── Sticky Nav ── */}
-      <nav className="sticky top-0 z-50 border-b border-white/10 bg-[#0f1f35]/90 backdrop-blur-md">
+      <nav className="sticky top-0 z-50 border-b border-sky-100 bg-white/90 backdrop-blur-md shadow-sm">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 py-4">
           <div className="flex items-center gap-3">
-            <img src={schoolLogo} alt="TFC" className="h-10 w-10 rounded-xl object-contain" />
+            <img src={schoolLogo} alt="TFC" className="h-10 w-10 rounded-xl object-contain ring-1 ring-sky-100" />
             <div>
-              <p className="text-base font-bold text-white leading-tight">TFC School</p>
-              <p className="text-xs text-blue-300">Training Formation Center</p>
+              <p className="text-base font-bold text-slate-900 leading-tight">TFC School</p>
+              <p className="text-xs text-sky-600">Training Formation Center</p>
             </div>
           </div>
 
           {/* Desktop nav */}
-          <div className="hidden items-center gap-6 text-sm font-medium text-blue-200 md:flex">
+          <div className="hidden items-center gap-6 text-sm font-medium text-slate-600 md:flex">
             {[["about", "About"], ["features", "Features"], ["ratings", "Reviews"], ["contact", "Contact"]].map(([id, label]) => (
               <button
                 key={id}
                 onClick={() => scrollTo(id)}
-                className="transition hover:text-white"
+                className="transition hover:text-sky-700"
               >
                 {label}
               </button>
@@ -166,30 +166,30 @@ export default function LandingPage() {
       </nav>
 
       {/* ── Hero ── */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-[#0a1628] via-[#0f1f35] to-[#1a2f50] py-24 text-white">
+      <section className="relative overflow-hidden bg-gradient-to-br from-sky-100 via-blue-50 to-sky-200 py-24 text-slate-900">
         {/* Decorative circles */}
         <div className="pointer-events-none absolute inset-0">
-          <div className="absolute -top-32 -left-32 h-[500px] w-[500px] rounded-full bg-blue-600/10 blur-3xl" />
-          <div className="absolute -bottom-32 -right-32 h-[400px] w-[400px] rounded-full bg-sky-500/10 blur-3xl" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[300px] w-[300px] rounded-full bg-violet-600/5 blur-3xl" />
+          <div className="absolute -top-32 -left-32 h-[500px] w-[500px] rounded-full bg-sky-300/30 blur-3xl" />
+          <div className="absolute -bottom-32 -right-32 h-[400px] w-[400px] rounded-full bg-blue-300/30 blur-3xl" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[300px] w-[300px] rounded-full bg-sky-200/40 blur-3xl" />
         </div>
 
         <div className="relative mx-auto max-w-7xl px-6 text-center">
           {/* Logo */}
-          <div className="mx-auto mb-8 flex h-32 w-32 items-center justify-center rounded-3xl bg-white/10 ring-4 ring-white/20 backdrop-blur-sm shadow-2xl animate-fade-slide-up">
+          <div className="mx-auto mb-8 flex h-32 w-32 items-center justify-center rounded-3xl bg-white ring-4 ring-sky-200 shadow-xl shadow-sky-200/50 animate-fade-slide-up">
             <img src={schoolLogo} alt="TFC School" className="h-24 w-24 rounded-2xl object-contain" />
           </div>
 
           <div className="animate-fade-slide-up" style={{ animationDelay: "0.1s" }}>
-            <p className="text-sm font-bold uppercase tracking-[0.3em] text-blue-300">Welcome to</p>
-            <h1 className="mt-3 text-5xl font-black leading-tight tracking-tight sm:text-6xl lg:text-7xl">
+            <p className="text-sm font-bold uppercase tracking-[0.3em] text-sky-600">Welcome to</p>
+            <h1 className="mt-3 text-5xl font-black leading-tight tracking-tight sm:text-6xl lg:text-7xl text-slate-900">
               Training Formation
               <br />
-              <span className="bg-gradient-to-r from-blue-400 to-sky-400 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-sky-500 to-blue-600 bg-clip-text text-transparent">
                 Center
               </span>
             </h1>
-            <p className="mx-auto mt-6 max-w-2xl text-lg text-blue-200/80 leading-relaxed">
+            <p className="mx-auto mt-6 max-w-2xl text-lg text-slate-600 leading-relaxed">
               {schoolInfo.tagline} — Annaba's premier educational institution dedicated to academic excellence and professional growth.
             </p>
             <button
@@ -211,10 +211,10 @@ export default function LandingPage() {
               { icon: Award, label: "Programs",  value: "12+"  },
               { icon: Clock, label: "Years",     value: "10+"  }
             ].map(({ icon: Icon, label, value }) => (
-              <div key={label} className="rounded-2xl bg-white/10 px-4 py-4 backdrop-blur-sm ring-1 ring-white/10">
-                <Icon className="mx-auto h-5 w-5 text-blue-300" />
-                <p className="mt-2 text-2xl font-black">{value}</p>
-                <p className="text-xs text-blue-300">{label}</p>
+              <div key={label} className="rounded-2xl bg-white px-4 py-4 ring-1 ring-sky-100 shadow-sm">
+                <Icon className="mx-auto h-5 w-5 text-sky-600" />
+                <p className="mt-2 text-2xl font-black text-slate-900">{value}</p>
+                <p className="text-xs text-slate-500">{label}</p>
               </div>
             ))}
           </div>
@@ -243,14 +243,14 @@ export default function LandingPage() {
           {/* Rating teaser */}
           {rating.count > 0 && (
             <div
-              className="mt-10 inline-flex items-center gap-3 rounded-full bg-white/10 px-6 py-3 backdrop-blur-sm ring-1 ring-white/20 animate-fade-in"
+              className="mt-10 inline-flex items-center gap-3 rounded-full bg-white px-6 py-3 ring-1 ring-sky-200 shadow-sm animate-fade-in"
               style={{ animationDelay: "0.4s" }}
             >
               <StarRating value={Math.round(rating.average)} readOnly size="sm" />
-              <span className="text-sm font-semibold text-white">
+              <span className="text-sm font-semibold text-slate-900">
                 {rating.average}/5
               </span>
-              <span className="text-sm text-blue-300">({rating.count} reviews)</span>
+              <span className="text-sm text-slate-500">({rating.count} reviews)</span>
             </div>
           )}
         </div>
@@ -332,25 +332,25 @@ export default function LandingPage() {
       </section>
 
       {/* ── Portals ── */}
-      <section className="bg-gradient-to-br from-[#0f1f35] to-[#1a2f50] py-24 text-white">
+      <section className="bg-gradient-to-br from-sky-100 via-blue-50 to-sky-200 py-24 text-slate-900">
         <div className="mx-auto max-w-7xl px-6 text-center">
-          <p className="text-sm font-bold uppercase tracking-widest text-blue-300">Secure Access</p>
-          <h2 className="mt-3 text-4xl font-black">Choose your portal</h2>
-          <p className="mt-4 text-blue-200/80">Each role has a dedicated, secure login portal.</p>
+          <p className="text-sm font-bold uppercase tracking-widest text-sky-600">Secure Access</p>
+          <h2 className="mt-3 text-4xl font-black text-slate-900">Choose your portal</h2>
+          <p className="mt-4 text-slate-600">Each role has a dedicated, secure login portal.</p>
 
           <div className="mt-12 grid gap-6 md:grid-cols-3">
             {portals.map((p) => (
               <Link
                 key={p.role}
                 to={p.link}
-                className="group relative overflow-hidden rounded-3xl bg-white/5 p-8 ring-1 ring-white/10 transition-all duration-300 hover:-translate-y-2 hover:bg-white/10 hover:ring-white/20 hover:shadow-2xl text-left"
+                className="group relative overflow-hidden rounded-3xl bg-white p-8 ring-1 ring-sky-100 shadow-sm transition-all duration-300 hover:-translate-y-2 hover:bg-sky-50 hover:ring-sky-200 hover:shadow-xl text-left"
               >
                 <div className={`mb-5 inline-flex rounded-2xl bg-gradient-to-br ${p.gradient} p-4 shadow-lg`}>
                   <p.icon className="h-8 w-8 text-white" />
                 </div>
-                <h3 className="text-xl font-black">{p.label}</h3>
-                <p className="mt-2 text-sm text-blue-200/70">{p.sub}</p>
-                <div className="mt-6 flex items-center gap-2 text-sm font-semibold text-blue-300 group-hover:text-white transition-colors">
+                <h3 className="text-xl font-black text-slate-900">{p.label}</h3>
+                <p className="mt-2 text-sm text-slate-500">{p.sub}</p>
+                <div className="mt-6 flex items-center gap-2 text-sm font-semibold text-sky-600 group-hover:text-sky-800 transition-colors">
                   Login now <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </div>
               </Link>
@@ -505,14 +505,14 @@ export default function LandingPage() {
       </section>
 
       {/* ── Footer ── */}
-      <footer className="bg-[#0a1628] py-12 text-center text-white">
+      <footer className="bg-gradient-to-br from-sky-500 to-blue-600 py-12 text-center text-white">
         <div className="mx-auto max-w-7xl px-6">
           <div className="flex flex-col items-center gap-4">
-            <img src={schoolLogo} alt="TFC" className="h-16 w-16 rounded-2xl object-contain opacity-90" />
+            <img src={schoolLogo} alt="TFC" className="h-16 w-16 rounded-2xl bg-white/90 object-contain p-1 shadow-sm" />
             <p className="text-xl font-black">Training Formation Center</p>
-            <p className="text-blue-300 text-sm">{schoolInfo.tagline}</p>
+            <p className="text-sky-100 text-sm">{schoolInfo.tagline}</p>
 
-            <div className="mt-4 flex flex-wrap justify-center gap-x-8 gap-y-2 text-sm text-blue-300">
+            <div className="mt-4 flex flex-wrap justify-center gap-x-8 gap-y-2 text-sm text-sky-100">
               <a href={`mailto:${schoolInfo.email}`} className="hover:text-white transition">{schoolInfo.email}</a>
               {schoolInfo.phones.map((p) => (
                 <a key={p} href={`tel:${p.replace(/\s/g, "")}`} className="hover:text-white transition">{p}</a>
@@ -520,11 +520,11 @@ export default function LandingPage() {
               <span>{schoolInfo.address}</span>
             </div>
 
-            <div className="mt-6 border-t border-white/10 pt-6 w-full">
-              <p className="text-xs text-blue-400/70">
+            <div className="mt-6 border-t border-white/20 pt-6 w-full">
+              <p className="text-xs text-sky-100/80">
                 © {new Date().getFullYear()} TFC — Training Formation Center. All rights reserved.
               </p>
-              <p className="mt-1 text-xs text-blue-400/50">{schoolInfo.credit}</p>
+              <p className="mt-1 text-xs text-sky-100/60">{schoolInfo.credit}</p>
             </div>
           </div>
         </div>
