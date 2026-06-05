@@ -6,7 +6,8 @@ import {
   RefreshCcw,
   Users,
   XCircle,
-  UserRound
+  UserRound,
+  IdCard
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { api, getApiError } from "../../api/http.js";
@@ -16,6 +17,7 @@ import StatTile from "../../components/StatTile.jsx";
 import StatusBadge from "../../components/StatusBadge.jsx";
 import AppLayout from "../../layouts/AppLayout.jsx";
 import AnnouncementsCard from "../../components/AnnouncementsCard.jsx";
+import IDCardModal from "../../components/IDCardModal.jsx";
 
 const countStatus = (students, status) =>
   students.filter((s) => s.todayAttendance?.status === status).length;
@@ -27,6 +29,7 @@ export default function TeacherDashboard() {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
+  const [showIdCard, setShowIdCard] = useState(false);
 
   const students = data?.students || [];
   const presentCount = countStatus(students, "Present");
@@ -131,10 +134,16 @@ export default function TeacherDashboard() {
                 </p>
               </div>
             </div>
-            <button type="button" className="btn-secondary" onClick={loadDashboard}>
-              <RefreshCcw className="h-4 w-4" aria-hidden="true" />
-              Refresh
-            </button>
+            <div className="flex gap-2">
+              <button type="button" className="btn-secondary" onClick={() => setShowIdCard(true)}>
+                <IdCard className="h-4 w-4" aria-hidden="true" />
+                My ID card
+              </button>
+              <button type="button" className="btn-secondary" onClick={loadDashboard}>
+                <RefreshCcw className="h-4 w-4" aria-hidden="true" />
+                Refresh
+              </button>
+            </div>
           </div>
 
           <div className="grid gap-3">
@@ -231,6 +240,8 @@ export default function TeacherDashboard() {
 
         <AnnouncementsCard />
       </div>
+
+      {showIdCard && data?.teacher && <IDCardModal user={data.teacher} onClose={() => setShowIdCard(false)} />}
     </AppLayout>
   );
 }

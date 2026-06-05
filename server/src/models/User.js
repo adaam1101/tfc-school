@@ -10,6 +10,7 @@ const teacherProfileSchema = new Schema(
   {
     subject: { type: String, trim: true },
     contactInfo: { type: String, trim: true },
+    dateOfBirth: { type: String, trim: true },
     assignedStudents: [{ type: Schema.Types.ObjectId, ref: "User" }]
   },
   { _id: false }
@@ -18,6 +19,7 @@ const teacherProfileSchema = new Schema(
 const studentProfileSchema = new Schema(
   {
     age: { type: Number, min: 3, max: 80 },
+    dateOfBirth: { type: String, trim: true },
     course: { type: String, trim: true },
     parentName: { type: String, trim: true },
     parentEmail: { type: String, trim: true, lowercase: true },
@@ -49,6 +51,7 @@ const userSchema = new Schema(
     },
     password: { type: String, required: true, minlength: 8, select: false },
     phone: { type: String, trim: true },
+    photo: { type: String }, // base64 data URL for ID card photo
     status: { type: String, enum: ["active", "inactive"], default: "active" },
     twoFactorEnabled: { type: Boolean, default: true },
     twoFactorCode: { type: String, select: false },

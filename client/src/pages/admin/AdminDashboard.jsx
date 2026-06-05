@@ -47,10 +47,12 @@ const emptyForm = {
   email: "",
   password: "",
   phone: "",
+  photo: "",
   status: "active",
-  teacherProfile: { subject: "", contactInfo: "" },
+  teacherProfile: { subject: "", contactInfo: "", dateOfBirth: "" },
   studentProfile: {
     age: "",
+    dateOfBirth: "",
     course: "English",
     parentName: "",
     parentEmail: "",
@@ -61,6 +63,29 @@ const emptyForm = {
     teacher: ""
   }
 };
+
+// Compress an uploaded image to a small base64 JPEG suitable for an ID card.
+const fileToCompressedDataUrl = (file, maxSize = 400) =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        const scale = Math.min(1, maxSize / Math.max(img.width, img.height));
+        const w = Math.round(img.width * scale);
+        const h = Math.round(img.height * scale);
+        const canvas = document.createElement("canvas");
+        canvas.width = w;
+        canvas.height = h;
+        canvas.getContext("2d").drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL("image/jpeg", 0.75));
+      };
+      img.onerror = reject;
+      img.src = reader.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
 
 const countStatus = (items = [], status) => items.find((item) => item._id === status)?.count || 0;
 
@@ -117,10 +142,21 @@ export default function AdminDashboard() {
     setForm((c) => ({ ...c, [group]: { ...c[group], [key]: value } }));
   };
 
+  const handlePhotoChange = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    try {
+      const dataUrl = await fileToCompressedDataUrl(file);
+      setForm((c) => ({ ...c, photo: dataUrl }));
+    } catch {
+      setError("Could not read that image. Try a different file.");
+    }
+  };
+
   const resetForm = () => { setForm(emptyForm); setEditingId(null); };
 
   const buildPayload = () => {
-    const payload = { role: form.role, name: form.name, email: form.email, phone: form.phone, status: form.status };
+    const payload = { role: form.role, name: form.name, email: form.email, phone: form.phone, photo: form.photo, status: form.status };
     if (!editingId || form.password) payload.password = form.password;
     if (form.role === "teacher")  payload.teacherProfile = form.teacherProfile;
     if (form.role === "student")  payload.studentProfile = form.studentProfile;
@@ -154,10 +190,12 @@ export default function AdminDashboard() {
       name: user.name || "",
       email: user.email || "",
       phone: user.phone || "",
+      photo: user.photo || "",
       status: user.status || "active",
-      teacherProfile: { subject: user.teacherProfile?.subject || "", contactInfo: user.teacherProfile?.contactInfo || "" },
+      teacherProfile: { subject: user.teacherProfile?.subject || "", contactInfo: user.teacherProfile?.contactInfo || "", dateOfBirth: user.teacherProfile?.dateOfBirth || "" },
       studentProfile: {
         age: user.studentProfile?.age || "",
+        dateOfBirth: user.studentProfile?.dateOfBirth || "",
         course: user.studentProfile?.course || "English",
         parentName: user.studentProfile?.parentName || "",
         parentEmail: user.studentProfile?.parentEmail || "",
@@ -318,6 +356,34 @@ export default function AdminDashboard() {
                 </label>
               </div>
 
+              {/* Photo for ID card (students and teachers) */}
+              {form.role !== "admin" && (
+                <div className="flex items-center gap-4 rounded-xl bg-slate-50 p-4">
+                  {form.photo ? (
+                    <img src={form.photo} alt="Preview" className="h-20 w-16 rounded-lg object-cover ring-1 ring-slate-200" />
+                  ) : (
+                    <div className="flex h-20 w-16 items-center justify-center rounded-lg bg-slate-200 text-slate-400">
+                      <IdCard className="h-6 w-6" />
+                    </div>
+                  )}
+                  <div className="flex-1">
+                    <p className="mb-1 text-sm font-semibold text-slate-700">ID card photo</p>
+                    <p className="mb-2 text-xs text-slate-500">A clear face photo. Used on the printed ID card.</p>
+                    <div className="flex gap-2">
+                      <label className="btn-secondary cursor-pointer text-xs">
+                        {form.photo ? "Change photo" : "Upload photo"}
+                        <input type="file" accept="image/*" className="hidden" onChange={handlePhotoChange} />
+                      </label>
+                      {form.photo && (
+                        <button type="button" className="btn-secondary text-xs" onClick={() => updateForm("photo", "")}>
+                          Remove
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {form.role === "teacher" && (
                 <div className="grid gap-4 sm:grid-cols-2">
                   <label className="field">
@@ -325,6 +391,10 @@ export default function AdminDashboard() {
                     <input className="input" value={form.teacherProfile.subject} onChange={(e) => updateForm("teacherProfile.subject", e.target.value)} required />
                   </label>
                   <label className="field">
+                    Date of birth
+                    <input className="input" type="date" value={form.teacherProfile.dateOfBirth} onChange={(e) => updateForm("teacherProfile.dateOfBirth", e.target.value)} />
+                  </label>
+                  <label className="field sm:col-span-2">
                     Contact info
                     <input className="input" value={form.teacherProfile.contactInfo} onChange={(e) => updateForm("teacherProfile.contactInfo", e.target.value)} />
                   </label>
@@ -336,6 +406,10 @@ export default function AdminDashboard() {
                   <label className="field">
                     Age
                     <input className="input" type="number" min="3" max="80" value={form.studentProfile.age} onChange={(e) => updateForm("studentProfile.age", e.target.value)} required />
+                  </label>
+                  <label className="field">
+                    Date of birth
+                    <input className="input" type="date" value={form.studentProfile.dateOfBirth} onChange={(e) => updateForm("studentProfile.dateOfBirth", e.target.value)} />
                   </label>
                   <label className="field">
                     Course
@@ -455,7 +529,7 @@ export default function AdminDashboard() {
                           <button type="button" className="icon-btn" onClick={() => editUser(user)} title="Edit">
                             <Pencil className="h-3.5 w-3.5" />
                           </button>
-                          {user.role === "student" && (
+                          {user.role !== "admin" && (
                             <button type="button" className="icon-btn" onClick={() => setIdCardStudent(user)} title="ID card">
                               <IdCard className="h-3.5 w-3.5" />
                             </button>
@@ -586,7 +660,7 @@ export default function AdminDashboard() {
         )}
       </div>
 
-      {idCardStudent && <IDCardModal student={idCardStudent} onClose={() => setIdCardStudent(null)} />}
+      {idCardStudent && <IDCardModal user={idCardStudent} onClose={() => setIdCardStudent(null)} />}
     </AppLayout>
   );
 }

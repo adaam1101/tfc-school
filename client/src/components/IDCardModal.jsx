@@ -3,14 +3,23 @@ import { X, Printer, CreditCard } from "lucide-react";
 import { schoolLogo, schoolInfo } from "../config/branding.js";
 
 /**
- * Printable student ID card. `student` is a user doc with name, email,
- * and studentProfile (course, rfidCardLast4, age, enrollmentDate).
+ * Printable ID card for a student or teacher.
+ * `user` is a user doc with name, role, photo, and a profile
+ * (studentProfile or teacherProfile) holding course/subject, dateOfBirth, etc.
  */
-export default function IDCardModal({ student, onClose }) {
+export default function IDCardModal({ user, student, onClose }) {
+  const person = user || student; // backward compatible with old `student` prop
   const cardRef = useRef(null);
-  const profile = student?.studentProfile || {};
-  const initials = student?.name?.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase() || "?";
-  const idNumber = (student?._id || "").toString().slice(-6).toUpperCase();
+
+  const isTeacher = person?.role === "teacher";
+  const profile = (isTeacher ? person?.teacherProfile : person?.studentProfile) || {};
+  const initials = person?.name?.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase() || "?";
+  const idNumber = (person?._id || "").toString().slice(-6).toUpperCase();
+  const idPrefix = isTeacher ? "TFC-T" : "TFC-S";
+  const roleLabel = isTeacher ? "Staff Identity Card" : "Student Identity Card";
+  const courseOrSubject = isTeacher ? profile.subject : profile.course;
+  const courseLabel = isTeacher ? "Subject" : "Course";
+  const photo = person?.photo;
 
   const handlePrint = () => {
     const html = cardRef.current?.innerHTML;
@@ -20,12 +29,12 @@ export default function IDCardModal({ student, onClose }) {
     win.document.write(`
       <html>
         <head>
-          <title>TFC Student ID — ${student?.name || ""}</title>
+          <title>TFC ID — ${person?.name || ""}</title>
           <script src="https://cdn.tailwindcss.com"></script>
         </head>
         <body style="margin:0;display:flex;align-items:center;justify-content:center;min-height:100vh;background:#e2e8f0;font-family:system-ui,sans-serif;">
           ${html}
-          <script>window.onload = () => { setTimeout(() => { window.print(); }, 400); };</script>
+          <script>window.onload = () => { setTimeout(() => { window.print(); }, 500); };</script>
         </body>
       </html>
     `);
@@ -38,7 +47,7 @@ export default function IDCardModal({ student, onClose }) {
         <div className="mb-4 flex items-center justify-between">
           <h2 className="flex items-center gap-2 text-lg font-bold text-slate-900">
             <CreditCard className="h-5 w-5 text-teal-600" />
-            Student ID Card
+            {isTeacher ? "Teacher ID Card" : "Student ID Card"}
           </h2>
           <button onClick={onClose} className="rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700">
             <X className="h-5 w-5" />
@@ -51,29 +60,41 @@ export default function IDCardModal({ student, onClose }) {
             style={{ width: "420px", maxWidth: "100%" }}
             className="mx-auto overflow-hidden rounded-2xl bg-gradient-to-br from-[#0a1628] via-[#0f1f35] to-[#1a3a5c] text-white shadow-xl"
           >
-            {/* Header */}
+            {/* Header: logo + school name */}
             <div className="flex items-center gap-3 border-b border-white/10 px-5 py-3">
-              <img src={schoolLogo} alt="TFC" className="h-10 w-10 rounded-lg bg-white/10 object-contain" />
+              <img src={schoolLogo} alt="TFC" className="h-11 w-11 rounded-lg bg-white/10 object-contain" />
               <div>
-                <p className="text-sm font-black leading-tight">Training Formation Center</p>
-                <p className="text-[10px] uppercase tracking-widest text-blue-300">Student Identity Card</p>
+                <p className="text-sm font-black leading-tight">{schoolInfo.name}</p>
+                <p className="text-[10px] uppercase tracking-widest text-blue-300">{roleLabel}</p>
               </div>
             </div>
 
-            {/* Body */}
-            <div className="flex items-center gap-4 px-5 py-5">
-              <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-teal-500 to-emerald-600 text-3xl font-black shadow-lg">
-                {initials}
-              </div>
+            {/* Body: photo + details */}
+            <div className="flex items-start gap-4 px-5 py-5">
+              {/* Photo */}
+              {photo ? (
+                <img
+                  src={photo}
+                  alt={person?.name}
+                  className="h-24 w-20 shrink-0 rounded-xl object-cover ring-2 ring-white/20 shadow-lg"
+                />
+              ) : (
+                <div className="flex h-24 w-20 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-teal-500 to-emerald-600 text-3xl font-black shadow-lg ring-2 ring-white/20">
+                  {initials}
+                </div>
+              )}
+
               <div className="min-w-0 flex-1">
-                <p className="truncate text-xl font-black">{student?.name}</p>
-                <p className="text-sm text-blue-200">{profile.course || "—"}</p>
-                <div className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1 text-[11px] text-blue-200/80">
+                <p className="truncate text-lg font-black leading-tight">{person?.name}</p>
+                <p className="mb-2 text-sm text-blue-200">{courseOrSubject || "—"}</p>
+                <div className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-[11px] text-blue-200/80">
                   <span className="text-blue-400">ID No.</span>
-                  <span className="font-mono font-bold text-white">TFC-{idNumber}</span>
-                  <span className="text-blue-400">Age</span>
-                  <span className="font-semibold text-white">{profile.age || "—"}</span>
-                  {profile.rfidCardLast4 && (
+                  <span className="font-mono font-bold text-white">{idPrefix}-{idNumber}</span>
+                  <span className="text-blue-400">Date of birth</span>
+                  <span className="font-semibold text-white">{profile.dateOfBirth || "—"}</span>
+                  <span className="text-blue-400">{courseLabel}</span>
+                  <span className="font-semibold text-white">{courseOrSubject || "—"}</span>
+                  {!isTeacher && profile.rfidCardLast4 && (
                     <>
                       <span className="text-blue-400">RFID</span>
                       <span className="font-mono font-semibold text-white">…{profile.rfidCardLast4}</span>
@@ -86,7 +107,7 @@ export default function IDCardModal({ student, onClose }) {
             {/* Footer */}
             <div className="flex items-center justify-between bg-white/5 px-5 py-2.5 text-[10px] text-blue-300">
               <span>{schoolInfo.address}</span>
-              <span>{schoolInfo.phones[0]}</span>
+              <span>{schoolInfo.phones?.[0]}</span>
             </div>
           </div>
         </div>

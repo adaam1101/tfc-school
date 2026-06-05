@@ -16,10 +16,17 @@ const optionalEmail = z.preprocess(
   z.string().trim().email().optional()
 );
 
+// A photo is stored as a base64 data URL (small, client-compressed image).
+const optionalPhoto = z.preprocess(
+  (value) => (value === "" || value === null ? undefined : value),
+  z.string().max(3_000_000).optional()
+);
+
 const teacherProfile = z
   .object({
     subject: optionalText(120),
     contactInfo: optionalText(200),
+    dateOfBirth: optionalText(20),
     assignedStudents: z.array(mongoId).optional()
   })
   .optional();
@@ -30,6 +37,7 @@ const studentProfile = z
       (value) => (value === "" || value === null ? undefined : value),
       z.coerce.number().int().min(3).max(80).optional()
     ),
+    dateOfBirth: optionalText(20),
     course: optionalText(120),
     parentName: optionalText(120),
     parentEmail: optionalEmail,
@@ -58,6 +66,7 @@ export const createUserSchema = z.object({
     email: z.string().trim().email().transform((value) => value.toLowerCase()),
     password: z.string().min(8).max(128),
     phone: optionalText(40),
+    photo: optionalPhoto,
     status: z.enum(["active", "inactive"]).optional(),
     teacherProfile,
     studentProfile
@@ -75,6 +84,7 @@ export const updateUserSchema = z.object({
       z.string().min(8).max(128).optional()
     ),
     phone: optionalText(40),
+    photo: optionalPhoto,
     status: z.enum(["active", "inactive"]).optional(),
     teacherProfile,
     studentProfile
