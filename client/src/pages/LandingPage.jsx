@@ -8,6 +8,7 @@ import {
 import { schoolLogo, schoolInfo } from "../config/branding.js";
 import { api } from "../api/http.js";
 import StarRating from "../components/StarRating.jsx";
+import EnrollModal from "../components/EnrollModal.jsx";
 
 function useRatingSummary() {
   const [data, setData] = useState({ average: 0, count: 0, distribution: [] });
@@ -108,6 +109,7 @@ function RatingBar({ star, count, total }) {
 export default function LandingPage() {
   const rating = useRatingSummary();
   const [navOpen, setNavOpen] = useState(false);
+  const [showEnroll, setShowEnroll] = useState(false);
 
   const scrollTo = (id) => {
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
@@ -142,6 +144,13 @@ export default function LandingPage() {
           </div>
 
           <div className="hidden items-center gap-2 md:flex">
+            <button
+              onClick={() => setShowEnroll(true)}
+              className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-teal-500 to-emerald-600 px-4 py-2 text-xs font-bold text-white shadow-sm transition-all hover:opacity-90 hover:shadow-md"
+            >
+              <GraduationCap className="h-3.5 w-3.5" />
+              Enroll
+            </button>
             {portals.map((p) => (
               <Link
                 key={p.role}
@@ -183,6 +192,13 @@ export default function LandingPage() {
             <p className="mx-auto mt-6 max-w-2xl text-lg text-blue-200/80 leading-relaxed">
               {schoolInfo.tagline} — Annaba's premier educational institution dedicated to academic excellence and professional growth.
             </p>
+            <button
+              onClick={() => setShowEnroll(true)}
+              className="mt-8 inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-teal-500 to-emerald-600 px-8 py-4 text-base font-black text-white shadow-lg shadow-teal-900/40 transition-all hover:-translate-y-0.5 hover:shadow-xl"
+            >
+              <GraduationCap className="h-5 w-5" />
+              Apply / Enroll Now
+            </button>
           </div>
 
           {/* Stats */}
@@ -513,6 +529,8 @@ export default function LandingPage() {
           </div>
         </div>
       </footer>
+
+      {showEnroll && <EnrollModal onClose={() => setShowEnroll(false)} />}
     </div>
   );
 }

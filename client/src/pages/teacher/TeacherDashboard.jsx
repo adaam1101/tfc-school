@@ -15,6 +15,7 @@ import LoadingState from "../../components/LoadingState.jsx";
 import StatTile from "../../components/StatTile.jsx";
 import StatusBadge from "../../components/StatusBadge.jsx";
 import AppLayout from "../../layouts/AppLayout.jsx";
+import AnnouncementsCard from "../../components/AnnouncementsCard.jsx";
 
 const countStatus = (students, status) =>
   students.filter((s) => s.todayAttendance?.status === status).length;
@@ -227,6 +228,8 @@ export default function TeacherDashboard() {
             )}
           </div>
         </section>
+
+        <AnnouncementsCard />
       </div>
     </AppLayout>
   );

@@ -5,6 +5,7 @@ import { Attendance } from "../models/Attendance.js";
 import { User } from "../models/User.js";
 import { dateKey, daysAgo } from "../utils/dates.js";
 import { applyRfidCardToProfile } from "../utils/rfid.js";
+import { recordAudit } from "../utils/audit.js";
 import {
   attendanceReportSchema,
   createUserSchema,
@@ -139,6 +140,8 @@ adminRouter.post("/users", validate(createUserSchema), async (req, res, next) =>
       .select(selectUserFields)
       .populate("studentProfile.teacher", "name email teacherProfile.subject");
 
+    await recordAudit({ req, action: "create", entity: "user", entityLabel: `${user.name} (${user.role})` });
+
     res.status(201).json({ user: savedUser });
   } catch (error) {
     next(error);
@@ -200,6 +203,8 @@ adminRouter.put("/users/:id", validate(updateUserSchema), async (req, res, next)
       .populate("studentProfile.teacher", "name email teacherProfile.subject")
       .populate("teacherProfile.assignedStudents", "name email studentProfile.course");
 
+    await recordAudit({ req, action: "update", entity: "user", entityLabel: `${user.name} (${user.role})` });
+
     res.json({ user });
   } catch (error) {
     next(error);
@@ -233,6 +238,9 @@ adminRouter.delete("/users/:id", validate(idParamSchema), async (req, res, next)
     }
 
     await user.deleteOne();
+
+    await recordAudit({ req, action: "delete", entity: "user", entityLabel: `${user.name} (${user.role})` });
+
     res.json({ message: "User deleted." });
   } catch (error) {
     next(error);

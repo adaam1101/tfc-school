@@ -7,7 +7,9 @@ import {
   UserRound,
   XCircle,
   GraduationCap,
-  CreditCard
+  CreditCard,
+  IdCard,
+  Wallet
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { api, getApiError } from "../../api/http.js";
@@ -16,9 +18,19 @@ import LoadingState from "../../components/LoadingState.jsx";
 import StatTile from "../../components/StatTile.jsx";
 import StatusBadge from "../../components/StatusBadge.jsx";
 import AppLayout from "../../layouts/AppLayout.jsx";
+import AnnouncementsCard from "../../components/AnnouncementsCard.jsx";
+import IDCardModal from "../../components/IDCardModal.jsx";
+
+const payStatusBadge = {
+  paid: "bg-emerald-100 text-emerald-700",
+  partial: "bg-amber-100 text-amber-700",
+  unpaid: "bg-rose-100 text-rose-700"
+};
 
 export default function StudentDashboard() {
   const [profile, setProfile] = useState(null);
+  const [payments, setPayments] = useState([]);
+  const [showIdCard, setShowIdCard] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
 
@@ -35,6 +47,7 @@ export default function StudentDashboard() {
       }
     };
     loadProfile();
+    api.get("/payments/mine").then(({ data }) => setPayments(data.payments || [])).catch(() => {});
   }, []);
 
   const summary = useMemo(() => {
@@ -127,6 +140,11 @@ export default function StudentDashboard() {
                 </div>
               ))}
             </dl>
+
+            <button onClick={() => setShowIdCard(true)} className="btn-secondary mt-4 w-full justify-center">
+              <IdCard className="h-4 w-4" />
+              View my ID card
+            </button>
           </div>
 
           {/* Attendance history */}
@@ -175,7 +193,48 @@ export default function StudentDashboard() {
             </div>
           </div>
         </section>
+
+        {/* Announcements + Fees */}
+        <section className="grid gap-6 lg:grid-cols-2">
+          <AnnouncementsCard />
+
+          {/* My fees */}
+          <div className="card p-6">
+            <div className="mb-5 flex items-center gap-3">
+              <div className="rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 p-2.5 shadow-sm">
+                <Wallet className="h-5 w-5 text-white" />
+              </div>
+              <div>
+                <h2 className="text-lg font-bold">My fees</h2>
+                <p className="text-sm text-slate-500">Your payment records</p>
+              </div>
+            </div>
+
+            {payments.length ? (
+              <div className="grid gap-2">
+                {payments.map((p) => (
+                  <div key={p._id} className="flex items-center justify-between gap-3 rounded-xl border border-slate-100 px-4 py-3">
+                    <div>
+                      <p className="font-semibold text-slate-800">{p.period}</p>
+                      <p className="text-xs text-slate-500">{p.paidAmount.toLocaleString()} / {p.amount.toLocaleString()} DA</p>
+                    </div>
+                    <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase ${payStatusBadge[p.status]}`}>
+                      {p.status}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-200 py-8 text-center">
+                <Wallet className="h-8 w-8 text-slate-300" />
+                <p className="mt-2 text-sm text-slate-500">No fee records yet</p>
+              </div>
+            )}
+          </div>
+        </section>
       </div>
+
+      {showIdCard && student && <IDCardModal student={student} onClose={() => setShowIdCard(false)} />}
     </AppLayout>
   );
 }

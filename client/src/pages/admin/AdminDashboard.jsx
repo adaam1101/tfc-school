@@ -12,7 +12,13 @@ import {
   UserRound,
   Users,
   XCircle,
-  ShieldCheck
+  ShieldCheck,
+  LayoutDashboard,
+  Inbox,
+  Wallet,
+  Megaphone,
+  History,
+  IdCard
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { api, getApiError } from "../../api/http.js";
@@ -21,6 +27,19 @@ import LoadingState from "../../components/LoadingState.jsx";
 import StatTile from "../../components/StatTile.jsx";
 import StatusBadge from "../../components/StatusBadge.jsx";
 import AppLayout from "../../layouts/AppLayout.jsx";
+import IDCardModal from "../../components/IDCardModal.jsx";
+import EnrollmentsPanel from "./EnrollmentsPanel.jsx";
+import PaymentsPanel from "./PaymentsPanel.jsx";
+import AnnouncementsPanel from "./AnnouncementsPanel.jsx";
+import AuditPanel from "./AuditPanel.jsx";
+
+const TABS = [
+  { id: "overview", label: "Overview", icon: LayoutDashboard },
+  { id: "enrollments", label: "Enrollments", icon: Inbox },
+  { id: "payments", label: "Payments", icon: Wallet },
+  { id: "announcements", label: "Announcements", icon: Megaphone },
+  { id: "audit", label: "Activity", icon: History }
+];
 
 const emptyForm = {
   role: "student",
@@ -62,8 +81,11 @@ export default function AdminDashboard() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [tab, setTab] = useState("overview");
+  const [idCardStudent, setIdCardStudent] = useState(null);
 
   const teachers = useMemo(() => users.filter((u) => u.role === "teacher"), [users]);
+  const students = useMemo(() => users.filter((u) => u.role === "student"), [users]);
 
   const loadData = async () => {
     setError("");
@@ -186,6 +208,35 @@ export default function AdminDashboard() {
       <div className="grid gap-6">
         <ErrorAlert message={error} />
 
+        {/* Tab navigation */}
+        <div className="flex flex-wrap gap-2 rounded-2xl border border-slate-200 bg-white p-1.5 shadow-sm">
+          {TABS.map((t) => {
+            const Icon = t.icon;
+            const active = tab === t.id;
+            return (
+              <button
+                key={t.id}
+                onClick={() => setTab(t.id)}
+                className={`inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-bold transition-all ${
+                  active
+                    ? "bg-gradient-to-r from-violet-600 to-purple-700 text-white shadow-sm"
+                    : "text-slate-600 hover:bg-slate-100"
+                }`}
+              >
+                <Icon className="h-4 w-4" />
+                {t.label}
+              </button>
+            );
+          })}
+        </div>
+
+        {tab === "enrollments" && <EnrollmentsPanel />}
+        {tab === "payments" && <PaymentsPanel students={students} />}
+        {tab === "announcements" && <AnnouncementsPanel />}
+        {tab === "audit" && <AuditPanel />}
+
+        {tab === "overview" && (
+        <>
         {/* Stats */}
         <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <StatTile icon={Users}        label="Total students"  value={dashboard?.stats.totalStudents || 0} tone="teal" />
@@ -404,6 +455,11 @@ export default function AdminDashboard() {
                           <button type="button" className="icon-btn" onClick={() => editUser(user)} title="Edit">
                             <Pencil className="h-3.5 w-3.5" />
                           </button>
+                          {user.role === "student" && (
+                            <button type="button" className="icon-btn" onClick={() => setIdCardStudent(user)} title="ID card">
+                              <IdCard className="h-3.5 w-3.5" />
+                            </button>
+                          )}
                           <button type="button" className="icon-btn-danger" onClick={() => deleteUser(user)} title="Delete">
                             <Trash2 className="h-3.5 w-3.5" />
                           </button>
@@ -526,7 +582,11 @@ export default function AdminDashboard() {
             </div>
           </div>
         </section>
+        </>
+        )}
       </div>
+
+      {idCardStudent && <IDCardModal student={idCardStudent} onClose={() => setIdCardStudent(null)} />}
     </AppLayout>
   );
 }
