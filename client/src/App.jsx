@@ -10,11 +10,13 @@ import RFIDAttendance from "./pages/RFIDAttendance.jsx";
 import TeacherDashboard from "./pages/teacher/TeacherDashboard.jsx";
 import StudentDashboard from "./pages/student/StudentDashboard.jsx";
 import NotFound from "./pages/NotFound.jsx";
+import InscriptionPage from "./pages/InscriptionPage.jsx";
 
 export default function App() {
   return (
     <Routes>
       <Route path="/" element={<LandingPage />} />
+      <Route path="/inscription" element={<InscriptionPage />} />
       <Route path="/admin/login"   element={<LoginPage role="admin"   />} />
       <Route path="/teacher/login" element={<LoginPage role="teacher" />} />
       <Route path="/student/login" element={<LoginPage role="student" />} />
