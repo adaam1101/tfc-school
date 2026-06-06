@@ -100,7 +100,7 @@ export const sendAbsenceNotification = async ({ student, teacher, attendance }) 
       "",
       `السلام عليكم ${parentName}،`,
       "",
-      `نُعلمكم بأن نجلكم / كريمتكم ${student.name} كان/كانت غائباً/غائبة اليوم ${date}.`,
+      `نُعلمكم بأن ابنكم / ابنتكم ${student.name} كان/كانت غائباً/غائبة اليوم ${date}.`,
       `ننصحكم بالتواصل معنا لتبرير هذا الغياب.`,
       "",
       `شكراً على ثقتكم.`,
