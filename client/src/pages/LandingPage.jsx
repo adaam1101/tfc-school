@@ -3,12 +3,11 @@ import { Link } from "react-router-dom";
 import {
   Mail, Phone, MapPin, ShieldCheck, GraduationCap, UserRound,
   Wifi, BarChart3, Bell, Star, ChevronRight, BookOpen,
-  Award, Users, Clock, ArrowRight
+  Award, Users, ArrowRight, Instagram, Facebook
 } from "lucide-react";
 import { schoolLogo, schoolInfo } from "../config/branding.js";
 import { api } from "../api/http.js";
 import StarRating from "../components/StarRating.jsx";
-import EnrollModal from "../components/EnrollModal.jsx";
 
 function useRatingSummary() {
   const [data, setData] = useState({ average: 0, count: 0, distribution: [] });
@@ -109,7 +108,6 @@ function RatingBar({ star, count, total }) {
 export default function LandingPage() {
   const rating = useRatingSummary();
   const [navOpen, setNavOpen] = useState(false);
-  const [showEnroll, setShowEnroll] = useState(false);
 
   const scrollTo = (id) => {
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
@@ -144,13 +142,6 @@ export default function LandingPage() {
           </div>
 
           <div className="hidden items-center gap-2 md:flex">
-            <button
-              onClick={() => setShowEnroll(true)}
-              className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-brand-500 to-emerald-600 px-4 py-2 text-xs font-bold text-white shadow-sm transition-all hover:opacity-90 hover:shadow-md"
-            >
-              <GraduationCap className="h-3.5 w-3.5" />
-              Enroll
-            </button>
             {portals.map((p) => (
               <Link
                 key={p.role}
@@ -192,31 +183,13 @@ export default function LandingPage() {
             <p className="mx-auto mt-6 max-w-2xl text-lg text-slate-600 leading-relaxed">
               {schoolInfo.tagline} — Annaba's premier educational institution dedicated to academic excellence and professional growth.
             </p>
-            <button
-              onClick={() => setShowEnroll(true)}
+            <Link
+              to="/inscription"
               className="mt-8 inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-brand-500 to-emerald-600 px-8 py-4 text-base font-black text-white shadow-lg shadow-brand-900/40 transition-all hover:-translate-y-0.5 hover:shadow-xl"
             >
               <GraduationCap className="h-5 w-5" />
-              Apply / Enroll Now
-            </button>
-          </div>
-
-          {/* Stats */}
-          <div
-            className="mx-auto mt-12 grid max-w-xl grid-cols-3 gap-4 animate-fade-slide-up"
-            style={{ animationDelay: "0.2s" }}
-          >
-            {[
-              { icon: Users, label: "Students", value: "200+" },
-              { icon: Award, label: "Programs",  value: "12+"  },
-              { icon: Clock, label: "Years",     value: "10+"  }
-            ].map(({ icon: Icon, label, value }) => (
-              <div key={label} className="rounded-2xl bg-white px-4 py-4 ring-1 ring-brand-100 shadow-sm">
-                <Icon className="mx-auto h-5 w-5 text-brand-600" />
-                <p className="mt-2 text-2xl font-black text-slate-900">{value}</p>
-                <p className="text-xs text-slate-500">{label}</p>
-              </div>
-            ))}
+              Inscrivez-vous maintenant
+            </Link>
           </div>
 
           {/* Portal buttons */}
@@ -450,7 +423,7 @@ export default function LandingPage() {
             <p className="mt-4 text-slate-500">We're here to answer your questions.</p>
           </div>
 
-          <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {[
               {
                 icon: Mail,
@@ -478,11 +451,27 @@ export default function LandingPage() {
               },
               {
                 icon: MapPin,
-                label: "Address",
+                label: "Location",
                 value: schoolInfo.address,
-                sub: schoolInfo.city,
+                sub: "Click to open in Google Maps",
                 color: "from-rose-500 to-red-600",
-                href: null
+                href: "https://maps.app.goo.gl/uUdRPCDM8krT7iJW7"
+              },
+              {
+                icon: Instagram,
+                label: "Instagram",
+                value: "@tfc.annaba",
+                sub: "Follow us on Instagram",
+                color: "from-pink-500 to-rose-600",
+                href: "https://www.instagram.com/tfc.annaba?igsh=NW0wa2o2NWVsb3pv"
+              },
+              {
+                icon: Facebook,
+                label: "Facebook",
+                value: "TFC Annaba",
+                sub: "Like our Facebook page",
+                color: "from-blue-600 to-blue-800",
+                href: "https://www.facebook.com/share/1Cqnoy2Pm8/"
               }
             ].map(({ icon: Icon, label, value, sub, color, href }) => (
               <div key={label} className="card-hover group border border-slate-100 p-6 text-center">
@@ -490,13 +479,14 @@ export default function LandingPage() {
                   <Icon className="h-7 w-7 text-white" />
                 </div>
                 <p className="text-xs font-bold uppercase tracking-wider text-slate-500">{label}</p>
-                {href ? (
-                  <a href={href} className="mt-2 block text-sm font-bold text-slate-900 hover:text-brand-600 transition-colors break-all">
-                    {value}
-                  </a>
-                ) : (
-                  <p className="mt-2 text-sm font-bold text-slate-900">{value}</p>
-                )}
+                <a
+                  href={href}
+                  target={href.startsWith("http") ? "_blank" : undefined}
+                  rel={href.startsWith("http") ? "noopener noreferrer" : undefined}
+                  className="mt-2 block text-sm font-bold text-slate-900 hover:text-brand-600 transition-colors break-all"
+                >
+                  {value}
+                </a>
                 <p className="mt-1 text-xs text-slate-400">{sub}</p>
               </div>
             ))}
@@ -517,7 +507,15 @@ export default function LandingPage() {
               {schoolInfo.phones.map((p) => (
                 <a key={p} href={`tel:${p.replace(/\s/g, "")}`} className="hover:text-white transition">{p}</a>
               ))}
-              <span>{schoolInfo.address}</span>
+              <a href="https://maps.app.goo.gl/uUdRPCDM8krT7iJW7" target="_blank" rel="noopener noreferrer" className="hover:text-white transition">{schoolInfo.address}</a>
+            </div>
+            <div className="mt-4 flex justify-center gap-4">
+              <a href="https://www.instagram.com/tfc.annaba?igsh=NW0wa2o2NWVsb3pv" target="_blank" rel="noopener noreferrer" className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/20 transition hover:bg-white/30">
+                <Instagram className="h-5 w-5" />
+              </a>
+              <a href="https://www.facebook.com/share/1Cqnoy2Pm8/" target="_blank" rel="noopener noreferrer" className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/20 transition hover:bg-white/30">
+                <Facebook className="h-5 w-5" />
+              </a>
             </div>
 
             <div className="mt-6 border-t border-white/20 pt-6 w-full">
@@ -530,7 +528,6 @@ export default function LandingPage() {
         </div>
       </footer>
 
-      {showEnroll && <EnrollModal onClose={() => setShowEnroll(false)} />}
     </div>
   );
 }
