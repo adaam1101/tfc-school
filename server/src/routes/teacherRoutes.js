@@ -108,8 +108,8 @@ teacherRouter.post("/attendance", validate(attendanceSchema), async (req, res, n
         attendance.parentNotification = {
           sent:         notification.sent,
           channel:      notification.channel,
-          emailSent:    notification.emailSent    || false,
-          whatsappSent: notification.whatsappSent || false,
+          emailSent:    notification.emailSent || false,
+          whatsappSent: false,
           sentAt:       notification.sent ? new Date() : undefined,
           error:        notification.error
         };
