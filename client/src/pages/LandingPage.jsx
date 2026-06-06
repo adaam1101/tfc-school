@@ -3,11 +3,12 @@ import { Link } from "react-router-dom";
 import {
   Mail, Phone, MapPin, ShieldCheck, GraduationCap, UserRound,
   Wifi, BarChart3, Bell, Star, ChevronRight, BookOpen,
-  Award, Users, ArrowRight, Instagram, Facebook, Globe
+  Award, Users, ArrowRight, Instagram, Facebook, Globe, Moon, Sun
 } from "lucide-react";
 import { schoolLogo, schoolInfo } from "../config/branding.js";
 import { api } from "../api/http.js";
 import StarRating from "../components/StarRating.jsx";
+import { useTheme } from "../hooks/useTheme.js";
 
 /* ── Translations ── */
 const translations = {
@@ -314,6 +315,7 @@ export default function LandingPage() {
   const [navOpen, setNavOpen] = useState(false);
   const [lang, setLang] = useState("fr");
   const t = translations[lang];
+  const { dark, toggle: toggleDark } = useTheme();
 
   const scrollTo = (id) => {
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
@@ -321,10 +323,10 @@ export default function LandingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white text-slate-900" dir={t.dir}>
+    <div className="min-h-screen bg-white text-slate-900 dark:bg-slate-900 dark:text-slate-100" dir={t.dir}>
 
       {/* ── Sticky Nav ── */}
-      <nav className="sticky top-0 z-50 border-b border-brand-100 bg-white/90 backdrop-blur-md shadow-sm">
+      <nav className="sticky top-0 z-50 border-b border-brand-100 bg-white/90 backdrop-blur-md shadow-sm dark:border-slate-700 dark:bg-slate-900/90">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 py-4">
           <div className="flex items-center gap-3">
             <img src={schoolLogo} alt="TFC" className="h-10 w-10 rounded-xl object-contain ring-1 ring-brand-100" />
@@ -345,8 +347,8 @@ export default function LandingPage() {
 
           <div className="flex items-center gap-2">
             {/* Language switcher */}
-            <div className="flex items-center gap-1 rounded-xl border border-brand-200 bg-brand-50 p-1">
-              <Globe className="h-3.5 w-3.5 text-brand-500 mx-1" />
+            <div className="flex items-center gap-1 rounded-xl border border-brand-200 bg-brand-50 p-1 dark:border-slate-600 dark:bg-slate-800">
+              <Globe className="h-3.5 w-3.5 text-brand-500 mx-1 dark:text-brand-400" />
               {LANGS.map((l) => (
                 <button
                   key={l.code}
@@ -354,13 +356,22 @@ export default function LandingPage() {
                   className={`rounded-lg px-2.5 py-1 text-xs font-bold transition-all ${
                     lang === l.code
                       ? "bg-brand-700 text-white shadow-sm"
-                      : "text-brand-700 hover:bg-brand-100"
+                      : "text-brand-700 hover:bg-brand-100 dark:text-brand-300 dark:hover:bg-slate-700"
                   }`}
                 >
                   {l.label}
                 </button>
               ))}
             </div>
+
+            {/* Dark mode toggle */}
+            <button
+              onClick={toggleDark}
+              className="flex h-9 w-9 items-center justify-center rounded-xl border border-brand-200 bg-brand-50 text-brand-700 transition hover:bg-brand-100 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+              title={dark ? "Light mode" : "Dark mode"}
+            >
+              {dark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            </button>
 
             <div className="hidden items-center gap-2 md:flex">
               {portalConfig.map((p) => {
@@ -447,21 +458,21 @@ export default function LandingPage() {
       </section>
 
       {/* ── About ── */}
-      <section id="about" className="bg-slate-50 py-24">
+      <section id="about" className="bg-slate-50 py-24 dark:bg-slate-800/50">
         <div className="mx-auto max-w-7xl px-6">
           <div className="grid gap-16 lg:grid-cols-2 lg:items-center">
             <div>
               <p className="text-sm font-bold uppercase tracking-widest text-brand-600">{t.about.label}</p>
-              <h2 className="mt-3 text-4xl font-black leading-tight text-slate-900">
+              <h2 className="mt-3 text-4xl font-black leading-tight text-slate-900 dark:text-slate-100">
                 {t.about.title}
-                <span className="text-brand-600"> {t.about.city}</span>
+                <span className="text-brand-600 dark:text-brand-400"> {t.about.city}</span>
               </h2>
-              <p className="mt-6 text-lg text-slate-600 leading-relaxed">{t.about.desc}</p>
+              <p className="mt-6 text-lg text-slate-600 leading-relaxed dark:text-slate-400">{t.about.desc}</p>
               <div className="mt-8 grid grid-cols-2 gap-4">
                 {t.about.values.map(({ label, desc }) => (
-                  <div key={label} className="rounded-2xl border border-slate-200 bg-white p-4">
-                    <p className="font-bold text-slate-900">{label}</p>
-                    <p className="mt-1 text-xs text-slate-500">{desc}</p>
+                  <div key={label} className="rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-800">
+                    <p className="font-bold text-slate-900 dark:text-slate-100">{label}</p>
+                    <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{desc}</p>
                   </div>
                 ))}
               </div>
@@ -486,12 +497,12 @@ export default function LandingPage() {
       </section>
 
       {/* ── Features ── */}
-      <section id="features" className="bg-white py-24">
+      <section id="features" className="bg-white py-24 dark:bg-slate-900">
         <div className="mx-auto max-w-7xl px-6">
           <div className="text-center">
             <p className="text-sm font-bold uppercase tracking-widest text-brand-700">{t.features.label}</p>
-            <h2 className="mt-3 text-4xl font-black text-slate-900">{t.features.title}</h2>
-            <p className="mx-auto mt-4 max-w-xl text-slate-500">{t.features.sub}</p>
+            <h2 className="mt-3 text-4xl font-black text-slate-900 dark:text-slate-100">{t.features.title}</h2>
+            <p className="mx-auto mt-4 max-w-xl text-slate-500 dark:text-slate-400">{t.features.sub}</p>
           </div>
 
           <div className="mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -502,8 +513,8 @@ export default function LandingPage() {
                   <div className={`mb-4 inline-flex rounded-2xl bg-gradient-to-br ${featureColors[i]} p-3 shadow-sm transition-transform group-hover:scale-110`}>
                     <Icon className="h-6 w-6 text-white" />
                   </div>
-                  <h3 className="text-lg font-bold text-slate-900">{f.title}</h3>
-                  <p className="mt-2 text-sm text-slate-500 leading-relaxed">{f.desc}</p>
+                  <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">{f.title}</h3>
+                  <p className="mt-2 text-sm text-slate-500 leading-relaxed dark:text-slate-400">{f.desc}</p>
                 </div>
               );
             })}
@@ -543,7 +554,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── Ratings ── */}
-      <section id="ratings" className="bg-slate-50 py-24">
+      <section id="ratings" className="bg-slate-50 py-24 dark:bg-slate-800/50">
         <div className="mx-auto max-w-7xl px-6">
           <div className="text-center">
             <p className="text-sm font-bold uppercase tracking-widest text-amber-600">{t.ratings.label}</p>
@@ -612,7 +623,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── Contact ── */}
-      <section id="contact" className="bg-white py-24">
+      <section id="contact" className="bg-white py-24 dark:bg-slate-900">
         <div className="mx-auto max-w-7xl px-6">
           <div className="text-center">
             <p className="text-sm font-bold uppercase tracking-widest text-brand-600">{t.contact.label}</p>

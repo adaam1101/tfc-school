@@ -5,6 +5,9 @@
 :root {
   color-scheme: light;
 }
+.dark {
+  color-scheme: dark;
+}
 
 * {
   scroll-behavior: smooth;
@@ -16,6 +19,10 @@ body {
   background: #EEF6FB;
   font-feature-settings: "cv11", "ss01";
   -webkit-font-smoothing: antialiased;
+  transition: background-color 0.2s ease;
+}
+.dark body {
+  background: #0f172a;
 }
 
 button,
@@ -77,11 +84,14 @@ textarea {
     @apply w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-950
            outline-none shadow-sm transition-all duration-200 placeholder:text-slate-400
            focus:border-brand-500 focus:ring-2 focus:ring-brand-100
-           disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400;
+           disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400
+           dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100
+           dark:placeholder:text-slate-500 dark:focus:border-brand-400 dark:focus:ring-brand-900
+           dark:disabled:bg-slate-900 dark:disabled:text-slate-600;
   }
 
   .field {
-    @apply grid gap-2 text-sm font-medium text-slate-700;
+    @apply grid gap-2 text-sm font-medium text-slate-700 dark:text-slate-300;
   }
 
   .btn-primary {
@@ -89,7 +99,8 @@ textarea {
            px-5 py-2.5 text-sm font-semibold text-white shadow-sm shadow-brand-200
            transition-all duration-200 hover:from-brand-400 hover:to-brand-600 hover:shadow-md hover:shadow-brand-200
            focus:outline-none focus:ring-2 focus:ring-brand-300
-           disabled:cursor-not-allowed disabled:opacity-60 disabled:shadow-none;
+           disabled:cursor-not-allowed disabled:opacity-60 disabled:shadow-none
+           dark:shadow-brand-900;
   }
 
   .btn-secondary {
@@ -97,7 +108,9 @@ textarea {
            px-5 py-2.5 text-sm font-semibold text-slate-700 shadow-sm
            transition-all duration-200 hover:border-brand-200 hover:bg-brand-50 hover:text-brand-800
            focus:outline-none focus:ring-2 focus:ring-brand-100
-           disabled:cursor-not-allowed disabled:opacity-60;
+           disabled:cursor-not-allowed disabled:opacity-60
+           dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300
+           dark:hover:border-brand-500 dark:hover:bg-slate-700 dark:hover:text-brand-300;
   }
 
   .btn-success {
@@ -120,18 +133,22 @@ textarea {
     @apply inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white
            text-slate-500 shadow-sm transition-all duration-200
            hover:border-brand-200 hover:bg-brand-50 hover:text-brand-700
-           focus:outline-none focus:ring-2 focus:ring-brand-100;
+           focus:outline-none focus:ring-2 focus:ring-brand-100
+           dark:border-slate-600 dark:bg-slate-800 dark:text-slate-400
+           dark:hover:border-brand-500 dark:hover:bg-slate-700 dark:hover:text-brand-400;
   }
 
   .icon-btn-danger {
     @apply inline-flex h-9 w-9 items-center justify-center rounded-xl border border-rose-100 bg-white
            text-rose-500 shadow-sm transition-all duration-200
            hover:bg-rose-50 hover:text-rose-700
-           focus:outline-none focus:ring-2 focus:ring-rose-100;
+           focus:outline-none focus:ring-2 focus:ring-rose-100
+           dark:border-rose-900 dark:bg-slate-800 dark:hover:bg-rose-950;
   }
 
   .card {
-    @apply rounded-2xl border border-slate-200/80 bg-white shadow-sm transition-all duration-200;
+    @apply rounded-2xl border border-slate-200/80 bg-white shadow-sm transition-all duration-200
+           dark:border-slate-700 dark:bg-slate-800;
   }
 
   .card-hover {
