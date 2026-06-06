@@ -89,11 +89,13 @@ const fileToCompressedDataUrl = (file, maxSize = 400) =>
 
 const countStatus = (items = [], status) => items.find((item) => item._id === status)?.count || 0;
 
-const roleLabel  = { admin: "Admin", teacher: "Teacher", student: "Student" };
+const roleLabel  = { admin: "Admin", "sous-admin": "Sous-Admin", moderator: "Moderator", teacher: "Teacher", student: "Student" };
 const roleBadge  = {
-  admin:   "bg-violet-100 text-violet-800",
-  teacher: "bg-brand-100 text-brand-800",
-  student: "bg-brand-100 text-brand-800"
+  admin:       "bg-violet-100 text-violet-800",
+  "sous-admin":"bg-indigo-100 text-indigo-800",
+  moderator:   "bg-amber-100 text-amber-800",
+  teacher:     "bg-brand-100 text-brand-800",
+  student:     "bg-brand-100 text-brand-800"
 };
 
 export default function AdminDashboard() {
@@ -314,6 +316,8 @@ export default function AdminDashboard() {
                   <select className="input" value={form.role} disabled={Boolean(editingId)} onChange={(e) => updateForm("role", e.target.value)}>
                     <option value="student">Student</option>
                     <option value="teacher">Teacher</option>
+                    <option value="sous-admin">Sous-Admin</option>
+                    <option value="moderator">Moderator</option>
                     <option value="admin">Admin</option>
                   </select>
                 </label>
