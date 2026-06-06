@@ -44,7 +44,7 @@ enrollmentRouter.post("/", publicLimiter, async (req, res, next) => {
 });
 
 // ── Admin: review applications ──
-enrollmentRouter.use(protect, allowRoles("admin"));
+enrollmentRouter.use(protect, allowRoles("admin", "moderator"));
 
 enrollmentRouter.get("/", async (req, res, next) => {
   try {

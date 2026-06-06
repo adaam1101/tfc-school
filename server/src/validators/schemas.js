@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 const mongoId = z.string().regex(/^[0-9a-fA-F]{24}$/, "Invalid database id.");
-const role = z.enum(["admin", "teacher", "student"]);
+const role = z.enum(["admin", "sous-admin", "moderator", "teacher", "student"]);
 const attendanceStatus = z.enum(["Present", "Absent"]);
 const dateString = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Use YYYY-MM-DD format.");
 

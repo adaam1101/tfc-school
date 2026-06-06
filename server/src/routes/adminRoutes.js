@@ -15,7 +15,15 @@ import {
 
 export const adminRouter = express.Router();
 
-adminRouter.use(protect, allowRoles("admin"));
+adminRouter.use(protect, allowRoles("admin", "sous-admin", "moderator"));
+
+const onlyAdmin = (req, res, next) =>
+  req.user.role === "admin" ? next()
+  : res.status(403).json({ message: "Only the super admin can perform this action." });
+
+const adminOrSousAdmin = (req, res, next) =>
+  ["admin", "sous-admin"].includes(req.user.role) ? next()
+  : res.status(403).json({ message: "You do not have permission for this action." });
 
 const selectUserFields = "-password";
 
@@ -65,7 +73,7 @@ const syncStudentTeacher = async ({ studentId, previousTeacherId, nextTeacherId 
   }
 };
 
-adminRouter.get("/dashboard", async (_req, res, next) => {
+adminRouter.get("/dashboard", adminOrSousAdmin, async (_req, res, next) => {
   try {
     const today = dateKey();
     const since = daysAgo(6);
@@ -106,6 +114,10 @@ adminRouter.get("/dashboard", async (_req, res, next) => {
 
 adminRouter.get("/users", async (req, res, next) => {
   try {
+    // Moderators can only list students
+    if (req.user.role === "moderator") {
+      req.query.role = "student";
+    }
     const filter = req.query.role ? { role: req.query.role } : {};
     const users = await User.find(filter)
       .select(selectUserFields)
@@ -121,6 +133,11 @@ adminRouter.get("/users", async (req, res, next) => {
 
 adminRouter.post("/users", validate(createUserSchema), async (req, res, next) => {
   try {
+    // Moderators can only add students
+    if (req.user.role === "moderator" && req.body.role !== "student") {
+      return res.status(403).json({ message: "Moderators can only add students." });
+    }
+
     if (req.body.studentProfile) {
       req.body.studentProfile = applyRfidCardToProfile(req.body.studentProfile);
     }
@@ -148,7 +165,7 @@ adminRouter.post("/users", validate(createUserSchema), async (req, res, next) =>
   }
 });
 
-adminRouter.put("/users/:id", validate(updateUserSchema), async (req, res, next) => {
+adminRouter.put("/users/:id", adminOrSousAdmin, validate(updateUserSchema), async (req, res, next) => {
   try {
     const existing = await User.findById(req.params.id);
 
@@ -211,7 +228,7 @@ adminRouter.put("/users/:id", validate(updateUserSchema), async (req, res, next)
   }
 });
 
-adminRouter.delete("/users/:id", validate(idParamSchema), async (req, res, next) => {
+adminRouter.delete("/users/:id", onlyAdmin, validate(idParamSchema), async (req, res, next) => {
   try {
     if (String(req.user._id) === req.params.id) {
       return res.status(400).json({ message: "You cannot delete your own admin account." });
@@ -247,7 +264,7 @@ adminRouter.delete("/users/:id", validate(idParamSchema), async (req, res, next)
   }
 });
 
-adminRouter.get("/reports/attendance", validate(attendanceReportSchema), async (req, res, next) => {
+adminRouter.get("/reports/attendance", onlyAdmin, validate(attendanceReportSchema), async (req, res, next) => {
   try {
     const filter = {};
 

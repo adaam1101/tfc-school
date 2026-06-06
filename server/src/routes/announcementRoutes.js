@@ -13,8 +13,8 @@ announcementRouter.get("/", async (req, res, next) => {
     const audiences = ["all"];
     if (req.user.role === "student") audiences.push("students");
     if (req.user.role === "teacher") audiences.push("teachers");
-    // Admins see everything.
-    const filter = req.user.role === "admin" ? {} : { audience: { $in: audiences } };
+    // Admins and sous-admins see everything.
+    const filter = ["admin", "sous-admin"].includes(req.user.role) ? {} : { audience: { $in: audiences } };
 
     const announcements = await Announcement.find(filter)
       .sort({ pinned: -1, createdAt: -1 })
@@ -27,7 +27,7 @@ announcementRouter.get("/", async (req, res, next) => {
 });
 
 // ── Admin: manage announcements ──
-announcementRouter.use(allowRoles("admin"));
+announcementRouter.use(allowRoles("admin", "sous-admin"));
 
 announcementRouter.post("/", async (req, res, next) => {
   try {

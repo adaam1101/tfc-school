@@ -13,6 +13,18 @@ const roleConfig = {
     icon: ShieldCheck,
     placeholder: "admin@tfcschool.dz"
   },
+  "sous-admin": {
+    title: "Sous-Admin Portal",
+    subtitle: "Gestion des utilisateurs",
+    icon: UserRound,
+    placeholder: "sousadmin@tfcschool.dz"
+  },
+  moderator: {
+    title: "Moderator Portal",
+    subtitle: "Gestion des inscriptions",
+    icon: ShieldCheck,
+    placeholder: "moderator@tfcschool.dz"
+  },
   teacher: {
     title: "Teacher Portal",
     subtitle: "Welcome back, educator",
@@ -48,7 +60,7 @@ export default function LoginPage({ role }) {
       if (result?.twoFactorRequired) {
         setStep("twofa");
       } else {
-        navigate(`/${role}`, { replace: true });
+        navigate(`/${result?.user?.role || role}`, { replace: true });
       }
     } catch (loginError) {
       setError(getApiError(loginError));
