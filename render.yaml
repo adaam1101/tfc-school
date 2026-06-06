@@ -41,3 +41,7 @@ services:
         sync: false
       - key: SMTP_FROM
         value: TFC School <no-reply@tfcschool.dz>
+      - key: WHATSAPP_TOKEN
+        sync: false
+      - key: WHATSAPP_PHONE_ID
+        sync: false

@@ -72,53 +72,85 @@ export const sendPasswordResetEmail = async ({ user, resetUrl }) => {
 };
 
 export const sendAbsenceNotification = async ({ student, teacher, attendance }) => {
-  const parentEmail = student.studentProfile?.parentEmail;
-  const missingSmtp = ["SMTP_HOST", "SMTP_FROM"].filter((key) => !process.env[key]);
+  const { sendWhatsApp, buildAbsenceMessage } = await import("./whatsapp.js");
 
   if (!notificationsEnabled()) {
     return {
-      sent: false,
-      channel: "none",
-      error: "Notifications are disabled. Set NOTIFICATIONS_ENABLED=true after SMTP is configured."
+      sent: false, channel: "none", emailSent: false, whatsappSent: false,
+      error: "Notifications are disabled. Set NOTIFICATIONS_ENABLED=true."
     };
   }
 
-  if (!parentEmail) {
-    return {
-      sent: false,
-      channel: "none",
-      error: "Student does not have a parent email address."
-    };
+  const parentEmail = student.studentProfile?.parentEmail;
+  const parentPhone = student.studentProfile?.parentPhone;
+  const parentName  = student.studentProfile?.parentName || "Parent";
+  const date        = attendance.date || new Date().toLocaleDateString("fr-DZ");
+
+  let emailSent = false, emailError = "";
+  let waSent    = false, waError    = "";
+
+  // ── Email ──────────────────────────────────────────────────────────────
+  if (parentEmail && process.env.SMTP_HOST && process.env.SMTP_FROM) {
+    try {
+      const transporter = createTransport();
+      const subject = `🏫 TFC — Absence de ${student.name} — ${date}`;
+      const text = [
+        `Bonjour ${parentName},`,
+        "",
+        `Nous vous informons que votre enfant ${student.name} a été marqué(e) ABSENT(E) aujourd'hui.`,
+        `📅 Date : ${date}`,
+        teacher?.name  ? `👩‍🏫 Responsable : ${teacher.name}` : "",
+        attendance.note ? `📝 Note : ${attendance.note}` : "",
+        "",
+        `السلام عليكم ${parentName}،`,
+        `نُعلمكم بأن الطالب/ة ${student.name} سُجِّل غائباً اليوم — ${date}.`,
+        "",
+        "📞 Pour toute question / للاستفسار : +213 561 502 098",
+        "🏫 TFC Training Formation Center — Annaba"
+      ].filter(Boolean).join("\n");
+
+      await transporter.sendMail({
+        from: process.env.SMTP_FROM || "TFC School <no-reply@tfcschool.dz>",
+        to: parentEmail,
+        subject,
+        text
+      });
+      emailSent = true;
+    } catch (err) {
+      emailError = err.message;
+    }
+  } else if (!parentEmail) {
+    emailError = "No parent email on file.";
+  } else {
+    emailError = "SMTP not configured.";
   }
 
-  if (missingSmtp.length) {
-    return {
-      sent: false,
-      channel: "email",
-      error: `Missing SMTP settings: ${missingSmtp.join(", ")}.`
-    };
+  // ── WhatsApp ───────────────────────────────────────────────────────────
+  if (parentPhone) {
+    const msg = buildAbsenceMessage({ student, teacher, attendance });
+    const result = await sendWhatsApp(parentPhone, msg);
+    waSent   = result.sent;
+    waError  = result.error || "";
+  } else {
+    waError = "No parent phone on file.";
   }
 
-  const transporter = createTransport();
-  const subject = `TFC School absence notification - ${student.name}`;
-  const text = [
-    `Hello ${student.studentProfile?.parentName || "Parent"},`,
-    "",
-    `${student.name} was marked absent on ${attendance.date}.`,
-    teacher?.name ? `Marked by: ${teacher.name}` : "",
-    attendance.note ? `Teacher note: ${attendance.note}` : "",
-    "",
-    "Please contact TFC School if you have any questions."
-  ]
-    .filter(Boolean)
-    .join("\n");
+  const anySent = emailSent || waSent;
+  const channel = emailSent && waSent ? "both"
+                : emailSent           ? "email"
+                : waSent              ? "whatsapp"
+                : "none";
 
-  await transporter.sendMail({
-    from: process.env.SMTP_FROM || "TFC School <no-reply@tfcschool.dz>",
-    to: parentEmail,
-    subject,
-    text
-  });
+  const errors = [
+    !emailSent && emailError ? `Email: ${emailError}` : "",
+    !waSent    && waError    ? `WhatsApp: ${waError}`  : ""
+  ].filter(Boolean).join(" | ");
 
-  return { sent: true, channel: "email", error: undefined };
+  return {
+    sent: anySent,
+    channel,
+    emailSent,
+    whatsappSent: waSent,
+    error: errors || undefined
+  };
 };

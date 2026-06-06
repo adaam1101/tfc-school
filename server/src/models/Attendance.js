@@ -11,10 +11,12 @@ const attendanceSchema = new Schema(
     source: { type: String, enum: ["manual", "rfid"], default: "manual" },
     note: { type: String, trim: true, maxlength: 500 },
     parentNotification: {
-      sent: { type: Boolean, default: false },
-      channel: { type: String, enum: ["email", "sms", "none"], default: "none" },
-      sentAt: Date,
-      error: String
+      sent:          { type: Boolean, default: false },
+      channel:       { type: String, enum: ["email", "whatsapp", "both", "none"], default: "none" },
+      emailSent:     { type: Boolean, default: false },
+      whatsappSent:  { type: Boolean, default: false },
+      sentAt:        Date,
+      error:         String
     }
   },
   { timestamps: true }
