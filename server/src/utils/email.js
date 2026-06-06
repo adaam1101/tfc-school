@@ -2,18 +2,21 @@ import https from "node:https";
 
 const notificationsEnabled = () => process.env.NOTIFICATIONS_ENABLED === "true";
 
-/** Send via Brevo HTTP API — works on Render free tier (port 443 only) */
-const sendViaBrevo = (payload) =>
+export const emailReady = () =>
+  notificationsEnabled() && Boolean(process.env.SENDGRID_API_KEY && process.env.SMTP_USER);
+
+/** Send via SendGrid HTTP API — works on Render free tier (HTTPS port 443) */
+const sendViaSendGrid = (payload) =>
   new Promise((resolve, reject) => {
     const body = JSON.stringify(payload);
     const req = https.request(
       {
-        hostname: "api.brevo.com",
-        path: "/v3/smtp/email",
+        hostname: "api.sendgrid.com",
+        path: "/v3/mail/send",
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "api-key": process.env.BREVO_API_KEY,
+          "Authorization": `Bearer ${process.env.SENDGRID_API_KEY}`,
           "Content-Length": Buffer.byteLength(body)
         }
       },
@@ -21,11 +24,12 @@ const sendViaBrevo = (payload) =>
         let data = "";
         res.on("data", (c) => { data += c; });
         res.on("end", () => {
-          if (res.statusCode >= 200 && res.statusCode < 300) {
+          // SendGrid returns 202 on success (no body)
+          if (res.statusCode === 202) {
             resolve();
           } else {
-            let msg = `Brevo API error ${res.statusCode}`;
-            try { msg = JSON.parse(data)?.message || msg; } catch (_) {}
+            let msg = `SendGrid error ${res.statusCode}`;
+            try { msg = JSON.parse(data)?.errors?.[0]?.message || msg; } catch (_) {}
             reject(new Error(msg));
           }
         });
@@ -36,19 +40,15 @@ const sendViaBrevo = (payload) =>
     req.end();
   });
 
-export const emailReady = () =>
-  notificationsEnabled() && Boolean(process.env.BREVO_API_KEY);
-
 export const sendEmail = async ({ to, subject, text }) => {
   if (!emailReady()) {
-    throw new Error("Email not configured. Set NOTIFICATIONS_ENABLED=true and BREVO_API_KEY.");
+    throw new Error("Email not configured. Set NOTIFICATIONS_ENABLED=true, SENDGRID_API_KEY, SMTP_USER.");
   }
-  const senderEmail = process.env.SMTP_USER || "no-reply@tfcschool.dz";
-  await sendViaBrevo({
-    sender:  { name: "TFC School", email: senderEmail },
-    to:      [{ email: to }],
+  await sendViaSendGrid({
+    personalizations: [{ to: [{ email: to }] }],
+    from:    { email: process.env.SMTP_USER, name: "TFC School" },
     subject,
-    textContent: text
+    content: [{ type: "text/plain", value: text }]
   });
 };
 
@@ -82,11 +82,10 @@ export const sendAbsenceNotification = async ({ student, teacher, attendance }) 
   }
 
   if (!emailReady()) {
-    return { sent: false, channel: "none", error: "BREVO_API_KEY not set." };
+    return { sent: false, channel: "none", error: "SENDGRID_API_KEY not set." };
   }
 
   try {
-    const senderEmail = process.env.SMTP_USER || "no-reply@tfcschool.dz";
     const text = [
       `Bonjour ${parentName},`,
       "",
@@ -104,11 +103,11 @@ export const sendAbsenceNotification = async ({ student, teacher, attendance }) 
       "🏫 TFC Training Formation Center — Annaba"
     ].filter(Boolean).join("\n");
 
-    await sendViaBrevo({
-      sender:      { name: "TFC School", email: senderEmail },
-      to:          [{ email: parentEmail, name: parentName }],
-      subject:     `🏫 TFC — Absence de ${student.name} — ${date}`,
-      textContent: text
+    await sendViaSendGrid({
+      personalizations: [{ to: [{ email: parentEmail, name: parentName }] }],
+      from:    { email: process.env.SMTP_USER, name: "TFC School" },
+      subject: `🏫 TFC — Absence de ${student.name} — ${date}`,
+      content: [{ type: "text/plain", value: text }]
     });
 
     return { sent: true, channel: "email", emailSent: true, whatsappSent: false };
