@@ -1,35 +1,54 @@
-import nodemailer from "nodemailer";
+import https from "node:https";
 
 const notificationsEnabled = () => process.env.NOTIFICATIONS_ENABLED === "true";
 
-const createTransport = () => {
-  const port = Number(process.env.SMTP_PORT || 587);
-  return nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    port,
-    secure: process.env.SMTP_SECURE ? process.env.SMTP_SECURE === "true" : port === 465,
-    connectionTimeout: 20000,
-    greetingTimeout:   20000,
-    socketTimeout:     30000,
-    auth:
-      process.env.SMTP_USER && process.env.SMTP_PASS
-        ? { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS }
-        : undefined
+/** Send via Brevo HTTP API — works on Render free tier (port 443 only) */
+const sendViaBrevo = (payload) =>
+  new Promise((resolve, reject) => {
+    const body = JSON.stringify(payload);
+    const req = https.request(
+      {
+        hostname: "api.brevo.com",
+        path: "/v3/smtp/email",
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "api-key": process.env.BREVO_API_KEY,
+          "Content-Length": Buffer.byteLength(body)
+        }
+      },
+      (res) => {
+        let data = "";
+        res.on("data", (c) => { data += c; });
+        res.on("end", () => {
+          if (res.statusCode >= 200 && res.statusCode < 300) {
+            resolve();
+          } else {
+            let msg = `Brevo API error ${res.statusCode}`;
+            try { msg = JSON.parse(data)?.message || msg; } catch (_) {}
+            reject(new Error(msg));
+          }
+        });
+      }
+    );
+    req.on("error", reject);
+    req.write(body);
+    req.end();
   });
-};
 
 export const emailReady = () =>
-  notificationsEnabled() &&
-  Boolean(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS);
+  notificationsEnabled() && Boolean(process.env.BREVO_API_KEY);
 
-export const sendEmail = async ({ to, subject, text, html }) => {
+export const sendEmail = async ({ to, subject, text }) => {
   if (!emailReady()) {
-    throw new Error("Email not configured. Set NOTIFICATIONS_ENABLED=true, SMTP_HOST, SMTP_USER, SMTP_PASS.");
+    throw new Error("Email not configured. Set NOTIFICATIONS_ENABLED=true and BREVO_API_KEY.");
   }
-  const transporter = createTransport();
-  await transporter.sendMail({
-    from: process.env.SMTP_FROM || "TFC School <no-reply@tfcschool.dz>",
-    to, subject, text, html
+  const senderEmail = process.env.SMTP_USER || "no-reply@tfcschool.dz";
+  await sendViaBrevo({
+    sender:  { name: "TFC School", email: senderEmail },
+    to:      [{ email: to }],
+    subject,
+    textContent: text
   });
 };
 
@@ -63,36 +82,33 @@ export const sendAbsenceNotification = async ({ student, teacher, attendance }) 
   }
 
   if (!emailReady()) {
-    return { sent: false, channel: "email", error: "SMTP not configured. Set SMTP_HOST, SMTP_USER, SMTP_PASS." };
+    return { sent: false, channel: "none", error: "BREVO_API_KEY not set." };
   }
 
   try {
-    const transporter = createTransport();
-
-    const subject = `🏫 TFC — Absence de ${student.name} — ${date}`;
-
+    const senderEmail = process.env.SMTP_USER || "no-reply@tfcschool.dz";
     const text = [
       `Bonjour ${parentName},`,
       "",
       `Nous vous informons que votre enfant ${student.name} a été marqué(e) ABSENT(E) aujourd'hui.`,
       `📅 Date : ${date}`,
-      teacher?.name    ? `👨‍🏫 Responsable : ${teacher.name}` : "",
-      attendance.note  ? `📝 Note : ${attendance.note}`       : "",
+      teacher?.name   ? `👨‍🏫 Responsable : ${teacher.name}` : "",
+      attendance.note ? `📝 Note : ${attendance.note}`        : "",
       "",
       "──────────────────────────",
       "",
       `السلام عليكم ${parentName}،`,
       `نُعلمكم بأن الطالب/ة ${student.name} سُجِّل غائباً اليوم — ${date}.`,
       "",
-      "📞 Pour toute question / للاستفسار : +213 561 502 098",
+      "📞 +213 561 502 098",
       "🏫 TFC Training Formation Center — Annaba"
     ].filter(Boolean).join("\n");
 
-    await transporter.sendMail({
-      from: process.env.SMTP_FROM || "TFC School <no-reply@tfcschool.dz>",
-      to: parentEmail,
-      subject,
-      text
+    await sendViaBrevo({
+      sender:      { name: "TFC School", email: senderEmail },
+      to:          [{ email: parentEmail, name: parentName }],
+      subject:     `🏫 TFC — Absence de ${student.name} — ${date}`,
+      textContent: text
     });
 
     return { sent: true, channel: "email", emailSent: true, whatsappSent: false };

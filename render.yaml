@@ -27,17 +27,7 @@ services:
         value: /tfc-logo.png
       - key: NOTIFICATIONS_ENABLED
         value: false
-      - key: TWO_FACTOR_ENABLED
-        value: false
-      - key: SMTP_HOST
+      - key: BREVO_API_KEY
         sync: false
-      - key: SMTP_PORT
-        value: 587
-      - key: SMTP_SECURE
-        value: false
       - key: SMTP_USER
         sync: false
-      - key: SMTP_PASS
-        sync: false
-      - key: SMTP_FROM
-        value: TFC School <no-reply@tfcschool.dz>
