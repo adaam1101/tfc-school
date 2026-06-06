@@ -89,18 +89,23 @@ export const sendAbsenceNotification = async ({ student, teacher, attendance }) 
     const text = [
       `Bonjour ${parentName},`,
       "",
-      `Nous vous informons que votre enfant ${student.name} a été marqué(e) ABSENT(E) aujourd'hui.`,
-      `📅 Date : ${date}`,
-      teacher?.name   ? `👨‍🏫 Responsable : ${teacher.name}` : "",
-      attendance.note ? `📝 Note : ${attendance.note}`        : "",
+      `Nous vous informons que votre fils / votre fille ${student.name} était absent(e) aujourd'hui le ${date}.`,
+      `Nous vous conseillons de nous contacter pour la justification de cette absence.`,
+      "",
+      `Merci pour votre confiance.`,
+      `📞 +213 561 502 098`,
+      `🏫 TFC Training Formation Center — Annaba`,
       "",
       "──────────────────────────",
       "",
       `السلام عليكم ${parentName}،`,
-      `نُعلمكم بأن الطالب/ة ${student.name} سُجِّل غائباً اليوم — ${date}.`,
       "",
-      "📞 +213 561 502 098",
-      "🏫 TFC Training Formation Center — Annaba"
+      `نُعلمكم بأن نجلكم / كريمتكم ${student.name} كان/كانت غائباً/غائبة اليوم ${date}.`,
+      `ننصحكم بالتواصل معنا لتبرير هذا الغياب.`,
+      "",
+      `شكراً على ثقتكم.`,
+      `📞 +213 561 502 098`,
+      `🏫 مركز التدريب والتكوين TFC — عنابة`
     ].filter(Boolean).join("\n");
 
     await sendViaSendGrid({
