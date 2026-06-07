@@ -6,6 +6,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import rateLimit from "express-rate-limit";
 import helmet from "helmet";
+import mongoSanitize from "express-mongo-sanitize";
 import morgan from "morgan";
 import { connectDB } from "./config/db.js";
 import { bootstrapAdmin } from "./config/bootstrapAdmin.js";
@@ -39,6 +40,7 @@ const allowedOrigins = [
 ].map((origin) => origin?.trim()).filter(Boolean);
 
 app.use(helmet());
+app.use(mongoSanitize());
 app.use(cors({ origin: (origin, callback) => { if (!origin || allowedOrigins.includes(origin)) return callback(null, true); return callback(new Error("Origin is not allowed by CORS.")); }, credentials: true }));
 app.use(express.json({ limit: "5mb" })); // allow base64 ID-card photos
 app.use(morgan("dev"));
