@@ -82,6 +82,7 @@ export const sendAbsenceSMS = async ({ student, teacher, attendance }) => {
     await sendViaInfobip(to, text);
     return { sent: true };
   } catch (err) {
+    console.error("[SMS] Infobip error:", err.message, "| to:", to);
     return { sent: false, error: err.message };
   }
 };
