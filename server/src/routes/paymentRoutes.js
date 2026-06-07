@@ -18,8 +18,32 @@ paymentRouter.get("/mine", allowRoles("student"), async (req, res, next) => {
   }
 });
 
-// ── Admin: manage payments ──
-paymentRouter.use(allowRoles("admin"));
+// ── Monthly report — admin only ──
+paymentRouter.get("/report/monthly", allowRoles("admin", "sous-admin"), async (req, res, next) => {
+  try {
+    const report = await Payment.aggregate([
+      {
+        $group: {
+          _id: { $ifNull: ["$month", { $substr: ["$period", 0, 7] }] },
+          totalBilled: { $sum: "$amount" },
+          totalCollected: { $sum: "$paidAmount" },
+          countPaid: { $sum: { $cond: [{ $eq: ["$status", "paid"] }, 1, 0] } },
+          countPending: { $sum: { $cond: [{ $in: ["$status", ["unpaid", "pending"]] }, 1, 0] } },
+          countOverdue: { $sum: { $cond: [{ $eq: ["$status", "overdue"] }, 1, 0] } },
+          countPartial: { $sum: { $cond: [{ $eq: ["$status", "partial"] }, 1, 0] } }
+        }
+      },
+      { $sort: { _id: -1 } },
+      { $limit: 24 }
+    ]);
+    res.json({ report });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// ── Admin / sous-admin: manage payments ──
+paymentRouter.use(allowRoles("admin", "sous-admin"));
 
 paymentRouter.get("/", async (req, res, next) => {
   try {
@@ -27,6 +51,7 @@ paymentRouter.get("/", async (req, res, next) => {
     if (req.query.status) filter.status = req.query.status;
     if (req.query.studentId) filter.student = req.query.studentId;
     if (req.query.period) filter.period = req.query.period;
+    if (req.query.month) filter.month = req.query.month;
 
     const payments = await Payment.find(filter)
       .sort({ createdAt: -1 })
@@ -45,9 +70,9 @@ paymentRouter.get("/", async (req, res, next) => {
 
 paymentRouter.post("/", async (req, res, next) => {
   try {
-    const { student, period, amount } = req.body;
-    if (!student || !period || amount == null) {
-      return res.status(400).json({ message: "Student, period, and amount are required." });
+    const { student, period, month, amount } = req.body;
+    if (!student || (!period && !month) || amount == null) {
+      return res.status(400).json({ message: "Student, period (or month), and amount are required." });
     }
 
     const studentDoc = await User.findOne({ _id: student, role: "student" }).select("name");
@@ -56,10 +81,14 @@ paymentRouter.post("/", async (req, res, next) => {
     const payment = await Payment.create({
       student,
       period: req.body.period,
+      month: req.body.month,
       amount: Number(req.body.amount),
       paidAmount: Number(req.body.paidAmount || 0),
+      dueDate: req.body.dueDate || undefined,
+      paidDate: req.body.paidDate || undefined,
       method: req.body.method || "cash",
       note: req.body.note,
+      notes: req.body.notes,
       recordedBy: req.user._id
     });
 
@@ -68,7 +97,7 @@ paymentRouter.post("/", async (req, res, next) => {
       action: "create",
       entity: "payment",
       entityLabel: studentDoc.name,
-      details: `${payment.period} · ${payment.status}`
+      details: `${payment.period || payment.month} · ${payment.status}`
     });
 
     const populated = await Payment.findById(payment._id).populate(
@@ -87,17 +116,21 @@ paymentRouter.put("/:id", async (req, res, next) => {
     if (!payment) return res.status(404).json({ message: "Payment not found." });
 
     if (req.body.period != null) payment.period = req.body.period;
+    if (req.body.month != null) payment.month = req.body.month;
     if (req.body.amount != null) payment.amount = Number(req.body.amount);
     if (req.body.paidAmount != null) payment.paidAmount = Number(req.body.paidAmount);
+    if (req.body.dueDate != null) payment.dueDate = req.body.dueDate;
+    if (req.body.paidDate != null) payment.paidDate = req.body.paidDate;
     if (req.body.method != null) payment.method = req.body.method;
     if (req.body.note != null) payment.note = req.body.note;
+    if (req.body.notes != null) payment.notes = req.body.notes;
     await payment.save();
 
     await recordAudit({
       req,
       action: "update",
       entity: "payment",
-      entityLabel: payment.period,
+      entityLabel: payment.period || payment.month,
       details: payment.status
     });
 
@@ -111,12 +144,12 @@ paymentRouter.put("/:id", async (req, res, next) => {
   }
 });
 
-paymentRouter.delete("/:id", async (req, res, next) => {
+paymentRouter.delete("/:id", allowRoles("admin"), async (req, res, next) => {
   try {
     const payment = await Payment.findByIdAndDelete(req.params.id);
     if (!payment) return res.status(404).json({ message: "Payment not found." });
 
-    await recordAudit({ req, action: "delete", entity: "payment", entityLabel: payment.period });
+    await recordAudit({ req, action: "delete", entity: "payment", entityLabel: payment.period || payment.month });
     res.json({ message: "Payment removed." });
   } catch (error) {
     next(error);
