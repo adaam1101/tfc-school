@@ -32,11 +32,13 @@ import EnrollmentsPanel from "./EnrollmentsPanel.jsx";
 import PaymentsPanel from "./PaymentsPanel.jsx";
 import AnnouncementsPanel from "./AnnouncementsPanel.jsx";
 import AuditPanel from "./AuditPanel.jsx";
+import SchedulePanel from "./SchedulePanel.jsx";
 
 const TABS = [
   { id: "overview", label: "Overview", icon: LayoutDashboard },
   { id: "enrollments", label: "Enrollments", icon: Inbox },
   { id: "payments", label: "Payments", icon: Wallet },
+  { id: "timetable", label: "Timetable", icon: BookOpen },
   { id: "announcements", label: "Announcements", icon: Megaphone },
   { id: "audit", label: "Activity", icon: History }
 ];
@@ -272,6 +274,7 @@ export default function AdminDashboard() {
 
         {tab === "enrollments" && <EnrollmentsPanel />}
         {tab === "payments" && <PaymentsPanel students={students} />}
+        {tab === "timetable" && <SchedulePanel teachers={teachers} />}
         {tab === "announcements" && <AnnouncementsPanel />}
         {tab === "audit" && <AuditPanel />}
 
