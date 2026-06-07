@@ -282,8 +282,8 @@ export default function AdminDashboard() {
   };
 
   return (
-    <AppLayout title="" subtitle="">
-      <div className="flex min-h-[calc(100vh-160px)] -mx-4 sm:-mx-6 lg:-mx-8 -mt-8">
+    <AppLayout title="" subtitle="" fullHeight>
+      <div className="flex h-full">
 
         {/* Mobile overlay */}
         {sidebarOpen && (
@@ -295,7 +295,7 @@ export default function AdminDashboard() {
 
         {/* Sidebar */}
         <aside
-          className={`fixed inset-y-0 left-0 z-50 flex w-64 flex-col bg-gradient-to-b from-brand-700 to-brand-950 transition-transform duration-300 lg:static lg:z-auto lg:translate-x-0 lg:min-h-full ${
+          className={`fixed inset-y-0 left-0 z-50 flex w-64 flex-col bg-gradient-to-b from-brand-700 to-brand-950 transition-transform duration-300 lg:relative lg:z-auto lg:translate-x-0 lg:h-full lg:shrink-0 ${
             sidebarOpen ? "translate-x-0" : "-translate-x-full"
           }`}
         >
@@ -356,7 +356,7 @@ export default function AdminDashboard() {
         </aside>
 
         {/* Main content */}
-        <div className="flex-1 min-w-0 overflow-auto">
+        <div className="flex-1 min-w-0 overflow-y-auto h-full">
           {/* Mobile top bar */}
           <div className="flex items-center gap-3 border-b border-slate-200 bg-white px-4 py-3 lg:hidden dark:border-slate-700 dark:bg-slate-900">
             <button

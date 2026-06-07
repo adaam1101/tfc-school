@@ -6,7 +6,7 @@ import { useAuth } from "../context/AuthContext.jsx";
 import RatingModal from "../components/RatingModal.jsx";
 import { useTheme } from "../hooks/useTheme.js";
 
-export default function AppLayout({ title, subtitle, children }) {
+export default function AppLayout({ title, subtitle, children, fullHeight = false }) {
   const { user, logout } = useAuth();
   const location = useLocation();
   const isRfid = location.pathname === "/rfid-attendance";
@@ -18,7 +18,7 @@ export default function AppLayout({ title, subtitle, children }) {
   const gradient = roleGradients[user?.role] || roleGradients.admin;
 
   return (
-    <div className="flex min-h-screen flex-col bg-gradient-to-br from-slate-50 via-slate-100 to-slate-50 text-slate-950 dark:from-slate-900 dark:via-slate-900 dark:to-slate-900 dark:text-slate-100">
+    <div className={`flex text-slate-950 dark:text-slate-100 bg-gradient-to-br from-slate-50 via-slate-100 to-slate-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-900 ${fullHeight ? "h-screen overflow-hidden flex-col" : "min-h-screen flex-col"}`}>
       <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/85 backdrop-blur-md shadow-sm dark:border-slate-700 dark:bg-slate-900/90">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
           <Link to={`/${user?.role || "admin"}`} className="group flex items-center gap-3">
@@ -60,7 +60,7 @@ export default function AppLayout({ title, subtitle, children }) {
           </div>
         </div>
       </header>
-      <main className={`w-full flex-1 animate-fade-in ${title ? "mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8" : ""}`}>
+      <main className={`w-full animate-fade-in ${fullHeight ? "flex-1 overflow-hidden" : `flex-1 ${title ? "mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8" : ""}`}`}>
         {title && (
           <div className="mb-8 animate-fade-slide-up">
             <h1 className="text-2xl font-black tracking-tight text-brand-800 dark:text-brand-300 sm:text-3xl">{title}</h1>
@@ -69,12 +69,14 @@ export default function AppLayout({ title, subtitle, children }) {
         )}
         {children}
       </main>
-      <footer className="border-t border-slate-200 bg-white/60 py-5 text-center backdrop-blur-sm dark:border-slate-700 dark:bg-slate-900/60">
-        <div className="mx-auto max-w-7xl px-6">
-          <p className="text-xs text-slate-400">© {new Date().getFullYear()} TFC — Training Formation Center · {schoolInfo.address}</p>
-          <p className="mt-0.5 text-xs text-slate-300 dark:text-slate-600">{schoolInfo.credit}</p>
-        </div>
-      </footer>
+      {!fullHeight && (
+        <footer className="border-t border-slate-200 bg-white/60 py-5 text-center backdrop-blur-sm dark:border-slate-700 dark:bg-slate-900/60">
+          <div className="mx-auto max-w-7xl px-6">
+            <p className="text-xs text-slate-400">© {new Date().getFullYear()} TFC — Training Formation Center · {schoolInfo.address}</p>
+            <p className="mt-0.5 text-xs text-slate-300 dark:text-slate-600">{schoolInfo.credit}</p>
+          </div>
+        </footer>
+      )}
       {showRating && <RatingModal onClose={() => setShowRating(false)} />}
     </div>
   );
