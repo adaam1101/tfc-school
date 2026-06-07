@@ -13,10 +13,12 @@ import TeacherDashboard from "./pages/teacher/TeacherDashboard.jsx";
 import StudentDashboard from "./pages/student/StudentDashboard.jsx";
 import NotFound from "./pages/NotFound.jsx";
 import InscriptionPage from "./pages/InscriptionPage.jsx";
+import DesignPreview from "./pages/DesignPreview.jsx";
 
 export default function App() {
   return (
     <Routes>
+      <Route path="/preview" element={<DesignPreview />} />
       <Route path="/" element={<LandingPage />} />
       <Route path="/inscription" element={<InscriptionPage />} />
       <Route path="/admin/login"      element={<LoginPage role="admin"      />} />
