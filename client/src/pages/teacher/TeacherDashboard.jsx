@@ -8,13 +8,13 @@ import {
   Users,
   XCircle,
   UserRound,
-  IdCard
+  IdCard,
+  Clock
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { api, getApiError } from "../../api/http.js";
 import ErrorAlert from "../../components/ErrorAlert.jsx";
 import LoadingState from "../../components/LoadingState.jsx";
-import StatTile from "../../components/StatTile.jsx";
 import StatusBadge from "../../components/StatusBadge.jsx";
 import AppLayout from "../../layouts/AppLayout.jsx";
 import AnnouncementsCard from "../../components/AnnouncementsCard.jsx";
@@ -23,7 +23,7 @@ import TimetableGrid from "../../components/TimetableGrid.jsx";
 
 const TABS = [
   { id: "attendance", label: "Attendance", icon: ClipboardCheck },
-  { id: "timetable", label: "Timetable", icon: CalendarDays }
+  { id: "timetable",  label: "Timetable",  icon: CalendarDays }
 ];
 
 const countStatus = (students, status) =>
@@ -126,20 +126,34 @@ export default function TeacherDashboard() {
         <ErrorAlert message={error} />
 
         {message && (
-          <div className="animate-fade-slide-up rounded-xl border border-brand-200 bg-brand-50 px-4 py-3 text-sm font-medium text-brand-800">
+          <div className="animate-fade-slide-up rounded-xl border border-brand-200 bg-brand-50 px-4 py-3 text-sm font-medium text-brand-800 dark:border-brand-800 dark:bg-brand-950/50 dark:text-brand-300">
             {message}
           </div>
         )}
 
-        {/* Stats */}
+        {/* Stats row */}
         <section className="grid gap-4 sm:grid-cols-3">
-          <StatTile icon={Users}        label="Assigned students" value={students.length} tone="sky"  />
-          <StatTile icon={CheckCircle2} label="Present today"     value={presentCount}    tone="teal" />
-          <StatTile icon={XCircle}      label="Absent today"      value={absentCount}     tone="rose" />
+          {[
+            { icon: Users,        label: "Assigned",      value: students.length, gradient: "from-brand-500 to-brand-700",     border: "border-brand-100 dark:border-brand-900",   num: "text-brand-900 dark:text-brand-200"   },
+            { icon: CheckCircle2, label: "Present today",  value: presentCount,    gradient: "from-emerald-500 to-teal-600",    border: "border-emerald-100 dark:border-emerald-900", num: "text-emerald-900 dark:text-emerald-200" },
+            { icon: XCircle,      label: "Absent today",   value: absentCount,     gradient: "from-rose-500 to-red-600",        border: "border-rose-100 dark:border-rose-900",      num: "text-rose-900 dark:text-rose-200"     }
+          ].map(({ icon: Icon, label, value, gradient, border, num }) => (
+            <div key={label} className={`card-hover border p-5 ${border}`}>
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">{label}</p>
+                  <p className={`mt-2 text-4xl font-black tracking-tight ${num}`}>{value}</p>
+                </div>
+                <div className={`rounded-2xl bg-gradient-to-br p-3 shadow-sm ${gradient}`}>
+                  <Icon className="h-6 w-6 text-white" />
+                </div>
+              </div>
+            </div>
+          ))}
         </section>
 
-        {/* Tab navigation */}
-        <div className="flex flex-wrap gap-2 rounded-2xl border border-slate-200 bg-white p-1.5 shadow-sm">
+        {/* Pill tabs */}
+        <div className="flex flex-wrap gap-2">
           {TABS.map((t) => {
             const Icon = t.icon;
             const active = tab === t.id;
@@ -147,156 +161,203 @@ export default function TeacherDashboard() {
               <button
                 key={t.id}
                 onClick={() => setTab(t.id)}
-                className={`inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-bold transition-all ${
+                className={`inline-flex items-center gap-2.5 rounded-2xl px-6 py-3 text-sm font-bold transition-all duration-200 ${
                   active
-                    ? "bg-gradient-to-r from-brand-500 to-brand-700 text-white shadow-sm"
-                    : "text-slate-600 hover:bg-slate-100"
+                    ? "bg-gradient-to-r from-brand-600 to-brand-700 text-white shadow-md shadow-brand-200 dark:shadow-brand-900"
+                    : "border border-slate-200 bg-white text-slate-600 hover:border-brand-200 hover:bg-brand-50 hover:text-brand-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-brand-600 dark:hover:bg-slate-700"
                 }`}
               >
                 <Icon className="h-4 w-4" />
                 {t.label}
+                {t.id === "attendance" && unmarkedCount > 0 && (
+                  <span className={`rounded-full px-2 py-0.5 text-[10px] font-black ${active ? "bg-white/20 text-white" : "bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200"}`}>
+                    {unmarkedCount}
+                  </span>
+                )}
               </button>
             );
           })}
         </div>
 
-        {/* Timetable tab */}
+        {/* ── Timetable tab ── */}
         {tab === "timetable" && (
-          <section className="card p-6">
-            <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-              <div className="flex items-center gap-3">
-                <div className="rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 p-2.5 shadow-sm">
-                  <CalendarDays className="h-5 w-5 text-white" />
-                </div>
-                <div>
-                  <h2 className="text-lg font-bold">My Timetable</h2>
-                  <p className="text-sm text-slate-500">Your scheduled classes for the week</p>
+          <section>
+            <div className="card overflow-hidden">
+              {/* Timetable header card */}
+              <div className="bg-gradient-to-r from-brand-600 to-brand-800 px-6 py-5">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/20 backdrop-blur-sm shadow-inner">
+                      <CalendarDays className="h-6 w-6 text-white" />
+                    </div>
+                    <div>
+                      <h2 className="text-lg font-bold text-white">My Timetable</h2>
+                      <p className="text-sm text-brand-200">
+                        {data?.teacher?.teacherProfile?.subject || "Your scheduled classes"} · weekly view
+                      </p>
+                    </div>
+                  </div>
+                  <button className="inline-flex items-center gap-2 rounded-xl bg-white/15 px-4 py-2 text-sm font-semibold text-white transition-all hover:bg-white/25" onClick={loadSchedules}>
+                    <RefreshCcw className="h-4 w-4" />
+                    Refresh
+                  </button>
                 </div>
               </div>
-              <button className="btn-secondary" onClick={loadSchedules}>
-                <RefreshCcw className="h-4 w-4" />
-                Refresh
-              </button>
+              <div className="p-6">
+                <TimetableGrid schedules={schedules} />
+              </div>
             </div>
-            <TimetableGrid schedules={schedules} />
           </section>
         )}
 
-        {/* Attendance tab */}
+        {/* ── Attendance tab ── */}
         {tab === "attendance" && (
-          <section className="card p-6">
-            <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-              <div className="flex items-center gap-3">
-                <div className="rounded-xl bg-gradient-to-br from-brand-500 to-emerald-600 p-2.5 shadow-sm">
-                  <ClipboardCheck className="h-5 w-5 text-white" aria-hidden="true" />
+          <section>
+            {/* Section header */}
+            <div className="card overflow-hidden mb-4">
+              <div className="bg-gradient-to-r from-brand-600 to-emerald-700 px-6 py-5">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/20 backdrop-blur-sm shadow-inner">
+                      <ClipboardCheck className="h-6 w-6 text-white" />
+                    </div>
+                    <div>
+                      <h2 className="text-lg font-bold text-white">Attendance — {data?.today}</h2>
+                      <p className="text-sm text-emerald-100">
+                        {data?.teacher?.teacherProfile?.subject || "Assigned class"} ·{" "}
+                        {unmarkedCount > 0 ? `${unmarkedCount} not yet marked` : "All students marked ✓"}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <button type="button" className="inline-flex items-center gap-2 rounded-xl bg-white/15 px-4 py-2 text-sm font-semibold text-white transition-all hover:bg-white/25" onClick={() => setShowIdCard(true)}>
+                      <IdCard className="h-4 w-4" />
+                      My ID
+                    </button>
+                    <button type="button" className="inline-flex items-center gap-2 rounded-xl bg-white/15 px-4 py-2 text-sm font-semibold text-white transition-all hover:bg-white/25" onClick={loadDashboard}>
+                      <RefreshCcw className="h-4 w-4" />
+                      Refresh
+                    </button>
+                  </div>
                 </div>
-                <div>
-                  <h2 className="text-lg font-bold">Attendance — {data?.today}</h2>
-                  <p className="text-sm text-slate-500">
-                    {data?.teacher?.teacherProfile?.subject || "Assigned class"} &middot;{" "}
-                    {unmarkedCount > 0 ? `${unmarkedCount} not yet marked` : "All students marked"}
-                  </p>
-                </div>
-              </div>
-              <div className="flex gap-2">
-                <button type="button" className="btn-secondary" onClick={() => setShowIdCard(true)}>
-                  <IdCard className="h-4 w-4" aria-hidden="true" />
-                  My ID card
-                </button>
-                <button type="button" className="btn-secondary" onClick={loadDashboard}>
-                  <RefreshCcw className="h-4 w-4" aria-hidden="true" />
-                  Refresh
-                </button>
               </div>
             </div>
 
-            <div className="grid gap-3">
+            {/* Student cards grid */}
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
               {students.map((student) => {
                 const status = student.todayAttendance?.status;
+                const initials = student.name?.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase() || "?";
+                const avatarGradient =
+                  status === "Present" ? "from-emerald-400 to-teal-500"
+                  : status === "Absent" ? "from-rose-400 to-red-500"
+                  : "from-slate-400 to-slate-500";
+
                 return (
                   <div
                     key={student._id}
-                    className={`grid gap-4 rounded-2xl border p-4 transition-all duration-200 lg:grid-cols-[1fr_1.1fr_auto] ${
+                    className={`card overflow-hidden transition-all duration-200 ${
                       status === "Present"
-                        ? "border-emerald-200 bg-emerald-50/50"
+                        ? "border-emerald-200 dark:border-emerald-800"
                         : status === "Absent"
-                        ? "border-rose-200 bg-rose-50/50"
-                        : "border-slate-200 bg-white"
+                        ? "border-rose-200 dark:border-rose-800"
+                        : ""
                     }`}
                   >
-                    {/* Student info */}
-                    <div className="flex items-start gap-3">
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-slate-400 to-slate-600 text-sm font-bold text-white">
-                        {student.name?.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()}
-                      </div>
-                      <div>
-                        <div className="flex flex-wrap items-center gap-2">
-                          <h3 className="font-bold text-slate-900">{student.name}</h3>
-                          <StatusBadge value={status} />
+                    {/* Card top strip */}
+                    <div className={`h-1 w-full ${
+                      status === "Present" ? "bg-gradient-to-r from-emerald-400 to-teal-500"
+                      : status === "Absent" ? "bg-gradient-to-r from-rose-400 to-red-500"
+                      : "bg-gradient-to-r from-slate-200 to-slate-300 dark:from-slate-700 dark:to-slate-600"
+                    }`} />
+
+                    <div className="p-4">
+                      {/* Student info */}
+                      <div className="mb-3 flex items-center gap-3">
+                        <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br text-sm font-black text-white shadow-sm ${avatarGradient}`}>
+                          {initials}
                         </div>
-                        <p className="mt-0.5 text-xs text-slate-500">
-                          Age {student.studentProfile?.age || "–"} &middot; {student.studentProfile?.course || "Course"}
-                        </p>
-                        <p className="mt-0.5 text-xs text-slate-500">
-                          Parent: {student.studentProfile?.parentPhone || student.studentProfile?.parentEmail || "No contact"}
-                        </p>
-                        {status === "Absent" && (
-                          <p className="mt-1 text-xs text-slate-400">
-                            Notification:{" "}
-                            {student.todayAttendance?.parentNotification?.sent
-                              ? "email sent ✓"
-                              : student.todayAttendance?.parentNotification?.error || "not sent"}
+                        <div className="min-w-0 flex-1">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <h3 className="font-bold text-slate-900 dark:text-slate-100 truncate">{student.name}</h3>
+                            <StatusBadge value={status} />
+                          </div>
+                          <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400 truncate">
+                            {student.studentProfile?.course || "Course"} · Age {student.studentProfile?.age || "–"}
                           </p>
-                        )}
+                          {student.studentProfile?.parentPhone && (
+                            <p className="mt-0.5 text-xs text-slate-400 dark:text-slate-500 truncate">
+                              Parent: {student.studentProfile.parentPhone}
+                            </p>
+                          )}
+                        </div>
                       </div>
-                    </div>
 
-                    {/* Note */}
-                    <label className="field">
-                      <span className="flex items-center gap-1.5 text-xs">
-                        <MessageSquareText className="h-3.5 w-3.5 text-slate-400" />
-                        Optional note
-                      </span>
-                      <textarea
-                        className="input min-h-[72px] text-xs"
-                        value={notes[student._id] ?? ""}
-                        onChange={(event) =>
-                          setNotes((current) => ({ ...current, [student._id]: event.target.value }))
-                        }
-                        placeholder="Reason or reminder"
-                      />
-                    </label>
+                      {/* Note */}
+                      <label className="field mb-3">
+                        <span className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
+                          <MessageSquareText className="h-3.5 w-3.5" />
+                          Optional note
+                        </span>
+                        <textarea
+                          className="input min-h-[64px] text-xs resize-none"
+                          value={notes[student._id] ?? ""}
+                          onChange={(event) =>
+                            setNotes((current) => ({ ...current, [student._id]: event.target.value }))
+                          }
+                          placeholder="Reason or reminder..."
+                        />
+                      </label>
 
-                    {/* Actions */}
-                    <div className="flex items-center gap-2 lg:flex-col lg:items-stretch lg:justify-center">
-                      <button
-                        type="button"
-                        className="btn-success justify-center"
-                        disabled={savingId === student._id}
-                        onClick={() => markAttendance(student, "Present")}
-                      >
-                        <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
-                        Present
-                      </button>
-                      <button
-                        type="button"
-                        className="btn-danger justify-center"
-                        disabled={savingId === student._id}
-                        onClick={() => markAttendance(student, "Absent")}
-                      >
-                        <XCircle className="h-4 w-4" aria-hidden="true" />
-                        Absent
-                      </button>
+                      {/* Action pill buttons */}
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          disabled={savingId === student._id}
+                          onClick={() => markAttendance(student, "Present")}
+                          className={`flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-sm font-bold transition-all duration-200 disabled:opacity-60 ${
+                            status === "Present"
+                              ? "bg-emerald-500 text-white shadow-sm shadow-emerald-200 dark:shadow-emerald-900"
+                              : "border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-500 hover:text-white hover:border-emerald-500 dark:border-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-400 dark:hover:bg-emerald-600 dark:hover:text-white"
+                          }`}
+                        >
+                          <CheckCircle2 className="h-4 w-4" />
+                          Present
+                        </button>
+                        <button
+                          type="button"
+                          disabled={savingId === student._id}
+                          onClick={() => markAttendance(student, "Absent")}
+                          className={`flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-sm font-bold transition-all duration-200 disabled:opacity-60 ${
+                            status === "Absent"
+                              ? "bg-rose-500 text-white shadow-sm shadow-rose-200 dark:shadow-rose-900"
+                              : "border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-500 hover:text-white hover:border-rose-500 dark:border-rose-800 dark:bg-rose-950/50 dark:text-rose-400 dark:hover:bg-rose-600 dark:hover:text-white"
+                          }`}
+                        >
+                          <XCircle className="h-4 w-4" />
+                          Absent
+                        </button>
+                      </div>
+
+                      {/* Notification status */}
+                      {status === "Absent" && (
+                        <p className="mt-2 text-center text-[10px] text-slate-400 dark:text-slate-500">
+                          Notification:{" "}
+                          {student.todayAttendance?.parentNotification?.sent
+                            ? "email sent ✓"
+                            : student.todayAttendance?.parentNotification?.error || "not sent"}
+                        </p>
+                      )}
                     </div>
                   </div>
                 );
               })}
 
               {students.length === 0 && (
-                <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-200 py-12 text-center">
-                  <UserRound className="h-10 w-10 text-slate-300" />
-                  <p className="mt-3 text-sm font-medium text-slate-500">No students assigned yet</p>
-                  <p className="mt-1 text-xs text-slate-400">Ask an admin to assign students to your class</p>
+                <div className="col-span-full flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-200 py-16 text-center dark:border-slate-700">
+                  <UserRound className="h-12 w-12 text-slate-300 dark:text-slate-600" />
+                  <p className="mt-3 text-sm font-bold text-slate-500 dark:text-slate-400">No students assigned yet</p>
+                  <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">Ask an admin to assign students to your class</p>
                 </div>
               )}
             </div>

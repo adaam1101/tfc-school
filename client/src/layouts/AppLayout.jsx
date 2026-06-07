@@ -60,12 +60,14 @@ export default function AppLayout({ title, subtitle, children }) {
           </div>
         </div>
       </header>
-      <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-8 sm:px-6 lg:px-8">
-        <div className="mb-8 animate-fade-slide-up">
-          <h1 className="text-2xl font-black tracking-tight text-brand-800 dark:text-brand-300 sm:text-3xl">{title}</h1>
-          {subtitle && <p className="mt-1.5 text-sm text-slate-500 dark:text-slate-400">{subtitle}</p>}
-        </div>
-        <div className="animate-fade-in">{children}</div>
+      <main className={`w-full flex-1 animate-fade-in ${title ? "mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8" : ""}`}>
+        {title && (
+          <div className="mb-8 animate-fade-slide-up">
+            <h1 className="text-2xl font-black tracking-tight text-brand-800 dark:text-brand-300 sm:text-3xl">{title}</h1>
+            {subtitle && <p className="mt-1.5 text-sm text-slate-500 dark:text-slate-400">{subtitle}</p>}
+          </div>
+        )}
+        {children}
       </main>
       <footer className="border-t border-slate-200 bg-white/60 py-5 text-center backdrop-blur-sm dark:border-slate-700 dark:bg-slate-900/60">
         <div className="mx-auto max-w-7xl px-6">
