@@ -12,9 +12,9 @@ const attendanceSchema = new Schema(
     note: { type: String, trim: true, maxlength: 500 },
     parentNotification: {
       sent:          { type: Boolean, default: false },
-      channel:       { type: String, enum: ["email", "whatsapp", "both", "none"], default: "none" },
+      channel:       { type: String, enum: ["email", "sms", "email+sms", "none"], default: "none" },
       emailSent:     { type: Boolean, default: false },
-      whatsappSent:  { type: Boolean, default: false },
+      smsSent:       { type: Boolean, default: false },
       sentAt:        Date,
       error:         String
     }

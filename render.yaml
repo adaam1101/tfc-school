@@ -31,3 +31,9 @@ services:
         sync: false
       - key: SMTP_USER
         sync: false
+      - key: INFOBIP_API_KEY
+        sync: false
+      - key: INFOBIP_BASE_URL
+        sync: false
+      - key: SMS_SENDER
+        value: TFCSchool

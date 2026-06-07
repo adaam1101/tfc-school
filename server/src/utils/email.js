@@ -1,4 +1,5 @@
 import https from "node:https";
+import { sendAbsenceSMS, smsReady } from "./sms.js";
 
 const notificationsEnabled = () => process.env.NOTIFICATIONS_ENABLED === "true";
 
@@ -77,46 +78,65 @@ export const sendAbsenceNotification = async ({ student, teacher, attendance }) 
   const parentName  = student.studentProfile?.parentName || "Parent";
   const date        = attendance.date || new Date().toLocaleDateString("fr-DZ");
 
-  if (!parentEmail) {
-    return { sent: false, channel: "none", error: "No parent email on file." };
+  let emailSent = false;
+  let smsSent   = false;
+  let errors    = [];
+
+  // ── Email ──────────────────────────────────────────────
+  if (emailReady() && parentEmail) {
+    try {
+      const text = [
+        `Bonjour ${parentName},`,
+        "",
+        `Nous vous informons que votre fils / votre fille ${student.name} était absent(e) aujourd'hui le ${date}.`,
+        `Nous vous conseillons de nous contacter pour la justification de cette absence.`,
+        "",
+        `Merci pour votre confiance.`,
+        `📞 +213 561 502 098`,
+        `🏫 TFC Training Formation Center — Annaba`,
+        "",
+        "──────────────────────────",
+        "",
+        `السلام عليكم ${parentName}،`,
+        "",
+        `نُعلمكم بأن ابنكم / ابنتكم ${student.name} كان/كانت غائباً/غائبة اليوم ${date}.`,
+        `ننصحكم بالتواصل معنا لتبرير هذا الغياب.`,
+        "",
+        `شكراً على ثقتكم.`,
+        `📞 +213 561 502 098`,
+        `🏫 مركز التدريب والتكوين TFC — عنابة`
+      ].filter(Boolean).join("\n");
+
+      await sendViaSendGrid({
+        personalizations: [{ to: [{ email: parentEmail, name: parentName }] }],
+        from:    { email: process.env.SMTP_USER, name: "TFC School" },
+        subject: `🏫 TFC — Absence de ${student.name} — ${date}`,
+        content: [{ type: "text/plain", value: text }]
+      });
+      emailSent = true;
+    } catch (err) {
+      errors.push(`email: ${err.message}`);
+    }
   }
 
-  if (!emailReady()) {
-    return { sent: false, channel: "none", error: "SENDGRID_API_KEY not set." };
+  // ── SMS ────────────────────────────────────────────────
+  if (smsReady()) {
+    const smsResult = await sendAbsenceSMS({ student, teacher, attendance });
+    if (smsResult.sent) {
+      smsSent = true;
+    } else if (smsResult.error) {
+      errors.push(`sms: ${smsResult.error}`);
+    }
   }
 
-  try {
-    const text = [
-      `Bonjour ${parentName},`,
-      "",
-      `Nous vous informons que votre fils / votre fille ${student.name} était absent(e) aujourd'hui le ${date}.`,
-      `Nous vous conseillons de nous contacter pour la justification de cette absence.`,
-      "",
-      `Merci pour votre confiance.`,
-      `📞 +213 561 502 098`,
-      `🏫 TFC Training Formation Center — Annaba`,
-      "",
-      "──────────────────────────",
-      "",
-      `السلام عليكم ${parentName}،`,
-      "",
-      `نُعلمكم بأن ابنكم / ابنتكم ${student.name} كان/كانت غائباً/غائبة اليوم ${date}.`,
-      `ننصحكم بالتواصل معنا لتبرير هذا الغياب.`,
-      "",
-      `شكراً على ثقتكم.`,
-      `📞 +213 561 502 098`,
-      `🏫 مركز التدريب والتكوين TFC — عنابة`
-    ].filter(Boolean).join("\n");
+  const sent    = emailSent || smsSent;
+  const channel = emailSent && smsSent ? "email+sms" : emailSent ? "email" : smsSent ? "sms" : "none";
 
-    await sendViaSendGrid({
-      personalizations: [{ to: [{ email: parentEmail, name: parentName }] }],
-      from:    { email: process.env.SMTP_USER, name: "TFC School" },
-      subject: `🏫 TFC — Absence de ${student.name} — ${date}`,
-      content: [{ type: "text/plain", value: text }]
-    });
-
-    return { sent: true, channel: "email", emailSent: true, whatsappSent: false };
-  } catch (err) {
-    return { sent: false, channel: "none", emailSent: false, whatsappSent: false, error: err.message };
-  }
+  return {
+    sent,
+    channel,
+    emailSent,
+    smsSent,
+    error: errors.length > 0 ? errors.join(" | ") : undefined
+  };
 };
