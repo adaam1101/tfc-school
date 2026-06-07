@@ -120,6 +120,7 @@ export const sendAbsenceNotification = async ({ student, teacher, attendance }) 
   }
 
   // ── SMS ────────────────────────────────────────────────
+  console.log("[SMS-email.js] smsReady:", smsReady(), "| NOTIFICATIONS_ENABLED:", process.env.NOTIFICATIONS_ENABLED, "| INFOBIP_API_KEY set:", Boolean(process.env.INFOBIP_API_KEY), "| INFOBIP_BASE_URL:", process.env.INFOBIP_BASE_URL);
   if (smsReady()) {
     const smsResult = await sendAbsenceSMS({ student, teacher, attendance });
     if (smsResult.sent) {
