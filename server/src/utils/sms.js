@@ -40,7 +40,9 @@ const sendViaInfobip = (to, text) =>
         res.on("data", (c) => { data += c; });
         res.on("end", () => {
           if (res.statusCode >= 200 && res.statusCode < 300) {
-            resolve(JSON.parse(data));
+            const parsed = JSON.parse(data);
+            console.log("[SMS] Infobip response:", JSON.stringify(parsed));
+            resolve(parsed);
           } else {
             let msg = `Infobip error ${res.statusCode}`;
             try {
