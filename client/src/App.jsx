@@ -8,6 +8,7 @@ import ResetPasswordPage from "./pages/ResetPasswordPage.jsx";
 import AdminDashboard from "./pages/admin/AdminDashboard.jsx";
 import SousAdminDashboard from "./pages/admin/SousAdminDashboard.jsx";
 import ModeratorDashboard from "./pages/admin/ModeratorDashboard.jsx";
+import CertificatePreview from "./pages/admin/CertificatePreview.jsx";
 import RFIDAttendance from "./pages/RFIDAttendance.jsx";
 import TeacherDashboard from "./pages/teacher/TeacherDashboard.jsx";
 import StudentDashboard from "./pages/student/StudentDashboard.jsx";
@@ -32,6 +33,7 @@ export default function App() {
       <Route path="/teacher"    element={<ProtectedRoute role="teacher">    <TeacherDashboard />    </ProtectedRoute>} />
       <Route path="/student"    element={<ProtectedRoute role="student">    <StudentDashboard />    </ProtectedRoute>} />
       <Route path="/rfid-attendance" element={<ProtectedRoute roles={["admin", "teacher"]}><RFIDAttendance /></ProtectedRoute>} />
+      <Route path="/admin/certificate-preview" element={<ProtectedRoute role="admin"><CertificatePreview /></ProtectedRoute>} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
