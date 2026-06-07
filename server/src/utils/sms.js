@@ -58,11 +58,14 @@ const sendViaInfobip = (to, text) =>
   });
 
 export const sendAbsenceSMS = async ({ student, teacher, attendance }) => {
+  console.log("[SMS] smsReady:", smsReady(), "| NOTIFICATIONS_ENABLED:", process.env.NOTIFICATIONS_ENABLED, "| API_KEY set:", Boolean(process.env.INFOBIP_API_KEY), "| BASE_URL:", process.env.INFOBIP_BASE_URL);
+
   if (!smsReady()) {
     return { sent: false, error: "SMS not configured." };
   }
 
   const parentPhone = student.studentProfile?.parentPhone;
+  console.log("[SMS] parentPhone:", parentPhone);
   if (!parentPhone) {
     return { sent: false, error: "No parent phone on file." };
   }
