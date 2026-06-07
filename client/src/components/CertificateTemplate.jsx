@@ -2,24 +2,40 @@ import React from "react";
 import { schoolInfo } from "../config/branding.js";
 
 const BLUE  = "#04436E";
-const GOLD  = "#C9A84C";
-const LIGHT = "#F8FBFF";
+const BLUE2 = "#032D4A";
+const GOLD  = "#8B6914";
+const CREAM = "#FAF8F0";
 
-const Star = ({ size = 16, color = "#aab8c8" }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill={color}>
-    <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26" />
+/* ── SVG ornamental corner ── */
+const Corner = ({ rotate = 0, size = 52 }) => (
+  <svg width={size} height={size} viewBox="0 0 80 80"
+    style={{ transform: `rotate(${rotate}deg)`, display:"block" }}>
+    <path d="M4,4 L4,32 Q4,36 8,36 L8,8 L36,8 Q36,4 32,4 Z"
+      fill="none" stroke={GOLD} strokeWidth="2" />
+    <path d="M4,4 L24,4 Q28,4 28,8 L8,8 Q8,28 4,28 Z"
+      fill={GOLD} opacity="0.15" />
+    <circle cx="4" cy="4" r="3" fill={GOLD} />
+    <path d="M14,4 Q18,14 28,4" fill="none" stroke={GOLD} strokeWidth="1.5" />
+    <path d="M4,14 Q14,18 4,28" fill="none" stroke={GOLD} strokeWidth="1.5" />
+    <circle cx="28" cy="4" r="2" fill={GOLD} opacity="0.6" />
+    <circle cx="4" cy="28" r="2" fill={GOLD} opacity="0.6" />
   </svg>
 );
 
-const Badge = ({ size = 56 }) => (
-  <svg width={size} height={size} viewBox="0 0 100 100">
-    <circle cx="50" cy="42" r="28" fill="none" stroke={BLUE} strokeWidth="4" />
-    <circle cx="50" cy="42" r="20" fill="none" stroke={GOLD} strokeWidth="2" />
-    <polygon points="50,26 53.5,35.8 64,35.8 55.7,41.9 58.9,52 50,46.2 41.1,52 44.3,41.9 36,35.8 46.5,35.8"
-      fill={BLUE} />
-    <rect x="38" y="68" width="24" height="10" rx="3" fill={GOLD} />
-    <rect x="44" y="66" width="5" height="6" fill={GOLD} />
-    <rect x="51" y="66" width="5" height="6" fill={GOLD} />
+/* ── Top floral divider ── */
+const Floral = ({ width = 180 }) => (
+  <svg width={width} height="28" viewBox="0 0 300 28">
+    <path d="M150,14 L140,6 Q150,2 160,6 Z" fill={GOLD} />
+    <path d="M150,14 L140,22 Q150,26 160,22 Z" fill={GOLD} />
+    <circle cx="150" cy="14" r="3" fill={GOLD} />
+    <path d="M10,14 Q75,4 130,14 Q75,24 10,14 Z" fill="none" stroke={GOLD} strokeWidth="1.2" />
+    <path d="M290,14 Q225,4 170,14 Q225,24 290,14 Z" fill="none" stroke={GOLD} strokeWidth="1.2" />
+    <circle cx="10"  cy="14" r="2.5" fill={GOLD} />
+    <circle cx="290" cy="14" r="2.5" fill={GOLD} />
+    <path d="M30,14 Q40,8 50,14 Q40,20 30,14 Z"   fill={GOLD} opacity="0.5" />
+    <path d="M270,14 Q260,8 250,14 Q260,20 270,14 Z" fill={GOLD} opacity="0.5" />
+    <path d="M55,14 Q65,10 75,14 Q65,18 55,14 Z"  fill={GOLD} opacity="0.35" />
+    <path d="M245,14 Q235,10 225,14 Q235,18 245,14 Z" fill={GOLD} opacity="0.35" />
   </svg>
 );
 
@@ -28,8 +44,7 @@ export default function CertificateTemplate({
   courseName     = "Informatique & Bureautique",
   duration       = "6 mois",
   completionDate = "Juin 2026",
-  directorName   = "Le Directeur",
-  directorTitle  = "Directeur TFC School",
+  directorName   = "Directeur",
   verifyCode     = null,
   qrDataUrl      = null,
   grade          = null,
@@ -39,203 +54,207 @@ export default function CertificateTemplate({
       id="certificate-root"
       style={{
         width: "297mm", height: "210mm",
-        background: LIGHT,
+        background: CREAM,
         position: "relative", overflow: "hidden",
         boxSizing: "border-box",
-        fontFamily: "'Georgia', 'Times New Roman', serif",
+        fontFamily: "'Cinzel', 'Georgia', serif",
       }}
     >
-      {/* ── TFC Logo watermark background ── */}
-      <img
-        src="/tfc-logo.png"
-        alt=""
-        style={{
-          position: "absolute",
-          top: "50%", left: "50%",
-          transform: "translate(-50%, -50%)",
-          width: "160mm", height: "160mm",
-          objectFit: "contain",
-          opacity: 0.04,
-          pointerEvents: "none",
-          zIndex: 0,
-        }}
-      />
-
-      {/* ── Thick outer blue border ── */}
+      {/* ── Subtle noise texture overlay ── */}
       <div style={{
-        position: "absolute", inset: 0,
-        border: `18mm solid ${BLUE}`,
-        boxSizing: "border-box",
-        zIndex: 1, pointerEvents: "none",
+        position:"absolute", inset:0, zIndex:1, pointerEvents:"none",
+        backgroundImage:`url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E")`,
+        backgroundRepeat:"repeat", opacity:0.6,
       }} />
 
-      {/* ── Dashed inner border ── */}
-      <div style={{
-        position: "absolute", inset: "20mm",
-        border: `2px dashed #9ab3c8`,
-        boxSizing: "border-box",
-        zIndex: 2, pointerEvents: "none",
+      {/* ── TFC Logo watermark ── */}
+      <img src="/tfc-logo.png" alt="" style={{
+        position:"absolute", top:"50%", left:"50%",
+        transform:"translate(-50%,-50%)",
+        width:"130mm", height:"130mm",
+        objectFit:"contain", opacity:0.05,
+        pointerEvents:"none", zIndex:2,
       }} />
 
-      {/* ── Thin gold inner line ── */}
+      {/* ── Outer thin border ── */}
       <div style={{
-        position: "absolute", inset: "22mm",
-        border: `1px solid ${GOLD}40`,
-        boxSizing: "border-box",
-        zIndex: 2, pointerEvents: "none",
+        position:"absolute", inset:"6mm",
+        border:`1.5px solid ${GOLD}`,
+        zIndex:3, pointerEvents:"none",
+      }} />
+
+      {/* ── Inner thin border ── */}
+      <div style={{
+        position:"absolute", inset:"9mm",
+        border:`0.5px solid ${GOLD}90`,
+        zIndex:3, pointerEvents:"none",
       }} />
 
       {/* ── Corner ornaments ── */}
-      {[
-        { top: "14mm",  left:  "14mm" },
-        { top: "14mm",  right: "14mm" },
-        { bottom:"14mm",left:  "14mm" },
-        { bottom:"14mm",right: "14mm" },
-      ].map((pos, i) => (
-        <div key={i} style={{ position:"absolute", zIndex:3, ...pos }}>
-          <Star size={18} color="#9ab3c8" />
-        </div>
-      ))}
+      <div style={{position:"absolute", top:"4.5mm",  left:"4.5mm",  zIndex:4}}><Corner rotate={0}   /></div>
+      <div style={{position:"absolute", top:"4.5mm",  right:"4.5mm", zIndex:4}}><Corner rotate={90}  /></div>
+      <div style={{position:"absolute", bottom:"4.5mm",left:"4.5mm", zIndex:4}}><Corner rotate={270} /></div>
+      <div style={{position:"absolute", bottom:"4.5mm",right:"4.5mm",zIndex:4}}><Corner rotate={180} /></div>
 
       {/* ── Content ── */}
       <div style={{
-        position: "absolute", inset: "24mm",
-        display: "flex", flexDirection: "column",
-        alignItems: "center", justifyContent: "space-between",
-        zIndex: 5, textAlign: "center",
+        position:"absolute", top:"14mm", left:"16mm", right:"16mm", bottom:"14mm",
+        zIndex:5,
+        display:"flex", flexDirection:"column",
+        alignItems:"center", justifyContent:"space-between",
+        textAlign:"center",
       }}>
 
-        {/* Top: school name inside border area */}
+        {/* Top ornament */}
+        <Floral width={220} />
+
+        {/* CERTIFICAT */}
         <div>
           <div style={{
-            fontSize: "8pt", letterSpacing: "4px", textTransform: "uppercase",
-            color: GOLD, fontWeight: "700", marginBottom: "2mm",
-          }}>
-            Training Formation Center · عنابة
-          </div>
-
-          {/* CERTIFICATE */}
-          <div style={{
-            fontSize: "36pt", fontWeight: "900", letterSpacing: "8px",
-            textTransform: "uppercase", color: BLUE,
-            fontFamily: "'Georgia', serif", lineHeight: 1,
+            fontFamily:"'Cinzel', Georgia, serif",
+            fontSize:"38pt", fontWeight:"900",
+            color: BLUE, letterSpacing:"10px",
+            textTransform:"uppercase", lineHeight:1,
+            textShadow:`1px 1px 0 ${BLUE2}30`,
           }}>
             CERTIFICAT
           </div>
-
-          {/* OF TRAINING */}
           <div style={{
-            fontSize: "10pt", letterSpacing: "5px", textTransform: "uppercase",
-            color: "#555", fontWeight: "400", marginTop: "1.5mm",
+            fontFamily:"'Cinzel', Georgia, serif",
+            fontSize:"10pt", fontWeight:"700",
+            color: GOLD, letterSpacing:"6px",
+            textTransform:"uppercase", marginTop:"1.5mm",
           }}>
-            DE FORMATION PROFESSIONNELLE &nbsp;·&nbsp; شهادة تكوين مهني
+            DE FORMATION PROFESSIONNELLE
+          </div>
+          <div style={{
+            fontSize:"8pt", color:`${BLUE}99`,
+            letterSpacing:"3px", marginTop:"1mm",
+            fontFamily:"Georgia, serif", fontStyle:"italic",
+          }}>
+            شهادة تكوين مهني
           </div>
         </div>
 
-        {/* Middle: student */}
-        <div style={{ width: "100%" }}>
-          {/* Presented to */}
+        {/* Presented to + name */}
+        <div style={{width:"100%"}}>
           <div style={{
-            fontSize: "8.5pt", fontStyle: "italic", fontWeight: "700",
-            color: "#666", letterSpacing: "2px", marginBottom: "2mm",
+            fontSize:"9pt", fontStyle:"italic",
+            color:`${BLUE}99`, marginBottom:"2mm",
+            fontFamily:"Georgia, serif", letterSpacing:"1px",
           }}>
             Proudly presented to &nbsp;·&nbsp; يُسعدنا تقديم هذه الشهادة إلى
           </div>
 
-          {/* Student name with lines */}
-          <div style={{ display:"flex", alignItems:"center", gap:"4mm", justifyContent:"center" }}>
-            <div style={{ flex:1, height:"1px", background:`linear-gradient(to right, transparent, ${BLUE}60)` }} />
-            <div style={{
-              fontSize: "28pt", color: BLUE, fontWeight: "700",
-              fontFamily: "'Palatino Linotype', 'Palatino', Georgia, serif",
-              fontStyle: "italic", letterSpacing: "1px", padding: "0 4mm",
-              whiteSpace: "nowrap",
-            }}>
-              {studentName}
-            </div>
-            <div style={{ flex:1, height:"1px", background:`linear-gradient(to left, transparent, ${BLUE}60)` }} />
+          <div style={{
+            fontFamily:"'Dancing Script', cursive",
+            fontSize:"40pt", fontWeight:"700",
+            color: BLUE, lineHeight:1.1,
+            letterSpacing:"1px",
+          }}>
+            {studentName}
           </div>
 
-          {/* Course info */}
-          <div style={{ marginTop:"3mm", fontSize:"9pt", color:"#555", lineHeight:1.7 }}>
-            a complété avec succès la formation en&nbsp;
-            <span style={{ color:BLUE, fontWeight:"700", fontSize:"10pt" }}>{courseName}</span>
-            <br />
-            <span style={{ fontSize:"8.5pt", color:"#777" }}>
-              قد أتمّ/أتمّت بنجاح برنامج التكوين في هذا التخصص
+          {/* Line under name */}
+          <div style={{
+            margin:"2mm auto 3mm",
+            width:"160mm", height:"1px",
+            background:`linear-gradient(to right, transparent, ${GOLD}, ${GOLD}, transparent)`,
+          }} />
+
+          {/* Description */}
+          <div style={{
+            fontFamily:"Georgia, serif",
+            fontSize:"9pt", color:`${BLUE2}cc`,
+            lineHeight:1.8, letterSpacing:"0.3px",
+          }}>
+            Pour avoir complété avec succès et distinction la formation en&nbsp;
+            <span style={{fontWeight:"700", color:BLUE}}>{courseName}</span>
+            <br/>
+            <span style={{fontSize:"8pt", color:`${BLUE}88`, fontStyle:"italic"}}>
+              إتماماً بنجاح وتفوق برنامج التكوين في هذا التخصص
             </span>
           </div>
 
-          {/* Duration / Date / Grade */}
+          {/* Duration · Date · Grade */}
           <div style={{
-            display:"flex", justifyContent:"center", gap:"8mm",
-            marginTop:"3mm", fontSize:"8pt", color:"#666",
+            marginTop:"2.5mm",
+            display:"flex", justifyContent:"center", gap:"6mm",
+            fontSize:"8pt", color:`${GOLD}dd`,
+            fontFamily:"Georgia, serif", fontStyle:"italic",
           }}>
-            <span>⏱ <strong style={{color:BLUE}}>{duration}</strong></span>
-            <span style={{color:"#ccc"}}>|</span>
-            <span>📅 <strong style={{color:BLUE}}>{completionDate}</strong></span>
+            <span>Durée: <strong style={{color:BLUE}}>{duration}</strong></span>
+            <span style={{color:`${GOLD}50`}}>✦</span>
+            <span>Date: <strong style={{color:BLUE}}>{completionDate}</strong></span>
             {grade && <>
-              <span style={{color:"#ccc"}}>|</span>
-              <span>🏆 <strong style={{color:GOLD}}>{grade}</strong></span>
+              <span style={{color:`${GOLD}50`}}>✦</span>
+              <span>Mention: <strong style={{color:BLUE}}>{grade}</strong></span>
             </>}
           </div>
         </div>
 
-        {/* Bottom: badge + signature + QR */}
+        {/* Bottom: signatures + QR */}
         <div style={{
           display:"flex", alignItems:"flex-end",
           justifyContent:"space-between", width:"100%",
+          paddingBottom:"1mm",
         }}>
-          {/* Signature */}
-          <div style={{ textAlign:"center", minWidth:"50mm" }}>
+          {/* Signature 1 */}
+          <div style={{textAlign:"center", minWidth:"50mm"}}>
+            <div style={{width:"44mm", height:"1px", background:`${GOLD}80`, margin:"0 auto 2mm"}} />
             <div style={{
-              width:"45mm", height:"1px",
-              background: BLUE, marginBottom:"1.5mm",
+              fontFamily:"'Cinzel', Georgia, serif",
+              fontSize:"8pt", fontWeight:"700", color:BLUE,
+            }}>
+              {directorName}
+            </div>
+            <div style={{fontSize:"7pt", color:`${GOLD}cc`, fontStyle:"italic", fontFamily:"Georgia,serif"}}>
+              Directeur · المدير
+            </div>
+          </div>
+
+          {/* Center: school name + bottom ornament */}
+          <div style={{textAlign:"center"}}>
+            <img src="/tfc-logo.png" alt="TFC" style={{
+              width:"14mm", height:"14mm", objectFit:"contain",
+              opacity:0.7, marginBottom:"1mm",
             }} />
-            <div style={{ fontSize:"9pt", fontWeight:"700", color:BLUE }}>{directorName}</div>
-            <div style={{ fontSize:"7.5pt", color:"#888" }}>{directorTitle}</div>
+            <div style={{
+              fontFamily:"'Cinzel',Georgia,serif",
+              fontSize:"7pt", fontWeight:"700",
+              color:`${BLUE}99`, letterSpacing:"2px",
+            }}>
+              TFC · ANNABA
+            </div>
           </div>
 
-          {/* Badge center */}
-          <div style={{ textAlign:"center" }}>
-            <Badge size={52} />
-          </div>
-
-          {/* QR + verify code */}
-          <div style={{ textAlign:"center", minWidth:"28mm" }}>
+          {/* QR code */}
+          <div style={{textAlign:"center", minWidth:"28mm"}}>
             {qrDataUrl ? (
-              <img src={qrDataUrl} alt="QR" style={{ width:"22mm", height:"22mm", border:`1px solid ${GOLD}50`, borderRadius:"2mm" }} />
+              <img src={qrDataUrl} alt="QR"
+                style={{width:"20mm", height:"20mm", border:`1px solid ${GOLD}50`, borderRadius:"1mm"}} />
             ) : (
               <div style={{
-                width:"22mm", height:"22mm",
-                border:`2px dashed ${GOLD}80`, borderRadius:"2mm",
+                width:"20mm", height:"20mm",
+                border:`1.5px dashed ${GOLD}70`, borderRadius:"1mm",
                 display:"flex", alignItems:"center", justifyContent:"center",
-                fontSize:"6pt", color:"#aaa", background:"#fafafa",
+                fontSize:"5.5pt", color:`${GOLD}99`, background:`${GOLD}08`,
               }}>
                 QR Code
               </div>
             )}
             {verifyCode && (
-              <div style={{ fontSize:"5pt", color:"#aaa", marginTop:"1mm", letterSpacing:"0.5px" }}>
-                #{verifyCode.slice(0,12).toUpperCase()}
+              <div style={{fontSize:"4.5pt", color:`${GOLD}88`, marginTop:"0.5mm", letterSpacing:"0.5px"}}>
+                {verifyCode.slice(0,12).toUpperCase()}
               </div>
             )}
-            <div style={{ fontSize:"5.5pt", color:"#bbb", marginTop:"0.5mm" }}>Vérification</div>
+            <div style={{fontSize:"5pt", color:`${BLUE}60`, marginTop:"0.3mm", fontStyle:"italic", fontFamily:"Georgia,serif"}}>
+              Vérification
+            </div>
           </div>
         </div>
 
       </div>
-
-      {/* ── Footer strip inside blue border ── */}
-      <div style={{
-        position:"absolute", bottom:"5mm", left:0, right:0,
-        textAlign:"center", zIndex:6,
-      }}>
-        <div style={{ fontSize:"6pt", color:"rgba(255,255,255,0.65)", letterSpacing:"2px" }}>
-          {schoolInfo.email} &nbsp;·&nbsp; {schoolInfo.phones[0]} &nbsp;·&nbsp; {schoolInfo.address}
-        </div>
-      </div>
-
     </div>
   );
 }
