@@ -56,6 +56,8 @@ const userSchema = new Schema(
     twoFactorEnabled: { type: Boolean, default: true },
     twoFactorCode: { type: String, select: false },
     twoFactorExpires: { type: Date, select: false },
+    loginAttempts: { type: Number, default: 0, select: false },
+    lockUntil: { type: Date, select: false },
     passwordResetToken: { type: String, select: false },
     passwordResetExpires: { type: Date, select: false },
     teacherProfile: teacherProfileSchema,
@@ -94,6 +96,38 @@ userSchema.methods.verifyTwoFactorCode = function verifyTwoFactorCode(code) {
 userSchema.methods.clearTwoFactorCode = function clearTwoFactorCode() {
   this.twoFactorCode = undefined;
   this.twoFactorExpires = undefined;
+};
+
+const MAX_LOGIN_ATTEMPTS = 5;
+const LOCK_DURATION_MS   = 15 * 60 * 1000; // 15 minutes
+
+userSchema.methods.isLocked = function isLocked() {
+  return this.lockUntil && this.lockUntil > Date.now();
+};
+
+userSchema.methods.lockMinutesLeft = function lockMinutesLeft() {
+  if (!this.isLocked()) return 0;
+  return Math.ceil((this.lockUntil - Date.now()) / 60000);
+};
+
+userSchema.methods.incrementLoginAttempts = async function incrementLoginAttempts() {
+  if (this.lockUntil && this.lockUntil < Date.now()) {
+    // Lock expired — reset
+    this.loginAttempts = 1;
+    this.lockUntil = undefined;
+  } else {
+    this.loginAttempts = (this.loginAttempts || 0) + 1;
+    if (this.loginAttempts >= MAX_LOGIN_ATTEMPTS) {
+      this.lockUntil = new Date(Date.now() + LOCK_DURATION_MS);
+    }
+  }
+  await this.save();
+};
+
+userSchema.methods.resetLoginAttempts = async function resetLoginAttempts() {
+  this.loginAttempts = 0;
+  this.lockUntil = undefined;
+  await this.save();
 };
 
 // --- Password reset token (valid 30 minutes) ---

@@ -41,9 +41,19 @@ const issueSession = async (res, user) => {
 authRouter.post("/login", sensitiveLimiter, validate(loginSchema), async (req, res, next) => {
   try {
     const { email, password, role } = req.body;
-    const user = await User.findOne({ email }).select("+password");
+    const user = await User.findOne({ email }).select("+password +loginAttempts +lockUntil");
 
-    if (!user || !(await user.matchPassword(password))) {
+    // Account lockout check
+    if (user?.isLocked()) {
+      return res.status(429).json({
+        message: `Account locked. Try again in ${user.lockMinutesLeft()} minute(s).`
+      });
+    }
+
+    const passwordMatch = user && await user.matchPassword(password);
+
+    if (!user || !passwordMatch) {
+      if (user) await user.incrementLoginAttempts();
       return res.status(401).json({ message: "Invalid email or password." });
     }
 
@@ -54,6 +64,8 @@ authRouter.post("/login", sensitiveLimiter, validate(loginSchema), async (req, r
     if (user.status !== "active") {
       return res.status(403).json({ message: "This account is inactive." });
     }
+
+    await user.resetLoginAttempts();
 
     // Step 2: email a one-time code instead of logging straight in.
     if (twoFactorActive() && user.twoFactorEnabled) {
