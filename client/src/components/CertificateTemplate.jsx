@@ -3,37 +3,35 @@ import { schoolInfo } from "../config/branding.js";
 
 const BLUE  = "#04436E";
 const BLUE2 = "#032D4A";
-const GOLD  = "#8B6914";
+const GOLD  = "#B8960C";
 const CREAM = "#FAF8F0";
 
 const Corner = ({ rotate = 0 }) => (
-  <svg width="64" height="64" viewBox="0 0 80 80"
+  <svg width="58" height="58" viewBox="0 0 72 72"
     style={{ transform:`rotate(${rotate}deg)`, display:"block" }}>
-    <path d="M6,6 L6,36 Q6,40 10,40 L10,10 L40,10 Q40,6 36,6 Z"
-      fill="none" stroke={GOLD} strokeWidth="2.5" />
-    <path d="M6,6 L26,6 Q30,6 30,10 L10,10 Q10,30 6,30 Z"
-      fill={GOLD} opacity="0.12" />
-    <circle cx="6" cy="6" r="3.5" fill={GOLD} />
-    <path d="M18,6 Q22,16 32,6" fill="none" stroke={GOLD} strokeWidth="1.8" />
-    <path d="M6,18 Q16,22 6,32"  fill="none" stroke={GOLD} strokeWidth="1.8" />
-    <circle cx="32" cy="6"  r="2.5" fill={GOLD} opacity="0.7" />
-    <circle cx="6"  cy="32" r="2.5" fill={GOLD} opacity="0.7" />
+    <path d="M5,5 L5,34 Q5,38 9,38 L9,9 L38,9 Q38,5 34,5 Z"
+      fill="none" stroke={BLUE} strokeWidth="2.5" />
+    <path d="M5,5 L24,5 Q28,5 28,9 L9,9 Q9,28 5,28 Z"
+      fill={BLUE} opacity="0.1" />
+    <circle cx="5" cy="5" r="3" fill={BLUE} />
+    <path d="M17,5 Q21,14 30,5"  fill="none" stroke={BLUE} strokeWidth="1.6" opacity="0.7" />
+    <path d="M5,17 Q14,21 5,30"  fill="none" stroke={BLUE} strokeWidth="1.6" opacity="0.7" />
+    <circle cx="30" cy="5" r="2" fill={BLUE} opacity="0.5" />
+    <circle cx="5" cy="30" r="2" fill={BLUE} opacity="0.5" />
   </svg>
 );
 
 const Floral = () => (
-  <svg width="260" height="30" viewBox="0 0 340 30">
-    <path d="M170,15 L160,6 Q170,1 180,6 Z"  fill={GOLD} />
-    <path d="M170,15 L160,24 Q170,29 180,24 Z" fill={GOLD} />
-    <circle cx="170" cy="15" r="3.5" fill={GOLD} />
-    <path d="M12,15 Q85,3 148,15 Q85,27 12,15 Z"  fill="none" stroke={GOLD} strokeWidth="1.4" />
-    <path d="M328,15 Q255,3 192,15 Q255,27 328,15 Z" fill="none" stroke={GOLD} strokeWidth="1.4" />
-    <circle cx="12"  cy="15" r="3" fill={GOLD} />
-    <circle cx="328" cy="15" r="3" fill={GOLD} />
-    <path d="M34,15 Q44,8 54,15 Q44,22 34,15 Z"   fill={GOLD} opacity="0.55" />
-    <path d="M306,15 Q296,8 286,15 Q296,22 306,15 Z" fill={GOLD} opacity="0.55" />
-    <path d="M60,15 Q70,11 80,15 Q70,19 60,15 Z"  fill={GOLD} opacity="0.35" />
-    <path d="M280,15 Q270,11 260,15 Q270,19 280,15 Z" fill={GOLD} opacity="0.35" />
+  <svg width="240" height="22" viewBox="0 0 320 22">
+    <path d="M160,11 L153,4 Q160,0 167,4 Z"  fill={GOLD} />
+    <path d="M160,11 L153,18 Q160,22 167,18 Z" fill={GOLD} />
+    <circle cx="160" cy="11" r="3" fill={GOLD} />
+    <path d="M10,11 Q80,2 138,11 Q80,20 10,11 Z"   fill="none" stroke={GOLD} strokeWidth="1.3" />
+    <path d="M310,11 Q240,2 182,11 Q240,20 310,11 Z" fill="none" stroke={GOLD} strokeWidth="1.3" />
+    <circle cx="10"  cy="11" r="2.5" fill={GOLD} />
+    <circle cx="310" cy="11" r="2.5" fill={GOLD} />
+    <path d="M30,11 Q39,5 48,11 Q39,17 30,11 Z"   fill={GOLD} opacity="0.5" />
+    <path d="M290,11 Q281,5 272,11 Q281,17 290,11 Z" fill={GOLD} opacity="0.5" />
   </svg>
 );
 
@@ -62,150 +60,152 @@ export default function CertificateTemplate({
       <img src="/tfc-logo.png" alt="" style={{
         position:"absolute", top:"50%", left:"50%",
         transform:"translate(-50%,-50%)",
-        width:"140mm", height:"140mm",
+        width:"130mm", height:"130mm",
         objectFit:"contain", opacity:0.05,
         pointerEvents:"none", zIndex:1,
       }} />
 
-      {/* Outer border */}
+      {/* Outer border — BLUE */}
       <div style={{
-        position:"absolute", inset:"6mm",
-        border:`2px solid ${GOLD}`,
+        position:"absolute", inset:"5mm",
+        border:`2.5px solid ${BLUE}`,
         zIndex:2, pointerEvents:"none",
       }} />
 
-      {/* Inner border */}
+      {/* Inner border — BLUE light */}
       <div style={{
-        position:"absolute", inset:"10mm",
-        border:`0.75px solid ${GOLD}70`,
+        position:"absolute", inset:"9mm",
+        border:`1px solid ${BLUE}40`,
         zIndex:2, pointerEvents:"none",
       }} />
 
       {/* Corners */}
-      <div style={{position:"absolute", top:"3.5mm",  left:"3.5mm",  zIndex:3}}><Corner rotate={0}   /></div>
-      <div style={{position:"absolute", top:"3.5mm",  right:"3.5mm", zIndex:3}}><Corner rotate={90}  /></div>
-      <div style={{position:"absolute", bottom:"3.5mm",left:"3.5mm", zIndex:3}}><Corner rotate={270} /></div>
-      <div style={{position:"absolute", bottom:"3.5mm",right:"3.5mm",zIndex:3}}><Corner rotate={180} /></div>
+      <div style={{position:"absolute", top:"3mm",   left:"3mm",   zIndex:3}}><Corner rotate={0}   /></div>
+      <div style={{position:"absolute", top:"3mm",   right:"3mm",  zIndex:3}}><Corner rotate={90}  /></div>
+      <div style={{position:"absolute", bottom:"3mm",left:"3mm",   zIndex:3}}><Corner rotate={270} /></div>
+      <div style={{position:"absolute", bottom:"3mm",right:"3mm",  zIndex:3}}><Corner rotate={180} /></div>
 
-      {/* Content */}
+      {/* ── All content in one tight column ── */}
       <div style={{
         position:"absolute",
-        top:"14mm", left:"18mm", right:"18mm", bottom:"12mm",
+        top:"13mm", left:"16mm", right:"16mm", bottom:"11mm",
         zIndex:4,
         display:"flex", flexDirection:"column",
-        alignItems:"center", justifyContent:"space-between",
+        alignItems:"center",
+        gap:"3.5mm",
         textAlign:"center",
       }}>
 
-        {/* Top ornament */}
+        {/* Floral ornament */}
         <Floral />
 
-        {/* Title block */}
-        <div>
+        {/* CERTIFICAT */}
+        <div style={{ lineHeight:1 }}>
           <div style={{
             fontFamily:"'Cinzel', Georgia, serif",
-            fontSize:"46pt", fontWeight:"900",
-            color: BLUE, letterSpacing:"12px",
-            textTransform:"uppercase", lineHeight:1,
+            fontSize:"42pt", fontWeight:"900",
+            color: BLUE, letterSpacing:"10px",
+            textTransform:"uppercase",
           }}>
             CERTIFICAT
           </div>
           <div style={{
             fontFamily:"'Cinzel', Georgia, serif",
-            fontSize:"12pt", fontWeight:"700",
-            color: GOLD, letterSpacing:"7px",
-            textTransform:"uppercase", marginTop:"2mm",
+            fontSize:"10.5pt", fontWeight:"700",
+            color: GOLD, letterSpacing:"6px",
+            textTransform:"uppercase", marginTop:"1mm",
           }}>
             DE FORMATION PROFESSIONNELLE
           </div>
           <div style={{
             fontFamily:"Georgia, serif",
-            fontSize:"10pt", fontStyle:"italic",
-            color:`${BLUE}88`, letterSpacing:"2px", marginTop:"1mm",
+            fontSize:"9pt", fontStyle:"italic",
+            color:`${BLUE}80`, letterSpacing:"2px", marginTop:"0.5mm",
           }}>
             شهادة تكوين مهني
           </div>
         </div>
 
-        {/* Student section */}
-        <div style={{width:"100%"}}>
-          <div style={{
-            fontFamily:"Georgia, serif",
-            fontSize:"10.5pt", fontStyle:"italic",
-            color:`${BLUE2}99`, letterSpacing:"1px", marginBottom:"3mm",
-          }}>
-            Proudly presented to &nbsp;&nbsp;·&nbsp;&nbsp; يُسعدنا تقديم هذه الشهادة إلى
-          </div>
+        {/* Gold divider */}
+        <div style={{
+          width:"140mm", height:"1px",
+          background:`linear-gradient(to right, transparent, ${GOLD}BB, ${GOLD}BB, transparent)`,
+        }} />
 
-          {/* Student name */}
-          <div style={{
-            fontFamily:"'Dancing Script', cursive",
-            fontSize:"46pt", fontWeight:"700",
-            color: BLUE, lineHeight:1.15,
-            letterSpacing:"1px",
-          }}>
-            {studentName}
-          </div>
-
-          {/* Divider line */}
-          <div style={{
-            margin:"2.5mm auto 4mm",
-            width:"170mm", height:"1px",
-            background:`linear-gradient(to right, transparent, ${GOLD}CC, ${GOLD}CC, transparent)`,
-          }} />
-
-          {/* Description */}
-          <div style={{
-            fontFamily:"Georgia, serif",
-            fontSize:"10.5pt", color:`${BLUE2}CC`,
-            lineHeight:1.9, letterSpacing:"0.2px",
-          }}>
-            Pour avoir complété avec succès et distinction la formation en&nbsp;
-            <strong style={{color:BLUE, fontFamily:"'Cinzel',Georgia,serif", fontSize:"11pt"}}>
-              {courseName}
-            </strong>
-            <br/>
-            <span style={{
-              fontSize:"9.5pt", color:`${BLUE}77`,
-              fontStyle:"italic",
-            }}>
-              إتماماً بنجاح وتفوق برنامج التكوين في هذا التخصص
-            </span>
-          </div>
-
-          {/* Duration / Date / Grade */}
-          <div style={{
-            marginTop:"3mm",
-            fontFamily:"Georgia, serif",
-            fontSize:"9.5pt", fontStyle:"italic",
-            color:`${GOLD}DD`,
-            display:"flex", justifyContent:"center",
-            gap:"8mm", alignItems:"center",
-          }}>
-            <span>Durée :&nbsp;<strong style={{color:BLUE, fontStyle:"normal"}}>{duration}</strong></span>
-            <span style={{color:`${GOLD}50`, fontSize:"8pt"}}>—</span>
-            <span>Date :&nbsp;<strong style={{color:BLUE, fontStyle:"normal"}}>{completionDate}</strong></span>
-            {grade && <>
-              <span style={{color:`${GOLD}50`, fontSize:"8pt"}}>—</span>
-              <span>Mention :&nbsp;<strong style={{color:BLUE, fontStyle:"normal"}}>{grade}</strong></span>
-            </>}
-          </div>
+        {/* Presented to */}
+        <div style={{
+          fontFamily:"Georgia, serif",
+          fontSize:"10pt", fontStyle:"italic",
+          color:`${BLUE2}88`, letterSpacing:"0.5px",
+        }}>
+          Proudly presented to &nbsp;·&nbsp; يُسعدنا تقديم هذه الشهادة إلى
         </div>
 
-        {/* Footer: signature · logo · QR */}
+        {/* Student name */}
         <div style={{
+          fontFamily:"'Dancing Script', cursive",
+          fontSize:"44pt", fontWeight:"700",
+          color: BLUE, lineHeight:1,
+          letterSpacing:"1px",
+        }}>
+          {studentName}
+        </div>
+
+        {/* Line under name */}
+        <div style={{
+          width:"160mm", height:"1px",
+          background:`linear-gradient(to right, transparent, ${GOLD}AA, ${GOLD}AA, transparent)`,
+        }} />
+
+        {/* Description */}
+        <div style={{
+          fontFamily:"Georgia, serif",
+          fontSize:"10pt", color:`${BLUE2}BB`,
+          lineHeight:1.7,
+        }}>
+          Pour avoir complété avec succès la formation en&nbsp;
+          <strong style={{
+            color:BLUE,
+            fontFamily:"'Cinzel', Georgia, serif",
+            fontSize:"10.5pt",
+          }}>
+            {courseName}
+          </strong>
+          <br/>
+          <span style={{fontSize:"9pt", color:`${BLUE}70`, fontStyle:"italic"}}>
+            إتماماً بنجاح برنامج التكوين في هذا التخصص
+          </span>
+        </div>
+
+        {/* Duration · Date · Grade */}
+        <div style={{
+          fontFamily:"Georgia, serif",
+          fontSize:"9.5pt", fontStyle:"italic",
+          color:`${GOLD}CC`,
+          display:"flex", justifyContent:"center",
+          gap:"7mm", alignItems:"center",
+        }}>
+          <span>Durée :&nbsp;<strong style={{color:BLUE, fontStyle:"normal"}}>{duration}</strong></span>
+          <span style={{color:`${GOLD}50`}}>—</span>
+          <span>Date :&nbsp;<strong style={{color:BLUE, fontStyle:"normal"}}>{completionDate}</strong></span>
+          {grade && <>
+            <span style={{color:`${GOLD}50`}}>—</span>
+            <span>Mention :&nbsp;<strong style={{color:BLUE, fontStyle:"normal"}}>{grade}</strong></span>
+          </>}
+        </div>
+
+        {/* Bottom row — fills remaining space */}
+        <div style={{
+          width:"100%", marginTop:"auto",
           display:"flex", alignItems:"flex-end",
-          justifyContent:"space-between", width:"100%",
+          justifyContent:"space-between",
         }}>
           {/* Signature */}
-          <div style={{textAlign:"center", minWidth:"55mm"}}>
-            <div style={{
-              width:"50mm", height:"1px",
-              background:`${GOLD}90`, margin:"0 auto 2.5mm",
-            }} />
+          <div style={{textAlign:"center", minWidth:"52mm"}}>
+            <div style={{width:"48mm", height:"1px", background:`${BLUE}60`, margin:"0 auto 2mm"}} />
             <div style={{
               fontFamily:"'Cinzel', Georgia, serif",
-              fontSize:"9.5pt", fontWeight:"700", color:BLUE,
+              fontSize:"9pt", fontWeight:"700", color:BLUE,
             }}>
               {directorName}
             </div>
@@ -220,14 +220,14 @@ export default function CertificateTemplate({
           {/* Center logo */}
           <div style={{textAlign:"center"}}>
             <img src="/tfc-logo.png" alt="TFC" style={{
-              width:"16mm", height:"16mm",
-              objectFit:"contain", opacity:0.75,
+              width:"15mm", height:"15mm",
+              objectFit:"contain", opacity:0.7,
               marginBottom:"1.5mm",
             }} />
             <div style={{
               fontFamily:"'Cinzel', Georgia, serif",
-              fontSize:"7.5pt", fontWeight:"700",
-              color:`${BLUE}88`, letterSpacing:"3px",
+              fontSize:"7pt", fontWeight:"700",
+              color:`${BLUE}80`, letterSpacing:"3px",
             }}>
               TFC &nbsp;·&nbsp; ANNABA
             </div>
@@ -236,33 +236,33 @@ export default function CertificateTemplate({
           {/* QR */}
           <div style={{textAlign:"center", minWidth:"28mm"}}>
             {qrDataUrl ? (
-              <img src={qrDataUrl} alt="QR Verification"
-                style={{width:"22mm", height:"22mm",
-                  border:`1px solid ${GOLD}60`, borderRadius:"1mm"}} />
+              <img src={qrDataUrl} alt="QR"
+                style={{width:"20mm", height:"20mm",
+                  border:`1px solid ${BLUE}40`, borderRadius:"1mm"}} />
             ) : (
               <div style={{
-                width:"22mm", height:"22mm",
-                border:`1.5px dashed ${GOLD}80`, borderRadius:"1mm",
+                width:"20mm", height:"20mm",
+                border:`1.5px dashed ${BLUE}60`, borderRadius:"1mm",
                 display:"flex", alignItems:"center", justifyContent:"center",
-                fontSize:"6.5pt", color:`${GOLD}AA`,
+                fontSize:"6.5pt", color:`${BLUE}70`,
                 fontFamily:"Georgia, serif", fontStyle:"italic",
-                background:`${GOLD}08`,
+                background:`${BLUE}06`,
               }}>
                 QR Code
               </div>
             )}
             {verifyCode && (
               <div style={{
-                fontSize:"5pt", color:`${GOLD}99`,
+                fontSize:"5pt", color:`${BLUE}70`,
                 marginTop:"1mm", letterSpacing:"0.5px",
                 fontFamily:"Georgia, serif",
               }}>
-                {verifyCode.slice(0,14).toUpperCase()}
+                {verifyCode.slice(0,16).toUpperCase()}
               </div>
             )}
             <div style={{
-              fontSize:"6pt", color:`${BLUE}60`,
-              marginTop:"0.5mm", fontStyle:"italic",
+              fontSize:"5.5pt", color:`${BLUE}55`,
+              marginTop:"0.3mm", fontStyle:"italic",
               fontFamily:"Georgia, serif",
             }}>
               Vérification d'authenticité
