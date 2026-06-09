@@ -151,13 +151,13 @@ const aboutStatColors = [
 ];
 
 const contactItems = [
-  { icon: Mail,      color: "from-brand-500 to-brand-700",  value: schoolInfo.email,     href: `mailto:${schoolInfo.email}` },
-  { icon: Phone,     color: "from-brand-500 to-emerald-600",value: schoolInfo.phones[0], href: `tel:${schoolInfo.phones[0].replace(/\s/g,"")}` },
-  { icon: Phone,     color: "from-brand-500 to-emerald-600",value: schoolInfo.phones[1], href: `tel:${schoolInfo.phones[1].replace(/\s/g,"")}` },
-  { icon: MapPin,    color: "from-rose-500 to-red-600",     value: schoolInfo.address,   href: "https://maps.app.goo.gl/uUdRPCDM8krT7iJW7" },
-  { icon: Instagram, color: "from-pink-500 to-rose-600",    value: "@tfc.annaba",        href: "https://www.instagram.com/tfc.annaba?igsh=NW0wa2o2NWVsb3pv" },
-  { icon: Facebook,  color: "from-blue-600 to-blue-800",    value: "TFC Annaba",         href: "https://www.facebook.com/share/1Cqnoy2Pm8/" }
-];
+  { icon: Mail,      color: "from-brand-500 to-brand-700",   value: schoolInfo.email,     href: `mailto:${schoolInfo.email}` },
+  { icon: Phone,     color: "from-brand-500 to-emerald-600", value: schoolInfo.phones[0], href: `tel:${schoolInfo.phones[0]?.replace(/\s/g,"")}` },
+  { icon: Phone,     color: "from-brand-500 to-emerald-600", value: schoolInfo.phones[1], href: `tel:${schoolInfo.phones[1]?.replace(/\s/g,"")}` },
+  { icon: MapPin,    color: "from-rose-500 to-red-600",      value: schoolInfo.address,   href: schoolInfo.mapsUrl },
+  { icon: Instagram, color: "from-pink-500 to-rose-600",     value: schoolInfo.instagram?.split("instagram.com/")[1]?.split("?")[0] || "Instagram", href: schoolInfo.instagram },
+  { icon: Facebook,  color: "from-blue-600 to-blue-800",     value: schoolInfo.name,      href: schoolInfo.facebook },
+].filter(item => item.value && item.href);
 
 const LANGS = [
   { code: "ar", label: "عربي" },
@@ -180,10 +180,10 @@ export default function LandingPage() {
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-6 py-4">
           {/* Logo */}
           <div className="flex items-center gap-3">
-            <img src={schoolLogo} alt="TFC" className="h-10 w-10 rounded-xl object-contain ring-1 ring-brand-100 dark:ring-slate-700" />
-            <div>
-              <p className="text-sm font-bold text-slate-900 dark:text-white leading-tight">TFC School</p>
-              <p className="text-xs text-brand-600 dark:text-brand-400">Training Formation Center</p>
+            <img src={schoolLogo} alt={schoolInfo.short} className="h-10 w-auto max-w-[120px] rounded-xl object-contain ring-1 ring-brand-100 dark:ring-slate-700" />
+            <div className="hidden sm:block">
+              <p className="text-sm font-bold text-slate-900 dark:text-white leading-tight">{schoolInfo.short} School</p>
+              <p className="text-xs text-brand-600 dark:text-brand-400">{schoolInfo.name}</p>
             </div>
           </div>
 
@@ -228,8 +228,8 @@ export default function LandingPage() {
 
         <div className="relative mx-auto max-w-6xl px-6 text-center">
           {/* Logo */}
-          <div className="mx-auto mb-8 flex h-28 w-28 items-center justify-center rounded-3xl bg-white dark:bg-slate-800 ring-4 ring-brand-200 dark:ring-slate-600 shadow-xl">
-            <img src={schoolLogo} alt="TFC" className="h-20 w-20 rounded-2xl object-contain" />
+          <div className="mx-auto mb-8 flex h-28 w-56 items-center justify-center rounded-3xl bg-white dark:bg-slate-800 ring-4 ring-brand-200 dark:ring-slate-600 shadow-xl px-4">
+            <img src={schoolLogo} alt={schoolInfo.short} className="h-20 w-full object-contain" />
           </div>
 
           <p className="text-sm font-bold uppercase tracking-[0.3em] text-brand-600 dark:text-brand-400">{t.hero.welcome}</p>
@@ -339,19 +339,23 @@ export default function LandingPage() {
       {/* ── Footer ── */}
       <footer className="bg-gradient-to-br from-brand-600 to-brand-800 py-10 text-center text-white">
         <div className="mx-auto max-w-6xl px-6 flex flex-col items-center gap-4">
-          <img src={schoolLogo} alt="TFC" className="h-14 w-14 rounded-2xl bg-white/90 object-contain p-1 shadow-sm" />
-          <p className="text-lg font-black">Training Formation Center</p>
+          <img src={schoolLogo} alt={schoolInfo.short} className="h-14 w-auto max-w-[160px] rounded-2xl bg-white/90 object-contain p-2 shadow-sm" />
+          <p className="text-lg font-black">{schoolInfo.name}</p>
           <p className="text-brand-200 text-sm">{schoolInfo.tagline}</p>
           <div className="flex gap-3">
-            <a href="https://www.instagram.com/tfc.annaba?igsh=NW0wa2o2NWVsb3pv" target="_blank" rel="noopener noreferrer" className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/20 hover:bg-white/30 transition">
-              <Instagram className="h-5 w-5" />
-            </a>
-            <a href="https://www.facebook.com/share/1Cqnoy2Pm8/" target="_blank" rel="noopener noreferrer" className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/20 hover:bg-white/30 transition">
-              <Facebook className="h-5 w-5" />
-            </a>
+            {schoolInfo.instagram && (
+              <a href={schoolInfo.instagram} target="_blank" rel="noopener noreferrer" className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/20 hover:bg-white/30 transition">
+                <Instagram className="h-5 w-5" />
+              </a>
+            )}
+            {schoolInfo.facebook && (
+              <a href={schoolInfo.facebook} target="_blank" rel="noopener noreferrer" className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/20 hover:bg-white/30 transition">
+                <Facebook className="h-5 w-5" />
+              </a>
+            )}
           </div>
           <div className="mt-2 border-t border-white/20 pt-4 w-full">
-            <p className="text-xs text-brand-200/70">© {new Date().getFullYear()} TFC — Training Formation Center · All rights reserved.</p>
+            <p className="text-xs text-brand-200/70">© {new Date().getFullYear()} {schoolInfo.short} — {schoolInfo.name} · All rights reserved.</p>
           </div>
         </div>
       </footer>
