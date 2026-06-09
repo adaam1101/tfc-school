@@ -171,7 +171,7 @@ export default function LandingPage() {
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-6 py-4">
           {/* Logo */}
           <div className="flex items-center gap-3">
-            <img src={schoolLogo} alt={schoolInfo.short} className="h-12 w-auto max-w-[150px] rounded-xl object-contain ring-1 ring-brand-100 dark:ring-slate-700" />
+            <img src={schoolLogo} alt={schoolInfo.short} className="h-14 w-auto max-w-[180px] object-contain" />
             <div className="hidden sm:block">
               <p className="text-sm font-bold text-slate-900 dark:text-white leading-tight">{schoolInfo.short} School</p>
               <p className="text-xs text-brand-600 dark:text-brand-400">{schoolInfo.name}</p>
@@ -219,8 +219,8 @@ export default function LandingPage() {
 
         <div className="relative mx-auto max-w-6xl px-6 text-center">
           {/* Logo */}
-          <div className="mx-auto mb-8 flex h-28 w-56 items-center justify-center rounded-3xl bg-white dark:bg-slate-800 ring-4 ring-brand-200 dark:ring-slate-600 shadow-xl p-2">
-            <img src={schoolLogo} alt={schoolInfo.short} className="h-full w-full object-contain" />
+          <div className="mx-auto mb-8 flex items-center justify-center">
+            <img src={schoolLogo} alt={schoolInfo.short} className="h-32 w-auto max-w-[320px] object-contain drop-shadow-xl" />
           </div>
 
           <p className="text-sm font-bold uppercase tracking-[0.3em] text-brand-600 dark:text-brand-400">{t.hero.welcome}</p>
