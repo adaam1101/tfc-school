@@ -16,6 +16,12 @@ export const schoolInfo = {
   facebook:    import.meta.env.VITE_SCHOOL_FACEBOOK    || "https://www.facebook.com/share/1Cqnoy2Pm8/",
   mapsUrl:     import.meta.env.VITE_SCHOOL_MAPS        || "https://maps.app.goo.gl/uUdRPCDM8krT7iJW7",
   credit:      import.meta.env.VITE_SCHOOL_CREDIT      || "Developed by TFC IT Team",
+  heroLine1:   import.meta.env.VITE_HERO_LINE1         || "Training Formation",
+  heroLine2:   import.meta.env.VITE_HERO_LINE2         || "Center",
+  statStudents: import.meta.env.VITE_STAT_STUDENTS     || "200+",
+  statTeachers: import.meta.env.VITE_STAT_TEACHERS     || "15+",
+  statCourses:  import.meta.env.VITE_STAT_COURSES      || "27+",
+  statYears:    import.meta.env.VITE_STAT_YEARS        || "10+",
 };
 
 /* Brand color scale — set per school in Render env vars */

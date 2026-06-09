@@ -14,21 +14,18 @@ const translations = {
     nav: { about: "About", contact: "Contact" },
     hero: {
       welcome: "Welcome to",
-      title1: "Training Formation",
-      title2: "Center",
-      tagline: "Annaba's premier educational institution dedicated to academic excellence and professional growth.",
+      tagline: "Premier educational institution dedicated to academic excellence and professional growth.",
       btn: "Register Now"
     },
     about: {
-      label: "About TFC",
+      labelPrefix: "About",
       title: "Building Futures in",
       city: "Annaba",
-      desc: "TFC — Training Formation Center is a premier private educational institution located in the heart of Annaba, Algeria. We offer a diverse range of programs including English language courses, computer skills, and career-focused certifications — taught by expert educators in a warm, student-centered environment.",
       stats: [
-        { label: "Active students", value: "200+" },
-        { label: "Expert teachers", value: "15+" },
-        { label: "Courses offered", value: "27+" },
-        { label: "Years of excellence", value: "10+" }
+        { label: "Active students" },
+        { label: "Expert teachers" },
+        { label: "Courses offered" },
+        { label: "Years of excellence" }
       ]
     },
     contact: {
@@ -56,21 +53,18 @@ const translations = {
     nav: { about: "À propos", contact: "Contact" },
     hero: {
       welcome: "Bienvenue à",
-      title1: "Training Formation",
-      title2: "Center",
-      tagline: "L'institution éducative de référence à Annaba, dédiée à l'excellence académique et au développement professionnel.",
+      tagline: "L'institution éducative de référence, dédiée à l'excellence académique et au développement professionnel.",
       btn: "S'inscrire maintenant"
     },
     about: {
-      label: "À propos de TFC",
+      labelPrefix: "À propos de",
       title: "Construire l'avenir à",
       city: "Annaba",
-      desc: "TFC — Training Formation Center est un établissement privé de premier plan situé au cœur d'Annaba. Nous proposons des cours d'anglais, d'informatique et des certifications professionnelles — enseignés par des experts dans un environnement chaleureux et centré sur l'élève.",
       stats: [
-        { label: "Élèves actifs", value: "200+" },
-        { label: "Enseignants experts", value: "15+" },
-        { label: "Cours proposés", value: "27+" },
-        { label: "Années d'excellence", value: "10+" }
+        { label: "Élèves actifs" },
+        { label: "Enseignants experts" },
+        { label: "Cours proposés" },
+        { label: "Années d'excellence" }
       ]
     },
     contact: {
@@ -98,21 +92,18 @@ const translations = {
     nav: { about: "من نحن", contact: "اتصل بنا" },
     hero: {
       welcome: "مرحباً بكم في",
-      title1: "مركز التدريب",
-      title2: "والتكوين",
-      tagline: "المؤسسة التعليمية الرائدة في عنابة، ملتزمة بالتميز الأكاديمي والنمو المهني.",
+      tagline: "المؤسسة التعليمية الرائدة، ملتزمة بالتميز الأكاديمي والنمو المهني.",
       btn: "سجّل الآن"
     },
     about: {
-      label: "من نحن",
+      labelPrefix: "عن",
       title: "نبني المستقبل في",
       city: "عنابة",
-      desc: "TFC — مركز التدريب والتكوين مؤسسة تعليمية خاصة متميزة في قلب عنابة. نقدم دورات اللغة الإنجليزية والإعلام الآلي والشهادات المهنية — بأساتذة متخصصين في بيئة دافئة تُحتضن فيها كل المواهب.",
       stats: [
-        { label: "طالب نشط", value: "+200" },
-        { label: "أستاذ متخصص", value: "+15" },
-        { label: "دورة متاحة", value: "+27" },
-        { label: "سنة من التميز", value: "+10" }
+        { label: "طالب نشط" },
+        { label: "أستاذ متخصص" },
+        { label: "دورة متاحة" },
+        { label: "سنة من التميز" }
       ]
     },
     contact: {
@@ -234,9 +225,9 @@ export default function LandingPage() {
 
           <p className="text-sm font-bold uppercase tracking-[0.3em] text-brand-600 dark:text-brand-400">{t.hero.welcome}</p>
           <h1 className="mt-3 text-5xl font-black leading-tight sm:text-6xl lg:text-7xl">
-            {t.hero.title1}
+            {schoolInfo.heroLine1}
             <br />
-            <span className="bg-gradient-to-r from-brand-500 to-brand-700 bg-clip-text text-transparent">{t.hero.title2}</span>
+            <span className="bg-gradient-to-r from-brand-500 to-brand-700 bg-clip-text text-transparent">{schoolInfo.heroLine2}</span>
           </h1>
           <p className="mx-auto mt-6 max-w-xl text-lg text-slate-600 dark:text-slate-400 leading-relaxed">{t.hero.tagline}</p>
 
@@ -276,22 +267,23 @@ export default function LandingPage() {
         <div className="mx-auto max-w-6xl px-6">
           <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
             <div>
-              <p className="text-sm font-bold uppercase tracking-widest text-brand-600 dark:text-brand-400">{t.about.label}</p>
+              <p className="text-sm font-bold uppercase tracking-widest text-brand-600 dark:text-brand-400">{t.about.labelPrefix} {schoolInfo.short}</p>
               <h2 className="mt-3 text-4xl font-black text-slate-900 dark:text-slate-100">
                 {t.about.title}<span className="text-brand-600 dark:text-brand-400"> {t.about.city}</span>
               </h2>
-              <p className="mt-5 text-lg text-slate-600 dark:text-slate-400 leading-relaxed">{t.about.desc}</p>
+              <p className="mt-5 text-lg text-slate-600 dark:text-slate-400 leading-relaxed">{schoolInfo.description}</p>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              {t.about.stats.map(({ label, value }, i) => {
+              {t.about.stats.map(({ label }, i) => {
                 const Icon = aboutStatIcons[i];
+                const statValues = [schoolInfo.statStudents, schoolInfo.statTeachers, schoolInfo.statCourses, schoolInfo.statYears];
                 return (
                   <div key={label} className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-6 text-center shadow-sm">
                     <div className={`mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br ${aboutStatColors[i]} shadow-sm`}>
                       <Icon className="h-6 w-6 text-white" />
                     </div>
-                    <p className="text-3xl font-black text-slate-900 dark:text-slate-100">{value}</p>
+                    <p className="text-3xl font-black text-slate-900 dark:text-slate-100">{statValues[i]}</p>
                     <p className="mt-1 text-xs font-medium text-slate-500 dark:text-slate-400">{label}</p>
                   </div>
                 );
