@@ -15,7 +15,7 @@ export default function IDCardModal({ user, student, onClose }) {
   const profile = (isTeacher ? person?.teacherProfile : person?.studentProfile) || {};
   const initials = person?.name?.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase() || "?";
   const idNumber = (person?._id || "").toString().slice(-6).toUpperCase();
-  const idPrefix = isTeacher ? "TFC-T" : "TFC-S";
+  const idPrefix = isTeacher ? `${schoolInfo.short}-T` : `${schoolInfo.short}-S`;
   const roleLabel = isTeacher ? "Staff Identity Card" : "Student Identity Card";
   const courseOrSubject = isTeacher ? profile.subject : profile.course;
   const courseLabel = isTeacher ? "Subject" : "Course";
@@ -32,7 +32,7 @@ export default function IDCardModal({ user, student, onClose }) {
     win.document.write(`
       <html>
         <head>
-          <title>TFC ID — ${person?.name || ""}</title>
+          <title>${schoolInfo.short} ID — ${person?.name || ""}</title>
           <script src="https://cdn.tailwindcss.com"></script>
           <style>
             * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
@@ -95,7 +95,7 @@ export default function IDCardModal({ user, student, onClose }) {
 
             {/* Header: logo + school name */}
             <div className="relative flex items-center gap-3 border-b border-brand-200 px-5 py-3">
-              <img src={schoolLogo} alt="TFC" className="h-11 w-11 rounded-lg bg-white/80 object-contain shadow-sm ring-1 ring-brand-200" />
+              <img src={schoolLogo} alt={schoolInfo.short} className="h-11 w-11 rounded-lg bg-white/80 object-contain shadow-sm ring-1 ring-brand-200" />
               <div>
                 <p className="text-sm font-black leading-tight text-brand-900">{schoolInfo.name}</p>
                 <p className="text-[10px] uppercase tracking-widest text-brand-600">{roleLabel}</p>

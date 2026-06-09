@@ -43,7 +43,7 @@ export default function EnrollModal({ onClose }) {
         <div className="sticky top-0 flex items-center justify-between bg-gradient-to-r from-brand-600 to-emerald-700 px-6 py-4 text-white">
           <h2 className="flex items-center gap-2 text-lg font-black">
             <GraduationCap className="h-5 w-5" />
-            Apply to TFC
+            Apply to {schoolInfo.short}
           </h2>
           <button onClick={onClose} className="rounded-lg p-1.5 transition hover:bg-white/20">
             <X className="h-5 w-5" />
@@ -55,14 +55,14 @@ export default function EnrollModal({ onClose }) {
             <CheckCircle2 className="h-16 w-16 text-emerald-500 animate-success-pop" />
             <h3 className="mt-4 text-xl font-black text-slate-900">Application sent! 🎉</h3>
             <p className="mt-2 max-w-sm text-sm text-slate-500">
-              Thank you for your interest in TFC. Our team will contact you soon at the number you provided.
+              Thank you for your interest in {schoolInfo.short}. Our team will contact you soon at the number you provided.
             </p>
             <button onClick={onClose} className="btn-primary mt-6">Done</button>
           </div>
         ) : (
           <form className="grid gap-4 p-6" onSubmit={submit}>
             <p className="text-sm text-slate-500">
-              Fill in the form and the TFC team will reach out. Fields marked * are required.
+              Fill in the form and the {schoolInfo.short} team will reach out. Fields marked * are required.
             </p>
 
             {error && (

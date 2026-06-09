@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Megaphone, Pin } from "lucide-react";
 import { api } from "../api/http.js";
+import { schoolInfo } from "../config/branding.js";
 
 const audienceBadge = {
   all: "bg-slate-100 text-slate-600",
@@ -28,7 +29,7 @@ export default function AnnouncementsCard() {
         </div>
         <div>
           <h2 className="text-lg font-bold">Announcements</h2>
-          <p className="text-sm text-slate-500">Latest news from TFC</p>
+          <p className="text-sm text-slate-500">Latest news from {schoolInfo.short}</p>
         </div>
       </div>
 

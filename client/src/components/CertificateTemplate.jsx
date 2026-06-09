@@ -57,7 +57,7 @@ export default function CertificateTemplate({
       }}
     >
       {/* Watermark */}
-      <img src="/tfc-logo.png" alt="" style={{
+      <img src={schoolInfo.logo || "/tfc-logo.png"} alt="" style={{
         position:"absolute", top:"50%", left:"50%",
         transform:"translate(-50%,-50%)",
         width:"130mm", height:"130mm",
@@ -219,7 +219,7 @@ export default function CertificateTemplate({
 
           {/* Center logo */}
           <div style={{textAlign:"center"}}>
-            <img src="/tfc-logo.png" alt="TFC" style={{
+            <img src={schoolInfo.logo || "/tfc-logo.png"} alt={schoolInfo.short} style={{
               width:"15mm", height:"15mm",
               objectFit:"contain", opacity:0.7,
               marginBottom:"1.5mm",
@@ -229,7 +229,7 @@ export default function CertificateTemplate({
               fontSize:"7pt", fontWeight:"700",
               color:`${BLUE}80`, letterSpacing:"3px",
             }}>
-              TFC &nbsp;·&nbsp; ANNABA
+              {schoolInfo.short} &nbsp;·&nbsp; {schoolInfo.city.split(",")[0].toUpperCase()}
             </div>
           </div>
 

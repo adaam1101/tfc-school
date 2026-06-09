@@ -24,7 +24,7 @@ export default function AppLayout({ title, subtitle, children, fullHeight = fals
           <Link to={`/${user?.role || "admin"}`} className="group flex items-center gap-3">
             <img src={schoolLogo} alt={schoolInfo.short} className="h-10 w-auto max-w-[120px] rounded-xl object-contain ring-2 ring-slate-100 transition group-hover:ring-brand-200 dark:ring-slate-700" />
             <div className="hidden sm:block">
-              <p className="text-sm font-black leading-tight tracking-tight">TFC School</p>
+              <p className="text-sm font-black leading-tight tracking-tight">{schoolInfo.short} School</p>
               <p className="text-xs text-slate-500 dark:text-slate-400">{schoolInfo.city}</p>
             </div>
           </Link>
@@ -72,7 +72,7 @@ export default function AppLayout({ title, subtitle, children, fullHeight = fals
       {!fullHeight && (
         <footer className="border-t border-slate-200 bg-white/60 py-5 text-center backdrop-blur-sm dark:border-slate-700 dark:bg-slate-900/60">
           <div className="mx-auto max-w-7xl px-6">
-            <p className="text-xs text-slate-400">© {new Date().getFullYear()} TFC — Training Formation Center · {schoolInfo.address}</p>
+            <p className="text-xs text-slate-400">© {new Date().getFullYear()} {schoolInfo.short} — {schoolInfo.name} · {schoolInfo.address}</p>
             <p className="mt-0.5 text-xs text-slate-300 dark:text-slate-600">{schoolInfo.credit}</p>
           </div>
         </footer>

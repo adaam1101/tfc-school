@@ -11,31 +11,31 @@ const roleConfig = {
     title: "Admin Portal",
     subtitle: "Authorized personnel only",
     icon: ShieldCheck,
-    placeholder: "admin@tfcschool.dz"
+    placeholder: `admin@${(import.meta.env.VITE_SCHOOL_SHORT || "tfc").toLowerCase()}school.dz`
   },
   "sous-admin": {
     title: "Sous-Admin Portal",
     subtitle: "Gestion des utilisateurs",
     icon: UserRound,
-    placeholder: "sousadmin@tfcschool.dz"
+    placeholder: `sousadmin@${(import.meta.env.VITE_SCHOOL_SHORT || "tfc").toLowerCase()}school.dz`
   },
   moderator: {
     title: "Moderator Portal",
     subtitle: "Gestion des inscriptions",
     icon: ShieldCheck,
-    placeholder: "moderator@tfcschool.dz"
+    placeholder: `moderator@${(import.meta.env.VITE_SCHOOL_SHORT || "tfc").toLowerCase()}school.dz`
   },
   teacher: {
     title: "Teacher Portal",
     subtitle: "Welcome back, educator",
     icon: GraduationCap,
-    placeholder: "teacher@tfcschool.dz"
+    placeholder: `teacher@${(import.meta.env.VITE_SCHOOL_SHORT || "tfc").toLowerCase()}school.dz`
   },
   student: {
     title: "Student Portal",
     subtitle: "Ready to learn today?",
     icon: UserRound,
-    placeholder: "student@tfcschool.dz"
+    placeholder: `student@${(import.meta.env.VITE_SCHOOL_SHORT || "tfc").toLowerCase()}school.dz`
   }
 };
 
@@ -123,7 +123,7 @@ export default function LoginPage({ role }) {
           <div className="p-8">
             {/* School identity */}
             <div className="mb-8 flex items-center gap-3">
-              <img src={schoolLogo} alt="TFC" className="h-10 w-10 rounded-xl object-contain ring-1 ring-brand-100" />
+              <img src={schoolLogo} alt={schoolInfo.short} className="h-10 w-10 rounded-xl object-contain ring-1 ring-brand-100" />
               <div>
                 <p className="text-sm font-bold text-slate-900">{schoolInfo.name}</p>
                 <p className="text-xs text-slate-500">{schoolInfo.city}</p>

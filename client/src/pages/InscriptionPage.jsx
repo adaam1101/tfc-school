@@ -42,7 +42,7 @@ const T = {
   fr: {
     dir: "ltr",
     title: "Inscription à une formation",
-    subtitle: "Training Formation Center — Annaba",
+    subtitle: `${schoolInfo.name} — ${schoolInfo.city}`,
     fullname: "Nom complet",
     fullnamePh: "Entrez votre nom complet",
     gender: "Genre",
@@ -302,7 +302,7 @@ export default function InscriptionPage() {
 
         {/* Footer */}
         <div className="border-t border-brand-100 bg-brand-50/60 px-6 py-3 text-center text-xs text-slate-400">
-          TFC Training Formation Center · Annaba, Algérie · +213 561 502 098
+          {schoolInfo.short} {schoolInfo.name} · {schoolInfo.city} · {schoolInfo.phones[0]}
         </div>
       </div>
     </div>

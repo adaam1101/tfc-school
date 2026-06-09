@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { X, MessageSquareText, Send } from "lucide-react";
 import { api, getApiError } from "../api/http.js";
+import { schoolInfo } from "../config/branding.js";
 import StarRating from "./StarRating.jsx";
 
 export default function RatingModal({ onClose }) {
@@ -34,7 +35,7 @@ export default function RatingModal({ onClose }) {
       <div className="w-full max-w-md animate-success-pop rounded-2xl bg-white p-8 shadow-2xl">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <h2 className="text-xl font-bold text-slate-900">Rate TFC School</h2>
+            <h2 className="text-xl font-bold text-slate-900">Rate {schoolInfo.short} School</h2>
             <p className="mt-0.5 text-sm text-slate-500">Your feedback helps us improve</p>
           </div>
           <button onClick={onClose} className="rounded-xl border border-slate-200 p-2 text-slate-400 transition hover:bg-slate-100">
@@ -56,7 +57,7 @@ export default function RatingModal({ onClose }) {
             </div>
             <label className="field mt-6">
               <span className="flex items-center gap-2"><MessageSquareText className="h-4 w-4 text-slate-400" />Comment (optional)</span>
-              <textarea className="input min-h-[90px] resize-none" value={comment} onChange={(e) => setComment(e.target.value.slice(0, 300))} placeholder="Share your experience with TFC…" maxLength={300} />
+              <textarea className="input min-h-[90px] resize-none" value={comment} onChange={(e) => setComment(e.target.value.slice(0, 300))} placeholder={`Share your experience with ${schoolInfo.short}…`} maxLength={300} />
               <span className="text-right text-xs text-slate-400">{comment.length}/300</span>
             </label>
             {error && <p className="mt-3 rounded-xl border border-rose-200 bg-rose-50 px-4 py-2.5 text-sm text-rose-700">{error}</p>}

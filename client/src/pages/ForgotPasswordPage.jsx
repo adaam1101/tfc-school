@@ -52,7 +52,7 @@ export default function ForgotPasswordPage() {
 
           <div className="p-8">
             <div className="mb-8 flex items-center gap-3">
-              <img src={schoolLogo} alt="TFC" className="h-10 w-10 rounded-xl object-contain ring-1 ring-brand-100" />
+              <img src={schoolLogo} alt={schoolInfo.short} className="h-10 w-10 rounded-xl object-contain ring-1 ring-brand-100" />
               <div>
                 <p className="text-sm font-bold text-slate-900">{schoolInfo.name}</p>
                 <p className="text-xs text-slate-500">{schoolInfo.city}</p>

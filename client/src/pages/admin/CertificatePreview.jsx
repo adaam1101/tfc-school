@@ -1,5 +1,6 @@
 import React, { useRef } from "react";
 import CertificateTemplate from "../../components/CertificateTemplate.jsx";
+import { schoolInfo } from "../../config/branding.js";
 
 const FONTS_URL =
   "https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Cinzel:wght@400;700;900&display=swap";
@@ -15,7 +16,7 @@ export default function CertificatePreview() {
       <html>
         <head>
           <meta charset="UTF-8" />
-          <title>Certificat TFC</title>
+          <title>Certificat ${schoolInfo.short}</title>
           <link rel="preconnect" href="https://fonts.googleapis.com" />
           <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
           <link href="${FONTS_URL}" rel="stylesheet" />
@@ -69,9 +70,9 @@ export default function CertificatePreview() {
             courseName="Informatique & Bureautique"
             duration="6 mois"
             completionDate="Juin 2026"
-            directorName="M. Directeur TFC"
+            directorName={`M. Directeur ${schoolInfo.short}`}
             grade="Très Bien"
-            verifyCode="TFC-2026-ADM-0042"
+            verifyCode={`${schoolInfo.short}-2026-ADM-0042`}
           />
         </div>
       </div>
