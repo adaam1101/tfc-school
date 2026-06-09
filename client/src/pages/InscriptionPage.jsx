@@ -157,7 +157,7 @@ export default function InscriptionPage() {
 
         {/* Header */}
         <div className="bg-gradient-to-r from-brand-700 to-brand-500 px-6 py-6 text-white text-center">
-          <img src={schoolLogo} alt="TFC"
+          <img src={schoolLogo} alt={schoolInfo.short}
                className="mx-auto mb-3 h-16 w-16 rounded-2xl bg-white/20 object-contain p-1 ring-2 ring-white/40" />
           <h1 className="text-xl font-black">{t.title}</h1>
           <p className="mt-1 text-sm text-brand-200">{t.subtitle}</p>

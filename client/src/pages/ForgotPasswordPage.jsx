@@ -86,7 +86,7 @@ export default function ForgotPasswordPage() {
                         type="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        placeholder="you@tfcschool.dz"
+                        placeholder={`you@${(import.meta.env.VITE_SCHOOL_SHORT || "tfc").toLowerCase()}school.dz`}
                         className="w-full rounded-2xl border border-brand-200 bg-brand-50/60 py-3.5 pl-11 pr-4 text-sm text-slate-900 placeholder-slate-400 outline-none transition focus:border-brand-400 focus:bg-white focus:ring-2 focus:ring-brand-200"
                         required
                         autoComplete="email"

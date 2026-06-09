@@ -47,7 +47,7 @@ export const sendEmail = async ({ to, subject, text }) => {
   }
   await sendViaSendGrid({
     personalizations: [{ to: [{ email: to }] }],
-    from:    { email: process.env.SMTP_USER, name: "TFC School" },
+    from:    { email: process.env.SMTP_USER, name: process.env.SCHOOL_NAME || "TFC School" },
     subject,
     content: [{ type: "text/plain", value: text }]
   });
@@ -56,7 +56,7 @@ export const sendEmail = async ({ to, subject, text }) => {
 export const sendTwoFactorCode = async ({ user, code }) => {
   await sendEmail({
     to: user.email,
-    subject: "Your TFC School login code",
+    subject: `Your ${process.env.SCHOOL_NAME || "TFC School"} login code`,
     text: `Hello ${user.name},\n\nYour verification code is: ${code}\n\nIt expires in 10 minutes.`
   });
 };
@@ -64,7 +64,7 @@ export const sendTwoFactorCode = async ({ user, code }) => {
 export const sendPasswordResetEmail = async ({ user, resetUrl }) => {
   await sendEmail({
     to: user.email,
-    subject: "Reset your TFC School password",
+    subject: `Reset your ${process.env.SCHOOL_NAME || "TFC School"} password`,
     text: `Hello ${user.name},\n\nClick the link below to reset your password:\n${resetUrl}\n\nThis link expires in 30 minutes.`
   });
 };
@@ -92,8 +92,8 @@ export const sendAbsenceNotification = async ({ student, teacher, attendance }) 
         `Nous vous conseillons de nous contacter pour la justification de cette absence.`,
         "",
         `Merci pour votre confiance.`,
-        `📞 +213 561 502 098`,
-        `🏫 TFC Training Formation Center — Annaba`,
+        `📞 ${process.env.SCHOOL_PHONE || "+213 561 502 098"}`,
+        `🏫 ${process.env.SCHOOL_NAME || "TFC Training Formation Center"}`,
         "",
         "──────────────────────────",
         "",
@@ -103,14 +103,14 @@ export const sendAbsenceNotification = async ({ student, teacher, attendance }) 
         `ننصحكم بالتواصل معنا لتبرير هذا الغياب.`,
         "",
         `شكراً على ثقتكم.`,
-        `📞 +213 561 502 098`,
-        `🏫 مركز التدريب والتكوين TFC — عنابة`
+        `📞 ${process.env.SCHOOL_PHONE || "+213 561 502 098"}`,
+        `🏫 ${process.env.SCHOOL_NAME || "TFC — Training Formation Center"}`
       ].filter(Boolean).join("\n");
 
       await sendViaSendGrid({
         personalizations: [{ to: [{ email: parentEmail, name: parentName }] }],
-        from:    { email: process.env.SMTP_USER, name: "TFC School" },
-        subject: `🏫 TFC — Absence de ${student.name} — ${date}`,
+        from:    { email: process.env.SMTP_USER, name: process.env.SCHOOL_NAME || "TFC School" },
+        subject: `🏫 ${process.env.SCHOOL_SHORT || "TFC"} — Absence de ${student.name} — ${date}`,
         content: [{ type: "text/plain", value: text }]
       });
       emailSent = true;

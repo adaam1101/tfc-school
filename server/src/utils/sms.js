@@ -17,7 +17,7 @@ const sendViaInfobip = (to, text) =>
   new Promise((resolve, reject) => {
     const body = JSON.stringify({
       messages: [{
-        from: process.env.SMS_SENDER || "TFCSchool",
+        from: process.env.SMS_SENDER || process.env.SCHOOL_SHORT || "TFCSchool",
         destinations: [{ to }],
         text
       }]
@@ -76,12 +76,12 @@ export const sendAbsenceSMS = async ({ student, teacher, attendance }) => {
   const to   = normalizePhone(parentPhone);
 
   const text =
-    `TFC School - Annaba:\n` +
+    `${process.env.SCHOOL_NAME || "TFC School"}:\n` +
     `${student.name} était absent(e) le ${date}.\n` +
-    `Contactez-nous: +213 561 502 098\n\n` +
-    `مركز TFC عنابة:\n` +
+    `Contactez-nous: ${process.env.SCHOOL_PHONE || "+213 561 502 098"}\n\n` +
+    `${process.env.SCHOOL_NAME || "مركز TFC"}:\n` +
     `${student.name} غائب/غائبة اليوم ${date}.\n` +
-    `للتواصل: 098 502 561 0`;
+    `للتواصل: ${process.env.SCHOOL_PHONE || "0561 502 098"}`;
 
   try {
     await sendViaInfobip(to, text);

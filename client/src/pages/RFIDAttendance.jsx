@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import { schoolInfo } from "../config/branding.js";
 import {
   CheckCircle2,
   CreditCard,
@@ -269,7 +270,7 @@ export default function RFIDAttendance() {
             <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Demo test cards</p>
             <p className="mt-1.5 text-xs text-slate-500">No physical reader? Use these:</p>
             <div className="mt-3 grid grid-cols-3 gap-2">
-              {["TFC1001", "TFC1002", "TFC1003"].map((demoCard) => (
+              {[`${schoolInfo.short}1001`, `${schoolInfo.short}1002`, `${schoolInfo.short}1003`].map((demoCard) => (
                 <button
                   key={demoCard}
                   type="button"

@@ -35,7 +35,7 @@ enrollmentRouter.post("/", publicLimiter, async (req, res, next) => {
     });
 
     res.status(201).json({
-      message: "Application received! The TFC team will contact you soon.",
+      message: `Application received! The ${process.env.SCHOOL_SHORT || "TFC"} team will contact you soon.`,
       enrollment: { _id: enrollment._id, status: enrollment.status }
     });
   } catch (error) {
