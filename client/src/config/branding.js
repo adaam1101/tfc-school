@@ -9,7 +9,7 @@ export const schoolInfo = {
   email:       import.meta.env.VITE_SCHOOL_EMAIL       || "tfcinfo23@gmail.com",
   phones: [
     import.meta.env.VITE_SCHOOL_PHONE1 || "+213 561 502 098",
-    import.meta.env.VITE_SCHOOL_PHONE2 || "+213 782 628 711",
+    import.meta.env.VITE_SCHOOL_PHONE2 || "",
   ].filter(Boolean),
   address:     import.meta.env.VITE_SCHOOL_ADDRESS     || "Annaba, beside Dubai Wedding Hall",
   city:        import.meta.env.VITE_SCHOOL_CITY        || "Annaba, Algeria",
