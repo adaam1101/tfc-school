@@ -171,7 +171,7 @@ export default function LandingPage() {
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-6 py-4">
           {/* Logo */}
           <div className="flex items-center gap-3">
-            <img src={schoolLogo} alt={schoolInfo.short} className="h-10 w-auto max-w-[120px] rounded-xl object-contain ring-1 ring-brand-100 dark:ring-slate-700" />
+            <img src={schoolLogo} alt={schoolInfo.short} className="h-12 w-auto max-w-[150px] rounded-xl object-contain ring-1 ring-brand-100 dark:ring-slate-700" />
             <div className="hidden sm:block">
               <p className="text-sm font-bold text-slate-900 dark:text-white leading-tight">{schoolInfo.short} School</p>
               <p className="text-xs text-brand-600 dark:text-brand-400">{schoolInfo.name}</p>
@@ -219,8 +219,8 @@ export default function LandingPage() {
 
         <div className="relative mx-auto max-w-6xl px-6 text-center">
           {/* Logo */}
-          <div className="mx-auto mb-8 flex h-28 w-56 items-center justify-center rounded-3xl bg-white dark:bg-slate-800 ring-4 ring-brand-200 dark:ring-slate-600 shadow-xl px-4">
-            <img src={schoolLogo} alt={schoolInfo.short} className="h-20 w-full object-contain" />
+          <div className="mx-auto mb-8 flex h-28 w-56 items-center justify-center rounded-3xl bg-white dark:bg-slate-800 ring-4 ring-brand-200 dark:ring-slate-600 shadow-xl p-2">
+            <img src={schoolLogo} alt={schoolInfo.short} className="h-full w-full object-contain" />
           </div>
 
           <p className="text-sm font-bold uppercase tracking-[0.3em] text-brand-600 dark:text-brand-400">{t.hero.welcome}</p>
@@ -331,7 +331,7 @@ export default function LandingPage() {
       {/* ── Footer ── */}
       <footer className="bg-gradient-to-br from-brand-600 to-brand-800 py-10 text-center text-white">
         <div className="mx-auto max-w-6xl px-6 flex flex-col items-center gap-4">
-          <img src={schoolLogo} alt={schoolInfo.short} className="h-14 w-auto max-w-[160px] rounded-2xl bg-white/90 object-contain p-2 shadow-sm" />
+          <img src={schoolLogo} alt={schoolInfo.short} className="h-16 w-auto max-w-[180px] rounded-2xl bg-white/90 object-contain p-1 shadow-sm" />
           <p className="text-lg font-black">{schoolInfo.name}</p>
           <p className="text-brand-200 text-sm">{schoolInfo.tagline}</p>
           <div className="flex gap-3">
