@@ -22,7 +22,7 @@ export default function AppLayout({ title, subtitle, children, fullHeight = fals
       <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/85 backdrop-blur-md shadow-sm dark:border-slate-700 dark:bg-slate-900/90">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
           <Link to={`/${user?.role || "admin"}`} className="group flex items-center gap-3">
-            <img src={schoolLogo} alt="TFC School" className="h-10 w-10 rounded-xl object-contain ring-2 ring-slate-100 transition group-hover:ring-brand-200 dark:ring-slate-700" />
+            <img src={schoolLogo} alt={schoolInfo.short} className="h-10 w-auto max-w-[120px] rounded-xl object-contain ring-2 ring-slate-100 transition group-hover:ring-brand-200 dark:ring-slate-700" />
             <div className="hidden sm:block">
               <p className="text-sm font-black leading-tight tracking-tight">TFC School</p>
               <p className="text-xs text-slate-500 dark:text-slate-400">{schoolInfo.city}</p>

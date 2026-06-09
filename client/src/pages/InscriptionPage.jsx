@@ -1,41 +1,9 @@
 import React, { useState } from "react";
 import { CheckCircle2, ChevronDown, Globe, Loader2 } from "lucide-react";
 import { api, getApiError } from "../api/http.js";
-import { schoolLogo } from "../config/branding.js";
+import { schoolLogo, schoolInfo } from "../config/branding.js";
+import { COURSES } from "../config/courses.js";
 
-// ─── Course list ─────────────────────────────────────────────────────────────
-const COURSES = [
-  // English & French — need level logic
-  { id: "anglais",  ar: "اللغة الإنجليزية",       fr: "Langue Anglaise",              lang: true },
-  { id: "francais", ar: "اللغة الفرنسية",          fr: "Langue Française",             lang: true },
-
-  // All other courses
-  { id: "sec3en1",      ar: "سكريتاريا - مساعدة إدارية - موظفة استقبال (3 في 1)", fr: "Secrétariat – Assistante Administrative – Réceptionniste (3 en 1)" },
-  { id: "recep",        ar: "موظفة استقبال فندقي وسياحي",                          fr: "Réceptionniste Hôtelière et Touristique" },
-  { id: "entrepren",    ar: "مقاولتية وإدارة المشاريع",                            fr: "Entrepreneuriat et Gestion de Projets" },
-  { id: "gestion",      ar: "إدارة الأعمال",                                       fr: "Gestion des Affaires" },
-  { id: "rh",           ar: "تسيير الموارد البشرية وأدوات الجودة",                 fr: "Gestion RH et Outils Qualité" },
-  { id: "commercial",   ar: "مندوب مبيعات",                                        fr: "Délégué Commercial" },
-  { id: "marketing",    ar: "التسويق الإلكتروني",                                  fr: "Marketing Digital" },
-  { id: "ecommerce",    ar: "التجارة الإلكترونية",                                 fr: "E-Commerce" },
-  { id: "management",   ar: "مناجمنت المؤسسات",                                    fr: "Management des Organisations" },
-  { id: "comadmin",     ar: "الاتصال الإداري",                                     fr: "Communication Administrative" },
-  { id: "ai",           ar: "الذكاء الاصطناعي",                                    fr: "Intelligence Artificielle" },
-  { id: "compta",       ar: "محاسبة تطبيقية",                                      fr: "Comptabilité Appliquée" },
-  { id: "webdesign",    ar: "المعلوماتية وتصميم المواقع",                           fr: "Informatique & Web Design" },
-  { id: "prog",         ar: "البرمجة وإدارة المشاريع التقنية",                      fr: "Programmation & Gestion Technique" },
-  { id: "stocks",       ar: "إدارة وتسيير المخازن والأقسام الاجتماعية",            fr: "Gestion des Stocks et Ressources Sociales" },
-  { id: "contenu",      ar: "صناعة المحتوى والغرافيك",                             fr: "Création de Contenu & Graphisme" },
-  { id: "design",       ar: "التصميم الداخلي والديكور (TBT)",                      fr: "Design d'Intérieur & Décoration (TBT)" },
-  { id: "import",       ar: "التجارة الدولية - الاستيراد والتصدير",                fr: "Commerce International – Import/Export" },
-  { id: "client",       ar: "المحترف في خدمة العملاء",                             fr: "Service Client Professionnel" },
-  { id: "startup",      ar: "المشاريع الناشئة",                                    fr: "Startups & Projets Innovants" },
-  { id: "securite",     ar: "تركيب أنظمة المراقبة والإنذار",                       fr: "Installation Systèmes de Sécurité & Alarme" },
-  { id: "maintenance",  ar: "الصيانة الحاسوبية",                                   fr: "Maintenance Informatique" },
-  { id: "parquet",      ar: "المحترف في الباركو والبلاتر",                         fr: "Professionnel Parquet & Plâtre" },
-  { id: "devperso",     ar: "دورة بالغ همك - التطوير الشخصي",                     fr: "Développement Personnel" },
-  { id: "hse",          ar: "الصوت والأمان والسلامة المهنية (HSE)",                fr: "Santé, Sécurité & Environnement (HSE)" },
-];
 
 const LEVELS = [
   { id: "test", ar: "اختبار تحديد المستوى", fr: "Test de niveau" },
@@ -49,7 +17,7 @@ const T = {
   ar: {
     dir: "rtl",
     title: "تسجيل في دورة",
-    subtitle: "Training Formation Center — عنابة",
+    subtitle: `${schoolInfo.name} — ${schoolInfo.city}`,
     fullname: "الاسم الكامل",
     fullnamePh: "أدخل اسمك الكامل",
     gender: "الجنس",
@@ -66,7 +34,7 @@ const T = {
     submit: "أرسل طلب التسجيل",
     sending: "جارٍ الإرسال...",
     successTitle: "تم إرسال طلبك بنجاح! 🎉",
-    successMsg: "سيتصل بك فريق TFC قريباً لتأكيد التسجيل.",
+    successMsg: `سيتصل بك فريق ${schoolInfo.short} قريباً لتأكيد التسجيل.`,
     newReg: "تسجيل جديد",
     required: "يرجى ملء جميع الحقول المطلوبة",
     errorPhone: "رقم الهاتف يجب أن يكون 10 أرقام على الأقل",
@@ -91,7 +59,7 @@ const T = {
     submit: "Envoyer la demande d'inscription",
     sending: "Envoi en cours...",
     successTitle: "Demande envoyée avec succès ! 🎉",
-    successMsg: "L'équipe TFC vous contactera prochainement pour confirmer votre inscription.",
+    successMsg: `L'équipe ${schoolInfo.short} vous contactera prochainement pour confirmer votre inscription.`,
     newReg: "Nouvelle inscription",
     required: "Veuillez remplir tous les champs obligatoires",
     errorPhone: "Le numéro de téléphone doit comporter au moins 10 chiffres",
