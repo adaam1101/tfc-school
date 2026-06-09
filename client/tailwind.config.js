@@ -8,19 +8,18 @@ export default {
         sans: ["Inter", "ui-sans-serif", "system-ui", "Segoe UI", "Arial", "sans-serif"]
       },
       colors: {
-        // Full scale built around the exact TFC logo blue: #04436E
         brand: {
-          50:  "#EEF6FB",
-          100: "#D3E9F5",
-          200: "#A7D2EA",
-          300: "#6AAFC8",
-          400: "#3887AE",
-          500: "#1A6696",
-          600: "#085580",
-          700: "#04436E",  // ← exact logo color
-          800: "#033358",
-          900: "#022242",
-          950: "#011629",
+          50:  "var(--brand-50)",
+          100: "var(--brand-100)",
+          200: "var(--brand-200)",
+          300: "var(--brand-300)",
+          400: "var(--brand-400)",
+          500: "var(--brand-500)",
+          600: "var(--brand-600)",
+          700: "var(--brand-700)",
+          800: "var(--brand-800)",
+          900: "var(--brand-900)",
+          950: "var(--brand-950)",
         }
       },
       boxShadow: {
