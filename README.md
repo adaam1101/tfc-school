@@ -121,21 +121,45 @@ To register a real card, log in as Admin, edit a student profile, focus the `RFI
 
 ## Notifications
 
-Absence email is implemented through SMTP with Nodemailer. For local testing, notifications are disabled and the attendance record stores the reason.
+Absence emails are sent via the **SendGrid HTTP API** (not Nodemailer/SMTP). This works reliably on Render free tier because it uses HTTPS port 443 rather than SMTP ports that are often blocked.
 
-To enable email:
+### Required environment variables on Render
 
 ```env
 NOTIFICATIONS_ENABLED=true
-SMTP_HOST=smtp.example.com
-SMTP_PORT=587
-SMTP_SECURE=false
-SMTP_USER=your_user
-SMTP_PASS=your_password
-SMTP_FROM="TFC School <no-reply@tfcschool.dz>"
+SENDGRID_API_KEY=SG.xxxxxxxxxxxxxxxxxxxx   # Your SendGrid API key
+SMTP_USER=no-reply@yourdomain.com          # Sender email — must be verified in SendGrid
+SCHOOL_NAME="TFC Training Formation Center"
+SCHOOL_SHORT="TFC"
+SCHOOL_PHONE="+213 561 502 098"
 ```
 
-SMS can be added later through the same notification utility by integrating Twilio or another Algeria-compatible SMS provider.
+### How to get a SendGrid API key
+
+1. Create a free account at sendgrid.com
+2. Go to Settings → API Keys → Create API Key (Mail Send permission)
+3. Verify your sender email under Settings → Sender Authentication
+4. Add the key and sender email to your Render environment variables
+
+### Test email without marking a student absent
+
+POST to `/api/admin/test-email` (admin auth required):
+
+```json
+{ "to": "your@email.com" }
+```
+
+The response includes a config status object so you can see exactly which env vars are missing.
+
+### SMS notifications (optional)
+
+SMS absence alerts are supported via Infobip. Add these vars to enable:
+
+```env
+INFOBIP_API_KEY=your_key
+INFOBIP_BASE_URL=your_hostname.api.infobip.com
+SMS_SENDER=TFCSchool
+```
 
 ## Security Notes
 

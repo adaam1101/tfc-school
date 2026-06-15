@@ -6,6 +6,7 @@ import { User } from "../models/User.js";
 import { dateKey, daysAgo } from "../utils/dates.js";
 import { applyRfidCardToProfile } from "../utils/rfid.js";
 import { recordAudit } from "../utils/audit.js";
+import { emailReady, sendEmail } from "../utils/email.js";
 import {
   attendanceReportSchema,
   createUserSchema,
@@ -42,11 +43,6 @@ const ensureRoleProfile = (payload) => {
       throw error;
     }
 
-    if (!profile.parentEmail && !profile.parentPhone) {
-      const error = new Error("At least one parent contact is required for each student.");
-      error.statusCode = 400;
-      throw error;
-    }
   }
 };
 
@@ -286,5 +282,34 @@ adminRouter.get("/reports/attendance", onlyAdmin, validate(attendanceReportSchem
     res.json({ records });
   } catch (error) {
     next(error);
+  }
+});
+
+// ── Email diagnostics ──────────────────────────────────────────────────────
+adminRouter.post("/test-email", onlyAdmin, async (req, res, next) => {
+  const status = {
+    NOTIFICATIONS_ENABLED: process.env.NOTIFICATIONS_ENABLED,
+    SENDGRID_API_KEY:       process.env.SENDGRID_API_KEY ? "set ✓" : "MISSING ✗",
+    SMTP_USER:              process.env.SMTP_USER        ? "set ✓" : "MISSING ✗",
+    emailReady:             emailReady()
+  };
+
+  if (!emailReady()) {
+    return res.status(400).json({
+      message: "Email is not configured. See config status below.",
+      status
+    });
+  }
+
+  const to = req.body.to || req.user.email;
+  try {
+    await sendEmail({
+      to,
+      subject: `${process.env.SCHOOL_SHORT || "TFC"} — Email test`,
+      text: `This is a test email from ${process.env.SCHOOL_NAME || "TFC School"}.\n\nIf you received this, email notifications are working correctly.\n\nSent at: ${new Date().toISOString()}`
+    });
+    res.json({ message: `Test email sent to ${to}.`, status });
+  } catch (err) {
+    next(err);
   }
 });
