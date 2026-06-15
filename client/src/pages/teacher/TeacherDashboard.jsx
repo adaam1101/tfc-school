@@ -9,8 +9,10 @@ import {
   XCircle,
   UserRound,
   IdCard,
-  Clock
+  Clock,
+  Smartphone
 } from "lucide-react";
+import { Link } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
 import { api, getApiError } from "../../api/http.js";
 import ErrorAlert from "../../components/ErrorAlert.jsx";
@@ -123,6 +125,25 @@ export default function TeacherDashboard() {
   return (
     <AppLayout title="Teacher dashboard" subtitle="Assigned students and daily attendance.">
       <div className="grid gap-6">
+        {/* Mobile app banner */}
+        <div className="flex items-center justify-between rounded-2xl border border-brand-200 bg-gradient-to-r from-brand-50 to-emerald-50 dark:border-brand-800 dark:from-brand-950/40 dark:to-emerald-950/30 px-4 py-3">
+          <div className="flex items-center gap-3">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 shadow-sm">
+              <Smartphone className="h-5 w-5 text-white" />
+            </div>
+            <div>
+              <p className="text-sm font-bold text-brand-800 dark:text-brand-200">Teacher Mobile App</p>
+              <p className="text-xs text-brand-600 dark:text-brand-400">Optimised for phones — mark attendance on the go</p>
+            </div>
+          </div>
+          <Link
+            to="/teacher/app"
+            className="shrink-0 rounded-xl bg-gradient-to-r from-brand-600 to-brand-700 px-4 py-2 text-sm font-bold text-white shadow-sm transition-all hover:from-brand-700 hover:to-brand-800"
+          >
+            Open
+          </Link>
+        </div>
+
         <ErrorAlert message={error} />
 
         {message && (

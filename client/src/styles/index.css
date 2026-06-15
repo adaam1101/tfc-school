@@ -77,6 +77,11 @@ textarea {
   to   { transform: rotate(360deg); }
 }
 
+/* Safe area helpers for iPhone notch / home bar */
+.safe-top    { padding-top:    env(safe-area-inset-top); }
+.safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+.pb-safe     { padding-bottom: max(0.5rem, env(safe-area-inset-bottom)); }
+
 .animate-pulse-ring   { animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
 .animate-scan-ring    { animation: scan-ring  1.6s ease-out infinite; }
 .animate-fade-slide-up{ animation: fade-slide-up 0.35s ease-out both; }

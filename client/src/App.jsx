@@ -11,6 +11,7 @@ import ModeratorDashboard from "./pages/admin/ModeratorDashboard.jsx";
 import CertificatePreview from "./pages/admin/CertificatePreview.jsx";
 import RFIDAttendance from "./pages/RFIDAttendance.jsx";
 import TeacherDashboard from "./pages/teacher/TeacherDashboard.jsx";
+import MobileTeacherApp from "./pages/teacher/MobileTeacherApp.jsx";
 import StudentDashboard from "./pages/student/StudentDashboard.jsx";
 import NotFound from "./pages/NotFound.jsx";
 import InscriptionPage from "./pages/InscriptionPage.jsx";
@@ -30,7 +31,8 @@ export default function App() {
       <Route path="/admin"      element={<ProtectedRoute role="admin">      <AdminDashboard />      </ProtectedRoute>} />
       <Route path="/sous-admin" element={<ProtectedRoute role="sous-admin"> <SousAdminDashboard /> </ProtectedRoute>} />
       <Route path="/moderator"  element={<ProtectedRoute role="moderator">  <ModeratorDashboard />  </ProtectedRoute>} />
-      <Route path="/teacher"    element={<ProtectedRoute role="teacher">    <TeacherDashboard />    </ProtectedRoute>} />
+      <Route path="/teacher"        element={<ProtectedRoute role="teacher"><TeacherDashboard /></ProtectedRoute>} />
+      <Route path="/teacher/app"    element={<ProtectedRoute role="teacher"><MobileTeacherApp /></ProtectedRoute>} />
       <Route path="/student"    element={<ProtectedRoute role="student">    <StudentDashboard />    </ProtectedRoute>} />
       <Route path="/rfid-attendance" element={<ProtectedRoute roles={["admin", "teacher"]}><RFIDAttendance /></ProtectedRoute>} />
       <Route path="/admin/certificate-preview" element={<ProtectedRoute role="admin"><CertificatePreview /></ProtectedRoute>} />
