@@ -677,8 +677,8 @@ export default function AdminDashboard() {
                             />
                           </label>
                           <label className="field">
-                            Phone
-                            <input className="input" value={form.phone} onChange={(e) => updateForm("phone", e.target.value)} />
+                            Phone{form.role === "student" && <span className="ml-1 text-rose-500">*</span>}
+                            <input className="input" value={form.phone} onChange={(e) => updateForm("phone", e.target.value)} required={form.role === "student"} />
                           </label>
                         </div>
 
@@ -729,31 +729,31 @@ export default function AdminDashboard() {
                         {form.role === "student" && (
                           <div className="grid gap-4 sm:grid-cols-2">
                             <label className="field">
-                              Age
+                              Age <span className="ml-1 text-rose-500">*</span>
                               <input className="input" type="number" min="3" max="80" value={form.studentProfile.age} onChange={(e) => updateForm("studentProfile.age", e.target.value)} required />
                             </label>
                             <label className="field">
-                              Date of birth
+                              Date of birth <span className="text-slate-400 text-xs font-normal">(optional)</span>
                               <input className="input" type="date" value={form.studentProfile.dateOfBirth} onChange={(e) => updateForm("studentProfile.dateOfBirth", e.target.value)} />
                             </label>
                             <label className="field">
-                              Course
+                              Course <span className="ml-1 text-rose-500">*</span>
                               <input className="input" value={form.studentProfile.course} onChange={(e) => updateForm("studentProfile.course", e.target.value)} required />
                             </label>
                             <label className="field">
-                              Parent name
+                              Parent name <span className="text-slate-400 text-xs font-normal">(optional)</span>
                               <input className="input" value={form.studentProfile.parentName} onChange={(e) => updateForm("studentProfile.parentName", e.target.value)} />
                             </label>
                             <label className="field">
-                              Parent email
+                              Parent email <span className="text-slate-400 text-xs font-normal">(optional)</span>
                               <input className="input" type="email" value={form.studentProfile.parentEmail} onChange={(e) => updateForm("studentProfile.parentEmail", e.target.value)} />
                             </label>
                             <label className="field">
-                              Parent phone
+                              Parent phone <span className="text-slate-400 text-xs font-normal">(optional)</span>
                               <input className="input" value={form.studentProfile.parentPhone} onChange={(e) => updateForm("studentProfile.parentPhone", e.target.value)} />
                             </label>
                             <label className="field">
-                              Mark
+                              Mark <span className="text-slate-400 text-xs font-normal">(optional)</span>
                               <input className="input" value={form.studentProfile.mark} onChange={(e) => updateForm("studentProfile.mark", e.target.value)} />
                             </label>
                             <label className="field sm:col-span-2">
@@ -774,9 +774,9 @@ export default function AdminDashboard() {
                               </span>
                             </label>
                             <label className="field sm:col-span-2">
-                              Assigned teacher
-                              <select className="input" value={form.studentProfile.teacher} onChange={(e) => updateForm("studentProfile.teacher", e.target.value)}>
-                                <option value="">Unassigned</option>
+                              Assigned teacher <span className="ml-1 text-rose-500">*</span>
+                              <select className="input" required value={form.studentProfile.teacher} onChange={(e) => updateForm("studentProfile.teacher", e.target.value)}>
+                                <option value="">— Select a teacher —</option>
                                 {teachers.map((t) => (
                                   <option key={t._id} value={t._id}>
                                     {t.name} — {t.teacherProfile?.subject || "Teacher"}
