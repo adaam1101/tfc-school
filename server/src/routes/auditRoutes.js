@@ -19,3 +19,12 @@ auditRouter.get("/", async (req, res, next) => {
     next(error);
   }
 });
+
+auditRouter.delete("/", async (req, res, next) => {
+  try {
+    await AuditLog.deleteMany({});
+    res.json({ message: "Activity history cleared." });
+  } catch (error) {
+    next(error);
+  }
+});

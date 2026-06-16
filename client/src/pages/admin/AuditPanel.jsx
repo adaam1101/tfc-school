@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { History, RefreshCcw, ShieldCheck } from "lucide-react";
+import { History, RefreshCcw, ShieldCheck, Trash2 } from "lucide-react";
 import { api, getApiError } from "../../api/http.js";
 import ErrorAlert from "../../components/ErrorAlert.jsx";
 
@@ -59,6 +59,10 @@ export default function AuditPanel() {
             <option value="enrollment">Enrollments</option>
           </select>
           <button className="btn-secondary" onClick={load}><RefreshCcw className="h-4 w-4" /></button>
+          <button className="btn-secondary text-rose-600 hover:border-rose-200 hover:bg-rose-50" onClick={async () => {
+            if (!window.confirm("Clear all activity history? This cannot be undone.")) return;
+            try { await api.delete("/audit"); setLogs([]); } catch (err) { setError(getApiError(err)); }
+          }}><Trash2 className="h-4 w-4" /> Clear all</button>
         </div>
       </div>
 
