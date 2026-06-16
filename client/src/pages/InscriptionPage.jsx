@@ -38,6 +38,12 @@ const T = {
     newReg: "تسجيل جديد",
     required: "يرجى ملء جميع الحقول المطلوبة",
     errorPhone: "رقم الهاتف يجب أن يكون 10 أرقام على الأقل",
+    priceLabel: "السعر",
+    durationLabel: "المدة",
+    sessionsLabel: "الحصص",
+    promoLabel: "عرض خاص",
+    perMonth: "/ شهر",
+    dzd: "دج",
   },
   fr: {
     dir: "ltr",
@@ -63,6 +69,12 @@ const T = {
     newReg: "Nouvelle inscription",
     required: "Veuillez remplir tous les champs obligatoires",
     errorPhone: "Le numéro de téléphone doit comporter au moins 10 chiffres",
+    priceLabel: "Tarif",
+    durationLabel: "Durée",
+    sessionsLabel: "Séances",
+    promoLabel: "Promotion",
+    perMonth: "/ mois",
+    dzd: "DA",
   }
 };
 
@@ -120,11 +132,14 @@ export default function InscriptionPage() {
     setLoading(true);
     try {
       await api.post("/enrollments", {
-        name:    form.name.trim(),
-        phone:   form.phone.trim(),
-        age:     age || undefined,
-        course:  courseLabel,
-        message: messageparts,
+        name:      form.name.trim(),
+        phone:     form.phone.trim(),
+        age:       age || undefined,
+        course:    courseLabel,
+        courseId:  courseObj?.id,
+        price:     courseObj?.price,
+        priceUnit: courseObj?.priceUnit ? (isAr ? courseObj.priceUnit.ar : courseObj.priceUnit.fr) : undefined,
+        message:   messageparts,
       });
       setDone(true);
     } catch (err) {
@@ -254,6 +269,32 @@ export default function InscriptionPage() {
                   <ChevronDown className={`pointer-events-none absolute top-1/2 -translate-y-1/2 h-4 w-4 text-brand-400 ${isAr ? "left-4" : "right-4"}`} />
                 </div>
               </div>
+
+              {/* Course info card */}
+              {courseObj && (
+                <div className="animate-fade-slide-up rounded-2xl bg-brand-50 border border-brand-200 px-4 py-4 grid gap-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold uppercase tracking-wider text-brand-600">{t.priceLabel}</span>
+                    <div className="flex items-center gap-1.5">
+                      {courseObj.promo && (
+                        <span className="rounded-full bg-rose-100 text-rose-700 text-[10px] font-bold px-2 py-0.5 uppercase">{t.promoLabel}</span>
+                      )}
+                      <span className="text-lg font-black text-brand-800">
+                        {courseObj.price?.toLocaleString()} {t.dzd}
+                        {courseObj.priceUnit ? <span className="text-sm font-semibold text-brand-500"> {isAr ? courseObj.priceUnit.ar : courseObj.priceUnit.fr}</span> : null}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between text-xs text-slate-600">
+                    <span className="font-semibold text-slate-500">{t.durationLabel}</span>
+                    <span className="font-bold">{isAr ? courseObj.duration.ar : courseObj.duration.fr}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-xs text-slate-600">
+                    <span className="font-semibold text-slate-500">{t.sessionsLabel}</span>
+                    <span className="font-bold">{isAr ? courseObj.sessions.ar : courseObj.sessions.fr}</span>
+                  </div>
+                </div>
+              )}
 
               {/* Level (only for EN/FR courses, age 13-50) */}
               {needsLevel && (
