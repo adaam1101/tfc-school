@@ -133,9 +133,10 @@ export default function AdminDashboard() {
 
   const teachers = useMemo(() => users.filter((u) => u.role === "teacher"), [users]);
   const students = useMemo(() => users.filter((u) => u.role === "student"), [users]);
+  const staff    = useMemo(() => users.filter((u) => ["sous-admin", "moderator", "admin"].includes(u.role)), [users]);
 
   const filteredUsers = useMemo(() => {
-    const list = userSubTab === "students" ? students : teachers;
+    const list = userSubTab === "students" ? students : userSubTab === "teachers" ? teachers : staff;
     if (!userSearch.trim()) return list;
     const q = userSearch.toLowerCase();
     return list.filter(
@@ -145,7 +146,7 @@ export default function AdminDashboard() {
         u.studentProfile?.course?.toLowerCase().includes(q) ||
         u.teacherProfile?.subject?.toLowerCase().includes(q)
     );
-  }, [userSubTab, students, teachers, userSearch]);
+  }, [userSubTab, students, teachers, staff, userSearch]);
 
   const loadData = async () => {
     setError("");
@@ -599,18 +600,22 @@ export default function AdminDashboard() {
 
                 {/* Sub-tabs */}
                 <div className="flex gap-2 rounded-2xl border border-slate-200 bg-white p-1.5 shadow-sm dark:border-slate-700 dark:bg-slate-800 w-fit">
-                  {["students", "teachers"].map((st) => (
+                  {[
+                    { id: "students", icon: GraduationCap, label: t.students || "Students" },
+                    { id: "teachers", icon: UserRound,     label: t.teachers || "Teachers" },
+                    { id: "staff",    icon: ShieldCheck,   label: t.staff    || "Staff"    }
+                  ].map((st) => (
                     <button
-                      key={st}
-                      onClick={() => setUserSubTab(st)}
+                      key={st.id}
+                      onClick={() => setUserSubTab(st.id)}
                       className={`inline-flex items-center gap-2 rounded-xl px-5 py-2 text-sm font-bold capitalize transition-all ${
-                        userSubTab === st
+                        userSubTab === st.id
                           ? "bg-gradient-to-r from-brand-600 to-brand-700 text-white shadow-sm"
                           : "text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700"
                       }`}
                     >
-                      {st === "students" ? <GraduationCap className="h-4 w-4" /> : <UserRound className="h-4 w-4" />}
-                      {st}
+                      <st.icon className="h-4 w-4" />
+                      {st.label}
                     </button>
                   ))}
                 </div>
