@@ -7,6 +7,8 @@ import {
 import { api, getApiError } from "../../api/http.js";
 import ErrorAlert from "../../components/ErrorAlert.jsx";
 import AppLayout from "../../layouts/AppLayout.jsx";
+import { useLang } from "../../context/LanguageContext.jsx";
+import { T } from "../../translations/dashboards.js";
 
 // ── helpers ───────────────────────────────────────────────────────────────────
 
@@ -28,15 +30,16 @@ function initials(name = "") {
   return name.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase() || "?";
 }
 
-const TABS = [
-  { id: "students",    label: "Students",    icon: Users },
-  { id: "teachers",   label: "Teachers",    icon: GraduationCap },
-  { id: "enrollments",label: "Enrollments", icon: Inbox }
+const TAB_IDS = [
+  { id: "students",     key: "students",     icon: Users },
+  { id: "teachers",     key: "teachers",     icon: GraduationCap },
+  { id: "enrollments",  key: "enrollments",  icon: Inbox }
 ];
 
 // ── Payment Modal ─────────────────────────────────────────────────────────────
 
 function PaymentModal({ student, payment, onClose, onSaved }) {
+  const { lang } = useLang(); const t = T[lang];
   const currentMonth = new Date().toISOString().slice(0, 7); // YYYY-MM
   const [status, setStatus]       = useState(payment?.status || "unpaid");
   const [amount, setAmount]       = useState(payment?.amount ?? "");
@@ -89,7 +92,7 @@ function PaymentModal({ student, payment, onClose, onSaved }) {
         {/* Header */}
         <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 px-5 py-4">
           <div>
-            <h2 className="font-black text-slate-900 dark:text-white">Payment</h2>
+            <h2 className="font-black text-slate-900 dark:text-white">{t.paymentTitle}</h2>
             <p className="text-xs text-slate-500">{student.name}</p>
           </div>
           <button onClick={onClose} className="rounded-xl p-2 hover:bg-slate-100 dark:hover:bg-slate-700 transition">
@@ -102,7 +105,7 @@ function PaymentModal({ student, payment, onClose, onSaved }) {
 
           {/* Month */}
           <div>
-            <label className="block text-xs font-bold text-slate-500 mb-1">Month</label>
+            <label className="block text-xs font-bold text-slate-500 mb-1">{t.month}</label>
             <input
               type="month"
               className="input w-full"
@@ -113,7 +116,7 @@ function PaymentModal({ student, payment, onClose, onSaved }) {
 
           {/* Total fee */}
           <div>
-            <label className="block text-xs font-bold text-slate-500 mb-1">Total fee (DZD)</label>
+            <label className="block text-xs font-bold text-slate-500 mb-1">{t.totalFee}</label>
             <input
               type="number"
               min="0"
@@ -126,7 +129,7 @@ function PaymentModal({ student, payment, onClose, onSaved }) {
 
           {/* Amount paid */}
           <div>
-            <label className="block text-xs font-bold text-slate-500 mb-1">Amount paid (DZD)</label>
+            <label className="block text-xs font-bold text-slate-500 mb-1">{t.amountPaid}</label>
             <input
               type="number"
               min="0"
@@ -145,25 +148,25 @@ function PaymentModal({ student, payment, onClose, onSaved }) {
                 : "bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300"
             }`}>
               {remaining <= 0
-                ? "Fully paid"
-                : `Remaining: ${remaining.toLocaleString()} DZD`}
+                ? t.fullyPaid
+                : `${t.remaining} ${remaining.toLocaleString()} DZD`}
             </div>
           )}
 
           {/* Status override */}
           <div>
-            <label className="block text-xs font-bold text-slate-500 mb-1">Status</label>
+            <label className="block text-xs font-bold text-slate-500 mb-1">{t.paymentStatus}</label>
             <select className="input w-full" value={status} onChange={e => setStatus(e.target.value)}>
-              <option value="paid">Paid</option>
-              <option value="partial">Partial</option>
-              <option value="unpaid">Unpaid</option>
-              <option value="overdue">Overdue</option>
+              <option value="paid">{t.paid}</option>
+              <option value="partial">{t.partial}</option>
+              <option value="unpaid">{t.unpaid}</option>
+              <option value="overdue">{t.overdue}</option>
             </select>
           </div>
 
           {/* Note */}
           <div>
-            <label className="block text-xs font-bold text-slate-500 mb-1">Note (optional)</label>
+            <label className="block text-xs font-bold text-slate-500 mb-1">{t.paymentNote}</label>
             <input
               type="text"
               className="input w-full"
@@ -175,10 +178,10 @@ function PaymentModal({ student, payment, onClose, onSaved }) {
         </div>
 
         <div className="flex justify-end gap-2 border-t border-slate-100 dark:border-slate-700 px-5 py-4">
-          <button onClick={onClose} className="btn-secondary">Cancel</button>
+          <button onClick={onClose} className="btn-secondary">{t.cancel}</button>
           <button onClick={save} disabled={saving} className="btn-primary flex items-center gap-2">
             <Save className="h-4 w-4" />
-            {saving ? "Saving…" : "Save payment"}
+            {saving ? t.saving : t.savePayment}
           </button>
         </div>
       </div>
@@ -189,6 +192,7 @@ function PaymentModal({ student, payment, onClose, onSaved }) {
 // ── Students tab ──────────────────────────────────────────────────────────────
 
 function StudentsTab() {
+  const { lang } = useLang(); const t = T[lang];
   const [students, setStudents]   = useState([]);
   const [payments, setPayments]   = useState({}); // studentId → latest payment
   const [loading, setLoading]     = useState(true);
@@ -248,9 +252,9 @@ function StudentsTab() {
       {/* Summary stats */}
       <div className="grid grid-cols-3 gap-3">
         {[
-          { icon: Users,        label: "Total students",  value: students.length, color: "from-brand-500 to-brand-700",   bg: "bg-brand-50 dark:bg-brand-950/40",     num: "text-brand-800 dark:text-brand-200" },
-          { icon: CheckCircle2, label: "Paid",            value: paidCount,       color: "from-emerald-500 to-teal-600",  bg: "bg-emerald-50 dark:bg-emerald-950/40", num: "text-emerald-800 dark:text-emerald-200" },
-          { icon: XCircle,      label: "Unpaid / overdue",value: unpaidCount,     color: "from-rose-500 to-red-600",      bg: "bg-rose-50 dark:bg-rose-950/40",       num: "text-rose-800 dark:text-rose-200" }
+          { icon: Users,        label: t.totalStudentsLabel, value: students.length, color: "from-brand-500 to-brand-700",   bg: "bg-brand-50 dark:bg-brand-950/40",     num: "text-brand-800 dark:text-brand-200" },
+          { icon: CheckCircle2, label: t.paid,              value: paidCount,       color: "from-emerald-500 to-teal-600",  bg: "bg-emerald-50 dark:bg-emerald-950/40", num: "text-emerald-800 dark:text-emerald-200" },
+          { icon: XCircle,      label: t.unpaidOverdue,     value: unpaidCount,     color: "from-rose-500 to-red-600",      bg: "bg-rose-50 dark:bg-rose-950/40",       num: "text-rose-800 dark:text-rose-200" }
         ].map(({ icon: Icon, label, value, color, bg, num }) => (
           <div key={label} className={`rounded-2xl p-4 ${bg}`}>
             <div className={`mb-2 inline-flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br ${color}`}>
@@ -267,7 +271,7 @@ function StudentsTab() {
         <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
         <input
           className="w-full rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 pl-9 pr-4 py-2.5 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-400"
-          placeholder="Search by name, course or teacher…"
+          placeholder={t.searchStudents}
           value={search}
           onChange={e => setSearch(e.target.value)}
         />
@@ -275,14 +279,14 @@ function StudentsTab() {
 
       {/* Table */}
       {loading ? (
-        <p className="text-center text-sm text-slate-400 py-10">Loading…</p>
+        <p className="text-center text-sm text-slate-400 py-10">{t.loading}</p>
       ) : (
         <div className="card overflow-hidden">
           <div className="overflow-x-auto">
             <table className="min-w-full text-sm">
               <thead>
                 <tr className="border-b border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60">
-                  {["Student", "Course", "Teacher", "Subject", "Phone", "Payment", ""].map(h => (
+                  {[t.student, t.course, t.teacher, t.subject, t.phone, t.paymentTitle, ""].map(h => (
                     <th key={h} className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider text-slate-400">{h}</th>
                   ))}
                 </tr>
@@ -290,7 +294,7 @@ function StudentsTab() {
               <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
                 {filtered.length === 0 && (
                   <tr>
-                    <td colSpan={7} className="px-4 py-10 text-center text-slate-400">No students found.</td>
+                    <td colSpan={7} className="px-4 py-10 text-center text-slate-400">{t.noStudentsFound}</td>
                   </tr>
                 )}
                 {filtered.map(s => {
@@ -315,7 +319,7 @@ function StudentsTab() {
                       <td className="px-4 py-3">
                         {teacher
                           ? <span className="font-medium text-slate-800 dark:text-slate-200">{teacher.name || "–"}</span>
-                          : <span className="text-slate-400 italic">Unassigned</span>
+                          : <span className="text-slate-400 italic">{t.unassigned}</span>
                         }
                       </td>
                       <td className="px-4 py-3 text-slate-500 dark:text-slate-400">{teacher?.teacherProfile?.subject || "–"}</td>
@@ -363,6 +367,7 @@ function StudentsTab() {
 // ── Teachers tab (read-only monitor) ─────────────────────────────────────────
 
 function TeachersTab() {
+  const { lang } = useLang(); const t = T[lang];
   const [teachers, setTeachers] = useState([]);
   const [loading, setLoading]   = useState(true);
   const [error, setError]       = useState("");
@@ -389,20 +394,20 @@ function TeachersTab() {
         <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
         <input
           className="w-full rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 pl-9 pr-4 py-2.5 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-400"
-          placeholder="Search by name or subject…"
+          placeholder={t.searchTeachers}
           value={search}
           onChange={e => setSearch(e.target.value)}
         />
       </div>
 
       {loading ? (
-        <p className="text-center text-sm text-slate-400 py-10">Loading…</p>
+        <p className="text-center text-sm text-slate-400 py-10">{t.loading}</p>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {filtered.length === 0 && (
             <div className="col-span-full flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-700 py-14 text-center">
               <GraduationCap className="h-12 w-12 text-slate-300 dark:text-slate-600 mb-3" />
-              <p className="font-bold text-slate-500">No teachers found</p>
+              <p className="font-bold text-slate-500">{t.noTeachersFound}</p>
             </div>
           )}
           {filtered.map(t => {
@@ -428,7 +433,7 @@ function TeachersTab() {
                     </div>
                     <div className="flex items-center gap-2 text-sm">
                       <Users className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
-                      <span className="text-slate-600 dark:text-slate-400">{studentCount} student{studentCount !== 1 ? "s" : ""} assigned</span>
+                      <span className="text-slate-600 dark:text-slate-400">{studentCount} {t.studentsAssigned}</span>
                     </div>
                     {t.phone && (
                       <div className="flex items-center gap-2 text-sm">
@@ -449,7 +454,7 @@ function TeachersTab() {
                         ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300"
                         : "bg-slate-100 text-slate-500 dark:bg-slate-700 dark:text-slate-400"
                     }`}>{t.status}</span>
-                    <span className="text-[10px] text-slate-300 dark:text-slate-600">read-only</span>
+                    <span className="text-[10px] text-slate-300 dark:text-slate-600">{t.readOnly}</span>
                   </div>
                 </div>
               </div>
@@ -464,6 +469,7 @@ function TeachersTab() {
 // ── Enrollments tab (existing logic) ─────────────────────────────────────────
 
 function EnrollmentsTab() {
+  const { lang } = useLang(); const t = T[lang];
   const [enrollments, setEnrollments] = useState([]);
   const [filter, setFilter]           = useState("");
   const [loading, setLoading]         = useState(true);
@@ -499,13 +505,13 @@ function EnrollmentsTab() {
       <ErrorAlert message={error} />
 
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-sm text-slate-500 dark:text-slate-400">{pendingCount} pending review</p>
+        <p className="text-sm text-slate-500 dark:text-slate-400">{pendingCount} {t.pendingReview}</p>
         <div className="flex gap-2">
           <select className="input text-sm py-2" value={filter} onChange={e => setFilter(e.target.value)}>
-            <option value="">All</option>
-            <option value="pending">Pending</option>
-            <option value="approved">Approved</option>
-            <option value="rejected">Rejected</option>
+            <option value="">{t.all}</option>
+            <option value="pending">{t.pending}</option>
+            <option value="approved">{t.approved}</option>
+            <option value="rejected">{t.rejected}</option>
           </select>
           <button className="btn-secondary py-2" onClick={load}>
             <RefreshCcw className="h-4 w-4" />
@@ -514,7 +520,7 @@ function EnrollmentsTab() {
       </div>
 
       {loading ? (
-        <p className="text-sm text-slate-400">Loading…</p>
+        <p className="text-sm text-slate-400">{t.loading}</p>
       ) : enrollments.length ? (
         <div className="grid gap-3">
           {enrollments.map(e => (
@@ -552,7 +558,7 @@ function EnrollmentsTab() {
       ) : (
         <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-700 py-14 text-center">
           <Inbox className="h-10 w-10 text-slate-300 dark:text-slate-600" />
-          <p className="mt-3 text-sm font-bold text-slate-500 dark:text-slate-400">No applications {filter ? `(${filter})` : "yet"}</p>
+          <p className="mt-3 text-sm font-bold text-slate-500 dark:text-slate-400">{t.noApplications} {filter ? `(${filter})` : t.yet}</p>
         </div>
       )}
     </div>
@@ -563,15 +569,17 @@ function EnrollmentsTab() {
 
 export default function ModeratorDashboard() {
   const [tab, setTab] = useState("students");
+  const { lang } = useLang(); const t = T[lang];
 
   return (
-    <AppLayout title="Moderator Dashboard" subtitle="Monitor students, teachers and enrollment applications.">
+    <AppLayout title={t.modTitle} subtitle={t.modSubtitle}>
       <div className="grid gap-6">
 
         {/* Tabs */}
         <div className="flex flex-wrap gap-2">
-          {TABS.map(({ id, label, icon: Icon }) => {
+          {TAB_IDS.map(({ id, key, icon: Icon }) => {
             const active = tab === id;
+            const label = t[key];
             return (
               <button
                 key={id}

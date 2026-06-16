@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 import {
   CalendarDays,
   CheckCircle2,
@@ -21,20 +21,23 @@ import ErrorAlert from "../../components/ErrorAlert.jsx";
 import LoadingState from "../../components/LoadingState.jsx";
 import StatusBadge from "../../components/StatusBadge.jsx";
 import AppLayout from "../../layouts/AppLayout.jsx";
+import { useLang } from "../../context/LanguageContext.jsx";
+import { T } from "../../translations/dashboards.js";
 import AnnouncementsCard from "../../components/AnnouncementsCard.jsx";
 import IDCardModal from "../../components/IDCardModal.jsx";
 import TimetableGrid from "../../components/TimetableGrid.jsx";
 
-const TABS = [
-  { id: "attendance", label: "Attendance", icon: ClipboardCheck },
-  { id: "groups",     label: "Students & Groups", icon: LayoutList },
-  { id: "timetable",  label: "Timetable",  icon: CalendarDays }
+const TAB_IDS = [
+  { id: "attendance", key: "attendance", icon: ClipboardCheck },
+  { id: "groups",     key: "studentsGroups", icon: LayoutList },
+  { id: "timetable",  key: "timetable",  icon: CalendarDays }
 ];
 
 const countStatus = (students, status) =>
   students.filter((s) => s.todayAttendance?.status === status).length;
 
 export default function TeacherDashboard() {
+  const { lang } = useLang(); const t = T[lang];
   const [data, setData] = useState(null);
   const [schedules, setSchedules] = useState([]);
   const [notes, setNotes] = useState({});
@@ -119,14 +122,14 @@ export default function TeacherDashboard() {
 
   if (loading) {
     return (
-      <AppLayout title="Teacher dashboard" subtitle="Assigned students and daily attendance.">
-        <LoadingState label="Loading assigned students" />
+      <AppLayout title={t.teacherTitle} subtitle={t.teacherSubtitle}>
+        <LoadingState label={t.loading} />
       </AppLayout>
     );
   }
 
   return (
-    <AppLayout title="Teacher dashboard" subtitle="Assigned students and daily attendance.">
+    <AppLayout title={t.teacherTitle} subtitle={t.teacherSubtitle}>
       <div className="grid gap-6">
         {/* Mobile app banner */}
         <div className="flex items-center justify-between rounded-2xl border border-brand-200 bg-gradient-to-r from-brand-50 to-emerald-50 dark:border-brand-800 dark:from-brand-950/40 dark:to-emerald-950/30 px-4 py-3">
@@ -135,15 +138,15 @@ export default function TeacherDashboard() {
               <Smartphone className="h-5 w-5 text-white" />
             </div>
             <div>
-              <p className="text-sm font-bold text-brand-800 dark:text-brand-200">Teacher Mobile App</p>
-              <p className="text-xs text-brand-600 dark:text-brand-400">Optimised for phones — mark attendance on the go</p>
+              <p className="text-sm font-bold text-brand-800 dark:text-brand-200">{t.mobileApp}</p>
+              <p className="text-xs text-brand-600 dark:text-brand-400">{t.mobileAppDesc}</p>
             </div>
           </div>
           <Link
             to="/teacher/app"
             className="shrink-0 rounded-xl bg-gradient-to-r from-brand-600 to-brand-700 px-4 py-2 text-sm font-bold text-white shadow-sm transition-all hover:from-brand-700 hover:to-brand-800"
           >
-            Open
+            {t.open}
           </Link>
         </div>
 
@@ -158,9 +161,9 @@ export default function TeacherDashboard() {
         {/* Stats row */}
         <section className="grid gap-4 sm:grid-cols-3">
           {[
-            { icon: Users,        label: "Assigned",      value: students.length, gradient: "from-brand-500 to-brand-700",     border: "border-brand-100 dark:border-brand-900",   num: "text-brand-900 dark:text-brand-200"   },
-            { icon: CheckCircle2, label: "Present today",  value: presentCount,    gradient: "from-emerald-500 to-teal-600",    border: "border-emerald-100 dark:border-emerald-900", num: "text-emerald-900 dark:text-emerald-200" },
-            { icon: XCircle,      label: "Absent today",   value: absentCount,     gradient: "from-rose-500 to-red-600",        border: "border-rose-100 dark:border-rose-900",      num: "text-rose-900 dark:text-rose-200"     }
+            { icon: Users,        label: t.assigned,      value: students.length, gradient: "from-brand-500 to-brand-700",     border: "border-brand-100 dark:border-brand-900",   num: "text-brand-900 dark:text-brand-200"   },
+            { icon: CheckCircle2, label: t.presentToday2,  value: presentCount,    gradient: "from-emerald-500 to-teal-600",    border: "border-emerald-100 dark:border-emerald-900", num: "text-emerald-900 dark:text-emerald-200" },
+            { icon: XCircle,      label: t.absentToday2,   value: absentCount,     gradient: "from-rose-500 to-red-600",        border: "border-rose-100 dark:border-rose-900",      num: "text-rose-900 dark:text-rose-200"     }
           ].map(({ icon: Icon, label, value, gradient, border, num }) => (
             <div key={label} className={`card-hover border p-5 ${border}`}>
               <div className="flex items-start justify-between gap-3">
@@ -178,13 +181,14 @@ export default function TeacherDashboard() {
 
         {/* Pill tabs */}
         <div className="flex flex-wrap gap-2">
-          {TABS.map((t) => {
-            const Icon = t.icon;
-            const active = tab === t.id;
+          {TAB_IDS.map((tab_item) => {
+            const Icon = tab_item.icon;
+            const active = tab === tab_item.id;
+            const label = t[tab_item.key];
             return (
               <button
-                key={t.id}
-                onClick={() => setTab(t.id)}
+                key={tab_item.id}
+                onClick={() => setTab(tab_item.id)}
                 className={`inline-flex items-center gap-2.5 rounded-2xl px-6 py-3 text-sm font-bold transition-all duration-200 ${
                   active
                     ? "bg-gradient-to-r from-brand-600 to-brand-700 text-white shadow-md shadow-brand-200 dark:shadow-brand-900"
@@ -192,8 +196,8 @@ export default function TeacherDashboard() {
                 }`}
               >
                 <Icon className="h-4 w-4" />
-                {t.label}
-                {t.id === "attendance" && unmarkedCount > 0 && (
+                {label}
+                {tab_item.id === "attendance" && unmarkedCount > 0 && (
                   <span className={`rounded-full px-2 py-0.5 text-[10px] font-black ${active ? "bg-white/20 text-white" : "bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200"}`}>
                     {unmarkedCount}
                   </span>
@@ -222,15 +226,15 @@ export default function TeacherDashboard() {
                       <CalendarDays className="h-6 w-6 text-white" />
                     </div>
                     <div>
-                      <h2 className="text-lg font-bold text-white">My Timetable</h2>
+                      <h2 className="text-lg font-bold text-white">{t.myTimetable}</h2>
                       <p className="text-sm text-brand-200">
-                        {data?.teacher?.teacherProfile?.subject || "Your scheduled classes"} · weekly view
+                        {data?.teacher?.teacherProfile?.subject || t.myTimetable} · {t.weeklyView}
                       </p>
                     </div>
                   </div>
                   <button className="inline-flex items-center gap-2 rounded-xl bg-white/15 px-4 py-2 text-sm font-semibold text-white transition-all hover:bg-white/25" onClick={loadSchedules}>
                     <RefreshCcw className="h-4 w-4" />
-                    Refresh
+                    {t.refresh}
                   </button>
                 </div>
               </div>
@@ -253,21 +257,21 @@ export default function TeacherDashboard() {
                       <ClipboardCheck className="h-6 w-6 text-white" />
                     </div>
                     <div>
-                      <h2 className="text-lg font-bold text-white">Attendance — {data?.today}</h2>
+                      <h2 className="text-lg font-bold text-white">{t.attendanceDate(data?.today)}</h2>
                       <p className="text-sm text-emerald-100">
-                        {data?.teacher?.teacherProfile?.subject || "Assigned class"} ·{" "}
-                        {unmarkedCount > 0 ? `${unmarkedCount} not yet marked` : "All students marked ✓"}
+                        {data?.teacher?.teacherProfile?.subject || t.assignedClass} ·{" "}
+                        {unmarkedCount > 0 ? t.notYetMarked(unmarkedCount) : t.allMarked}
                       </p>
                     </div>
                   </div>
                   <div className="flex gap-2">
                     <button type="button" className="inline-flex items-center gap-2 rounded-xl bg-white/15 px-4 py-2 text-sm font-semibold text-white transition-all hover:bg-white/25" onClick={() => setShowIdCard(true)}>
                       <IdCard className="h-4 w-4" />
-                      My ID
+                      {t.myId}
                     </button>
                     <button type="button" className="inline-flex items-center gap-2 rounded-xl bg-white/15 px-4 py-2 text-sm font-semibold text-white transition-all hover:bg-white/25" onClick={loadDashboard}>
                       <RefreshCcw className="h-4 w-4" />
-                      Refresh
+                      {t.refresh}
                     </button>
                   </div>
                 </div>
@@ -328,7 +332,7 @@ export default function TeacherDashboard() {
                       <label className="field mb-3">
                         <span className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
                           <MessageSquareText className="h-3.5 w-3.5" />
-                          Optional note
+                          {t.optionalNote}
                         </span>
                         <textarea
                           className="input min-h-[64px] text-xs resize-none"
@@ -336,7 +340,7 @@ export default function TeacherDashboard() {
                           onChange={(event) =>
                             setNotes((current) => ({ ...current, [student._id]: event.target.value }))
                           }
-                          placeholder="Reason or reminder..."
+                          placeholder={t.noteReason}
                         />
                       </label>
 
@@ -353,7 +357,7 @@ export default function TeacherDashboard() {
                           }`}
                         >
                           <CheckCircle2 className="h-4 w-4" />
-                          Present
+                          {t.present}
                         </button>
                         <button
                           type="button"
@@ -366,7 +370,7 @@ export default function TeacherDashboard() {
                           }`}
                         >
                           <XCircle className="h-4 w-4" />
-                          Absent
+                          {t.absent}
                         </button>
                       </div>
 
@@ -375,8 +379,8 @@ export default function TeacherDashboard() {
                         <p className="mt-2 text-center text-[10px] text-slate-400 dark:text-slate-500">
                           Notification:{" "}
                           {student.todayAttendance?.parentNotification?.sent
-                            ? "email sent ✓"
-                            : student.todayAttendance?.parentNotification?.error || "not sent"}
+                            ? t.emailSent
+                            : student.todayAttendance?.parentNotification?.error || t.notSent}
                         </p>
                       )}
                     </div>
@@ -387,8 +391,8 @@ export default function TeacherDashboard() {
               {students.length === 0 && (
                 <div className="col-span-full flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-200 py-16 text-center dark:border-slate-700">
                   <UserRound className="h-12 w-12 text-slate-300 dark:text-slate-600" />
-                  <p className="mt-3 text-sm font-bold text-slate-500 dark:text-slate-400">No students assigned yet</p>
-                  <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">Ask an admin to assign students to your class</p>
+                  <p className="mt-3 text-sm font-bold text-slate-500 dark:text-slate-400">{t.noStudentsAssigned}</p>
+                  <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">{t.askAdmin}</p>
                 </div>
               )}
             </div>

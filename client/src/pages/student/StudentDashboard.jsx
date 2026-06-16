@@ -20,6 +20,8 @@ import ErrorAlert from "../../components/ErrorAlert.jsx";
 import LoadingState from "../../components/LoadingState.jsx";
 import StatusBadge from "../../components/StatusBadge.jsx";
 import AppLayout from "../../layouts/AppLayout.jsx";
+import { useLang } from "../../context/LanguageContext.jsx";
+import { T } from "../../translations/dashboards.js";
 import AnnouncementsCard from "../../components/AnnouncementsCard.jsx";
 import IDCardModal from "../../components/IDCardModal.jsx";
 import TimetableGrid from "../../components/TimetableGrid.jsx";
@@ -32,13 +34,14 @@ const payStatusBadge = {
   pending:  "bg-sky-100 text-sky-700 ring-sky-200 dark:bg-sky-900 dark:text-sky-300 dark:ring-sky-700"
 };
 
-const TABS = [
-  { id: "overview",  label: "Overview",  icon: UserRound    },
-  { id: "timetable", label: "Timetable", icon: CalendarDays },
-  { id: "payments",  label: "Payments",  icon: Wallet       }
+const TAB_IDS = [
+  { id: "overview",  key: "overview",  icon: UserRound    },
+  { id: "timetable", key: "timetable", icon: CalendarDays },
+  { id: "payments",  key: "payments",  icon: Wallet       }
 ];
 
 export default function StudentDashboard() {
+  const { lang } = useLang(); const t = T[lang];
   const [profile, setProfile] = useState(null);
   const [payments, setPayments] = useState([]);
   const [schedules, setSchedules] = useState([]);
@@ -84,8 +87,8 @@ export default function StudentDashboard() {
 
   if (loading) {
     return (
-      <AppLayout title="Student dashboard" subtitle="Profile and attendance history.">
-        <LoadingState label="Loading student profile" />
+      <AppLayout title={t.studentTitle} subtitle={t.studentSubtitle}>
+        <LoadingState label={t.loading} />
       </AppLayout>
     );
   }
@@ -161,7 +164,7 @@ export default function StudentDashboard() {
             {summary.total > 0 && (
               <div className="flex-1 min-w-[160px]">
                 <div className="mb-1.5 flex items-center justify-between text-xs font-semibold">
-                  <span className="text-slate-500 dark:text-slate-400">Attendance rate</span>
+                  <span className="text-slate-500 dark:text-slate-400">{t.attendanceRate}</span>
                   <span className={summary.rate >= 75 ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"}>
                     {summary.rate}%
                   </span>
@@ -180,20 +183,20 @@ export default function StudentDashboard() {
             )}
             <button onClick={() => setShowIdCard(true)} className="btn-secondary shrink-0">
               <IdCard className="h-4 w-4" />
-              View my ID card
+              {t.viewIdCard}
             </button>
           </div>
         </section>
 
         {/* ── Pill tabs ── */}
         <div className="flex flex-wrap gap-2">
-          {TABS.map((t) => {
-            const Icon = t.icon;
-            const active = tab === t.id;
+          {TAB_IDS.map((tab_item) => {
+            const Icon = tab_item.icon;
+            const active = tab === tab_item.id;
             return (
               <button
-                key={t.id}
-                onClick={() => setTab(t.id)}
+                key={tab_item.id}
+                onClick={() => setTab(tab_item.id)}
                 className={`inline-flex items-center gap-2.5 rounded-2xl px-6 py-3 text-sm font-bold transition-all duration-200 ${
                   active
                     ? "bg-gradient-to-r from-brand-600 to-emerald-700 text-white shadow-md shadow-brand-200 dark:shadow-brand-900"
@@ -201,7 +204,7 @@ export default function StudentDashboard() {
                 }`}
               >
                 <Icon className="h-4 w-4" />
-                {t.label}
+                {t[tab_item.key]}
               </button>
             );
           })}
@@ -217,15 +220,15 @@ export default function StudentDashboard() {
                     <CalendarDays className="h-6 w-6 text-white" />
                   </div>
                   <div>
-                    <h2 className="text-lg font-bold text-white">My Timetable</h2>
+                    <h2 className="text-lg font-bold text-white">{t.myTimetable}</h2>
                     <p className="text-sm text-brand-200">
-                      {details.course ? `Course: ${details.course}` : "Your weekly schedule"}
+                      {details.course ? `${t.course}: ${details.course}` : t.weeklyView}
                     </p>
                   </div>
                 </div>
                 <button className="inline-flex items-center gap-2 rounded-xl bg-white/15 px-4 py-2 text-sm font-semibold text-white transition-all hover:bg-white/25" onClick={loadSchedules}>
                   <RefreshCcw className="h-4 w-4" />
-                  Refresh
+                  {t.refresh}
                 </button>
               </div>
             </div>
@@ -244,8 +247,8 @@ export default function StudentDashboard() {
                   <Wallet className="h-6 w-6 text-white" />
                 </div>
                 <div>
-                  <h2 className="text-lg font-bold text-white">My Payments</h2>
-                  <p className="text-sm text-emerald-100">Your full payment history</p>
+                  <h2 className="text-lg font-bold text-white">{t.myPayments}</h2>
+                  <p className="text-sm text-emerald-100">{t.fullHistory}</p>
                 </div>
               </div>
             </div>
@@ -256,7 +259,7 @@ export default function StudentDashboard() {
                   <table className="min-w-full text-sm">
                     <thead>
                       <tr className="border-b border-slate-100 dark:border-slate-700">
-                        {["Period / Month", "Amount", "Paid", "Due date", "Status"].map((h) => (
+                        {[t.periodMonth, t.amount, t.paid, t.dueDate, t.status].map((h) => (
                           <th key={h} className="pb-3 pr-4 text-left text-xs font-bold uppercase tracking-wider text-slate-400 first:pl-2">{h}</th>
                         ))}
                       </tr>
@@ -283,7 +286,7 @@ export default function StudentDashboard() {
               ) : (
                 <div className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-200 py-12 text-center dark:border-slate-700">
                   <Wallet className="h-10 w-10 text-slate-300 dark:text-slate-600" />
-                  <p className="mt-3 text-sm font-medium text-slate-500 dark:text-slate-400">No payment records yet</p>
+                  <p className="mt-3 text-sm font-medium text-slate-500 dark:text-slate-400">{t.noPayments}</p>
                 </div>
               )}
             </div>
@@ -300,16 +303,16 @@ export default function StudentDashboard() {
                   <div className="rounded-xl bg-gradient-to-br from-brand-500 to-emerald-600 p-2.5 shadow-sm">
                     <UserRound className="h-5 w-5 text-white" />
                   </div>
-                  <h2 className="text-base font-bold text-slate-900 dark:text-slate-100">Profile Details</h2>
+                  <h2 className="text-base font-bold text-slate-900 dark:text-slate-100">{t.profileDetails}</h2>
                 </div>
 
                 <dl className="grid gap-2.5 text-sm">
                   {[
-                    { label: "Age",     icon: UserRound,     value: details.age || "–"                              },
-                    { label: "Course",  icon: GraduationCap, value: details.course || "–"                          },
-                    { label: "Teacher", icon: BookOpen,       value: profile?.teacher?.name || "Not assigned"       },
-                    { label: "Parent",  icon: UserRound,      value: details.parentName || "–"                      },
-                    { label: "Contact", icon: Phone,          value: details.parentPhone || details.parentEmail || "–" }
+                    { label: t.ageLabel,     icon: UserRound,     value: details.age || "–"                              },
+                    { label: t.courseLabel,  icon: GraduationCap, value: details.course || "–"                          },
+                    { label: t.teacherLabel, icon: BookOpen,       value: profile?.teacher?.name || t.notAssigned       },
+                    { label: t.parentLabel,  icon: UserRound,      value: details.parentName || "–"                      },
+                    { label: t.contactLabel, icon: Phone,          value: details.parentPhone || details.parentEmail || "–" }
                   ].map(({ label, icon: Icon, value }) => (
                     <div key={label} className="flex items-center justify-between gap-3 rounded-xl bg-slate-50 px-3.5 py-2.5 dark:bg-slate-700/50">
                       <span className="flex items-center gap-2 text-slate-500 dark:text-slate-400 shrink-0">
@@ -329,12 +332,12 @@ export default function StudentDashboard() {
                     <CalendarDays className="h-5 w-5 text-white" aria-hidden="true" />
                   </div>
                   <div>
-                    <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">Attendance History</h2>
+                    <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">{t.attendanceHistory}</h2>
                     <p className="text-sm text-slate-500 dark:text-slate-400">
-                      Most recent 90 records
+                      {t.last90}
                       {summary.total > 0 && (
                         <span className={`ml-2 font-semibold ${summary.rate >= 75 ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"}`}>
-                          · {summary.rate}% rate
+                          · {summary.rate}% {t.rate}
                         </span>
                       )}
                     </p>
@@ -345,10 +348,10 @@ export default function StudentDashboard() {
                   <table className="min-w-full text-sm">
                     <thead>
                       <tr className="border-b border-slate-100 dark:border-slate-700">
-                        <th className="pb-3 pl-2 pr-4 text-left text-xs font-bold uppercase tracking-wider text-slate-400">Date</th>
-                        <th className="pb-3 pr-4 text-left text-xs font-bold uppercase tracking-wider text-slate-400">Status</th>
-                        <th className="pb-3 pr-4 text-left text-xs font-bold uppercase tracking-wider text-slate-400">Teacher</th>
-                        <th className="pb-3 text-left text-xs font-bold uppercase tracking-wider text-slate-400">Note</th>
+                        <th className="pb-3 pl-2 pr-4 text-left text-xs font-bold uppercase tracking-wider text-slate-400">{t.date}</th>
+                        <th className="pb-3 pr-4 text-left text-xs font-bold uppercase tracking-wider text-slate-400">{t.status}</th>
+                        <th className="pb-3 pr-4 text-left text-xs font-bold uppercase tracking-wider text-slate-400">{t.teacherLabel}</th>
+                        <th className="pb-3 text-left text-xs font-bold uppercase tracking-wider text-slate-400">{t.note}</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-50 dark:divide-slate-700/50">
@@ -366,7 +369,7 @@ export default function StudentDashboard() {
                       ) : (
                         <tr>
                           <td className="py-10 text-center text-sm text-slate-400" colSpan="4">
-                            No attendance records yet.
+                            {t.noAttendance}
                           </td>
                         </tr>
                       )}
@@ -387,8 +390,8 @@ export default function StudentDashboard() {
                       <Wallet className="h-5 w-5 text-white" />
                     </div>
                     <div>
-                      <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">My Fees</h2>
-                      <p className="text-sm text-slate-500 dark:text-slate-400">Latest payment records</p>
+                      <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">{t.myFees}</h2>
+                      <p className="text-sm text-slate-500 dark:text-slate-400">{t.latestPayments}</p>
                     </div>
                   </div>
                   {payments.length > 5 && (
@@ -397,7 +400,7 @@ export default function StudentDashboard() {
                       className="btn-secondary text-xs"
                       onClick={() => setTab("payments")}
                     >
-                      View all
+                      {t.viewAll}
                     </button>
                   )}
                 </div>
@@ -421,7 +424,7 @@ export default function StudentDashboard() {
                 ) : (
                   <div className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-200 py-8 text-center dark:border-slate-700">
                     <Wallet className="h-8 w-8 text-slate-300 dark:text-slate-600" />
-                    <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">No fee records yet</p>
+                    <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">{t.noFees}</p>
                   </div>
                 )}
               </div>

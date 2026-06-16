@@ -11,6 +11,8 @@ import {
 import { api, getApiError } from "../../api/http.js";
 import ErrorAlert from "../../components/ErrorAlert.jsx";
 import AppLayout from "../../layouts/AppLayout.jsx";
+import { useLang } from "../../context/LanguageContext.jsx";
+import { T } from "../../translations/dashboards.js";
 
 const emptyForm = {
   role: "student",
@@ -33,13 +35,14 @@ const emptyForm = {
   }
 };
 
-const TABS = [
-  { id: "students", label: "Students", icon: Users },
-  { id: "teachers", label: "Teachers", icon: GraduationCap },
-  { id: "announcements", label: "Announcements", icon: Megaphone }
+const TAB_IDS = [
+  { id: "students",      key: "students",      icon: Users },
+  { id: "teachers",      key: "teachers",      icon: GraduationCap },
+  { id: "announcements", key: "announcements", icon: Megaphone }
 ];
 
 export default function SousAdminDashboard() {
+  const { lang } = useLang(); const t = T[lang];
   const [users, setUsers] = useState([]);
   const [announcements, setAnnouncements] = useState([]);
   const [form, setForm] = useState(emptyForm);
@@ -164,7 +167,7 @@ export default function SousAdminDashboard() {
   };
 
   const removeAnnouncement = async (id) => {
-    if (!window.confirm("Delete this announcement?")) return;
+    if (!window.confirm(t.deleteAnnouncement)) return;
     try {
       await api.delete(`/announcements/${id}`);
       loadAnnouncements();
@@ -176,19 +179,19 @@ export default function SousAdminDashboard() {
   const currentList = tab === "students" ? students : tab === "teachers" ? teachers : [];
 
   return (
-    <AppLayout title="Sous-Admin Dashboard" subtitle="Manage users and announcements.">
+    <AppLayout title={t.sousAdminTitle} subtitle={t.sousAdminSubtitle}>
       <div className="grid gap-6">
         <ErrorAlert message={error} />
 
         {/* Tab navigation */}
         <div className="flex flex-wrap gap-2 rounded-2xl border border-slate-200 bg-white p-1.5 shadow-sm">
-          {TABS.map((t) => {
-            const Icon = t.icon;
-            const active = tab === t.id;
+          {TAB_IDS.map((tab_item) => {
+            const Icon = tab_item.icon;
+            const active = tab === tab_item.id;
             return (
               <button
-                key={t.id}
-                onClick={() => { setTab(t.id); resetForm(); }}
+                key={tab_item.id}
+                onClick={() => { setTab(tab_item.id); resetForm(); }}
                 className={`inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-bold transition-all ${
                   active
                     ? "bg-gradient-to-r from-brand-500 to-brand-700 text-white shadow-sm"
@@ -196,7 +199,7 @@ export default function SousAdminDashboard() {
                 }`}
               >
                 <Icon className="h-4 w-4" />
-                {t.label}
+                {t[tab_item.key]}
               </button>
             );
           })}
@@ -211,8 +214,8 @@ export default function SousAdminDashboard() {
                   <Megaphone className="h-5 w-5 text-white" />
                 </div>
                 <div>
-                  <h2 className="text-lg font-bold">Announcements</h2>
-                  <p className="text-sm text-slate-500">{announcements.length} published</p>
+                  <h2 className="text-lg font-bold">{t.announcements}</h2>
+                  <p className="text-sm text-slate-500">{announcements.length} {t.published}</p>
                 </div>
               </div>
               <button className="btn-secondary" onClick={loadAnnouncements}>
@@ -258,7 +261,7 @@ export default function SousAdminDashboard() {
             ) : (
               <div className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-200 py-12 text-center">
                 <Megaphone className="h-10 w-10 text-slate-300" />
-                <p className="mt-3 text-sm font-medium text-slate-500">No announcements yet</p>
+                <p className="mt-3 text-sm font-medium text-slate-500">{t.noAnnouncements}</p>
               </div>
             )}
           </div>
@@ -277,10 +280,10 @@ export default function SousAdminDashboard() {
                   </div>
                   <div>
                     <h2 className="text-lg font-bold">
-                      {editingId ? "Edit user" : `Add ${tab === "students" ? "Student" : "Teacher"}`}
+                      {editingId ? t.updateUser : `${t.addUser} — ${tab === "students" ? t.student : t.teacher}`}
                     </h2>
                     <p className="text-sm text-slate-500">
-                      {editingId ? "Update selected account" : "Create a new account"}
+                      {editingId ? t.updateSelected : t.createAccount}
                     </p>
                   </div>
                 </div>
@@ -292,12 +295,12 @@ export default function SousAdminDashboard() {
                       onClick={() => openAddForm(tab === "students" ? "student" : "teacher")}
                     >
                       <Plus className="h-4 w-4" />
-                      Add {tab === "students" ? "Student" : "Teacher"}
+                      {tab === "students" ? t.addStudent : t.addTeacher}
                     </button>
                   )}
                   {showForm && (
                     <button type="button" className="btn-secondary" onClick={resetForm}>
-                      Cancel
+                      {t.cancel}
                     </button>
                   )}
                 </div>
@@ -307,7 +310,7 @@ export default function SousAdminDashboard() {
                 <form className="grid gap-4" onSubmit={handleSubmit}>
                   <div className="grid gap-4 sm:grid-cols-2">
                     <label className="field">
-                      Full name
+                      {t.fullName}
                       <input
                         className="input"
                         value={form.name}
@@ -316,7 +319,7 @@ export default function SousAdminDashboard() {
                       />
                     </label>
                     <label className="field">
-                      Email
+                      {t.email}
                       <input
                         className="input"
                         type="email"
@@ -329,7 +332,7 @@ export default function SousAdminDashboard() {
 
                   <div className="grid gap-4 sm:grid-cols-2">
                     <label className="field">
-                      Password
+                      {t.password}
                       <input
                         className="input"
                         type="password"
@@ -337,11 +340,11 @@ export default function SousAdminDashboard() {
                         onChange={(e) => updateForm("password", e.target.value)}
                         minLength={8}
                         required={!editingId}
-                        placeholder={editingId ? "Leave blank to keep current" : ""}
+                        placeholder={editingId ? t.leaveBlankPassword : ""}
                       />
                     </label>
                     <label className="field">
-                      Phone
+                      {t.phone}
                       <input
                         className="input"
                         value={form.phone}
@@ -351,21 +354,21 @@ export default function SousAdminDashboard() {
                   </div>
 
                   <label className="field">
-                    Status
+                    {t.status}
                     <select
                       className="input"
                       value={form.status}
                       onChange={(e) => updateForm("status", e.target.value)}
                     >
-                      <option value="active">Active</option>
-                      <option value="inactive">Inactive</option>
+                      <option value="active">{t.active}</option>
+                      <option value="inactive">{t.inactive}</option>
                     </select>
                   </label>
 
                   {form.role === "teacher" && (
                     <div className="grid gap-4 sm:grid-cols-2">
                       <label className="field">
-                        Subject
+                        {t.subject}
                         <input
                           className="input"
                           value={form.teacherProfile.subject}
@@ -374,7 +377,7 @@ export default function SousAdminDashboard() {
                         />
                       </label>
                       <label className="field">
-                        Date of birth
+                        {t.dateOfBirth}
                         <input
                           className="input"
                           type="date"
@@ -383,7 +386,7 @@ export default function SousAdminDashboard() {
                         />
                       </label>
                       <label className="field sm:col-span-2">
-                        Contact info
+                        {t.contactInfo}
                         <input
                           className="input"
                           value={form.teacherProfile.contactInfo}
@@ -396,7 +399,7 @@ export default function SousAdminDashboard() {
                   {form.role === "student" && (
                     <div className="grid gap-4 sm:grid-cols-2">
                       <label className="field">
-                        Age
+                        {t.age}
                         <input
                           className="input"
                           type="number"
@@ -408,7 +411,7 @@ export default function SousAdminDashboard() {
                         />
                       </label>
                       <label className="field">
-                        Date of birth
+                        {t.dateOfBirth}
                         <input
                           className="input"
                           type="date"
@@ -417,7 +420,7 @@ export default function SousAdminDashboard() {
                         />
                       </label>
                       <label className="field">
-                        Course
+                        {t.course}
                         <input
                           className="input"
                           value={form.studentProfile.course}
@@ -426,7 +429,7 @@ export default function SousAdminDashboard() {
                         />
                       </label>
                       <label className="field">
-                        Parent name
+                        {t.parentName}
                         <input
                           className="input"
                           value={form.studentProfile.parentName}
@@ -434,7 +437,7 @@ export default function SousAdminDashboard() {
                         />
                       </label>
                       <label className="field">
-                        Parent email
+                        {t.parentEmail}
                         <input
                           className="input"
                           type="email"
@@ -443,7 +446,7 @@ export default function SousAdminDashboard() {
                         />
                       </label>
                       <label className="field">
-                        Parent phone
+                        {t.parentPhone}
                         <input
                           className="input"
                           value={form.studentProfile.parentPhone}
@@ -451,7 +454,7 @@ export default function SousAdminDashboard() {
                         />
                       </label>
                       <label className="field">
-                        Mark
+                        {t.mark}
                         <input
                           className="input"
                           value={form.studentProfile.mark}
@@ -459,13 +462,13 @@ export default function SousAdminDashboard() {
                         />
                       </label>
                       <label className="field">
-                        Assigned teacher
+                        {t.assignedTeacher}
                         <select
                           className="input"
                           value={form.studentProfile.teacher}
                           onChange={(e) => updateForm("studentProfile.teacher", e.target.value)}
                         >
-                          <option value="">Unassigned</option>
+                          <option value="">{t.unassigned}</option>
                           {teachers.map((t) => (
                             <option key={t._id} value={t._id}>
                               {t.name} — {t.teacherProfile?.subject || "Teacher"}
@@ -478,15 +481,14 @@ export default function SousAdminDashboard() {
 
                   <button className="btn-primary mt-1 justify-center" type="submit" disabled={saving}>
                     {editingId ? <Pencil className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
-                    {saving ? "Saving…" : editingId ? "Update user" : "Create user"}
+                    {saving ? t.saving : editingId ? t.updateUser : t.createUser}
                   </button>
                 </form>
               )}
 
               {!showForm && (
                 <p className="text-sm text-slate-400">
-                  Click "Add {tab === "students" ? "Student" : "Teacher"}" to create a new account, or click
-                  the edit button on a record to update it.
+                  {t.clickToAdd(tab)}
                 </p>
               )}
             </div>
@@ -504,25 +506,25 @@ export default function SousAdminDashboard() {
                   </div>
                   <div>
                     <h2 className="text-lg font-bold">
-                      {tab === "students" ? "Students" : "Teachers"}
+                      {tab === "students" ? t.students : t.teachers}
                     </h2>
-                    <p className="text-sm text-slate-500">{currentList.length} records</p>
+                    <p className="text-sm text-slate-500">{currentList.length} {t.records}</p>
                   </div>
                 </div>
                 <button type="button" className="btn-secondary" onClick={loadUsers}>
                   <RefreshCcw className="h-4 w-4" aria-hidden="true" />
-                  Refresh
+                  {t.refresh}
                 </button>
               </div>
 
               {loading ? (
-                <p className="text-sm text-slate-400">Loading…</p>
+                <p className="text-sm text-slate-400">{t.loading}</p>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="min-w-full text-sm">
                     <thead>
                       <tr className="border-b border-slate-100">
-                        {["Name", "Email", tab === "students" ? "Course" : "Subject", "Status", "Edit"].map((h) => (
+                        {[t.name, t.email, tab === "students" ? t.course : t.subject, t.status, t.edit].map((h) => (
                           <th
                             key={h}
                             className="pb-3 pr-4 text-left text-xs font-bold uppercase tracking-wider text-slate-400 first:pl-2"
@@ -568,7 +570,7 @@ export default function SousAdminDashboard() {
                       {currentList.length === 0 && (
                         <tr>
                           <td className="py-8 text-center text-sm text-slate-400" colSpan="5">
-                            No {tab} found.
+                            {t.noData}
                           </td>
                         </tr>
                       )}

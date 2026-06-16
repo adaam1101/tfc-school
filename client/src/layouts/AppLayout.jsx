@@ -1,14 +1,18 @@
 import React, { useState } from "react";
-import { LogOut, Moon, ScanLine, Sun, UserPen, MoreVertical, Star } from "lucide-react";
+import { LogOut, Moon, ScanLine, Sun, UserPen, MoreVertical, Star, Globe } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { schoolLogo, schoolInfo } from "../config/branding.js";
 import { useAuth } from "../context/AuthContext.jsx";
+import { useLang } from "../context/LanguageContext.jsx";
 import RatingModal from "../components/RatingModal.jsx";
 import ProfileEditModal from "../components/ProfileEditModal.jsx";
 import { useTheme } from "../hooks/useTheme.js";
 
+const LANGS = [{ code: "ar", label: "ع" }, { code: "fr", label: "FR" }, { code: "en", label: "EN" }];
+
 export default function AppLayout({ title, subtitle, children, fullHeight = false }) {
   const { user, logout } = useAuth();
+  const { lang, setLang } = useLang();
   const location = useLocation();
   const isRfid = location.pathname === "/rfid-attendance";
   const [showRating, setShowRating]   = useState(false);
@@ -45,6 +49,23 @@ export default function AppLayout({ title, subtitle, children, fullHeight = fals
 
           {/* Right side */}
           <div className="flex items-center gap-1.5">
+
+            {/* Language switcher */}
+            <div className="flex items-center gap-0.5 rounded-xl border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-800 p-0.5">
+              {LANGS.map((l) => (
+                <button
+                  key={l.code}
+                  onClick={() => setLang(l.code)}
+                  className={`rounded-lg px-2 py-1 text-[11px] font-bold transition-all ${
+                    lang === l.code
+                      ? "bg-brand-600 text-white shadow-sm"
+                      : "text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-700"
+                  }`}
+                >
+                  {l.label}
+                </button>
+              ))}
+            </div>
 
             {/* Dark mode — always visible, icon only */}
             <button

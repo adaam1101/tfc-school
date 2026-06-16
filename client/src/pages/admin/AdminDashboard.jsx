@@ -41,15 +41,17 @@ import AnnouncementsPanel from "./AnnouncementsPanel.jsx";
 import AuditPanel from "./AuditPanel.jsx";
 import SchedulePanel from "./SchedulePanel.jsx";
 import { useAuth } from "../../context/AuthContext.jsx";
+import { useLang } from "../../context/LanguageContext.jsx";
+import { T } from "../../translations/dashboards.js";
 
-const NAV_ITEMS = [
-  { id: "overview",      label: "Overview",      icon: LayoutDashboard },
-  { id: "users",         label: "Users",          icon: Users },
-  { id: "enrollments",   label: "Enrollments",    icon: Inbox },
-  { id: "payments",      label: "Payments",       icon: Wallet },
-  { id: "timetable",     label: "Timetable",      icon: BookOpen },
-  { id: "announcements", label: "Announcements",  icon: Megaphone },
-  { id: "audit",         label: "Activity",       icon: History }
+const NAV_KEYS = [
+  { id: "overview",      key: "overview",      icon: LayoutDashboard },
+  { id: "users",         key: "users",          icon: Users },
+  { id: "enrollments",   key: "enrollments",    icon: Inbox },
+  { id: "payments",      key: "payments",       icon: Wallet },
+  { id: "timetable",     key: "timetable",      icon: BookOpen },
+  { id: "announcements", key: "announcements",  icon: Megaphone },
+  { id: "audit",         key: "activity",       icon: History }
 ];
 
 const emptyForm = {
@@ -110,6 +112,7 @@ const roleBadge  = {
 
 export default function AdminDashboard() {
   const { user } = useAuth();
+  const { lang } = useLang(); const t = T[lang];
   const [dashboard, setDashboard] = useState(null);
   const [users, setUsers] = useState([]);
   const [records, setRecords] = useState([]);
@@ -263,8 +266,8 @@ export default function AdminDashboard() {
 
   if (loading) {
     return (
-      <AppLayout title="Admin dashboard" subtitle="Overview, profiles, attendance, and reports.">
-        <LoadingState label="Loading admin data" />
+      <AppLayout title={t.adminTitle} subtitle={t.adminSubtitle}>
+        <LoadingState label={t.loading} />
       </AppLayout>
     );
   }
@@ -322,9 +325,10 @@ export default function AdminDashboard() {
 
           {/* Nav items */}
           <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-1">
-            {NAV_ITEMS.map((item) => {
+            {NAV_KEYS.map((item) => {
               const Icon = item.icon;
               const active = tab === item.id;
+              const label = t[item.key];
               return (
                 <button
                   key={item.id}
@@ -336,7 +340,7 @@ export default function AdminDashboard() {
                   }`}
                 >
                   <Icon className="h-4 w-4 shrink-0" />
-                  {item.label}
+                  {label}
                   {active && <ChevronRight className="h-3.5 w-3.5 ml-auto text-brand-400" />}
                 </button>
               );
@@ -350,7 +354,7 @@ export default function AdminDashboard() {
               className="w-full flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-semibold text-brand-200 hover:bg-white/10 hover:text-white transition-all"
             >
               <RefreshCcw className="h-4 w-4 shrink-0" />
-              Refresh data
+              {t.refreshData}
             </button>
           </div>
         </aside>
@@ -366,12 +370,12 @@ export default function AdminDashboard() {
               <Menu className="h-5 w-5" />
             </button>
             <div className="flex items-center gap-2">
-              {NAV_ITEMS.find((n) => n.id === tab) && (() => {
-                const Icon = NAV_ITEMS.find((n) => n.id === tab).icon;
+              {NAV_KEYS.find((n) => n.id === tab) && (() => {
+                const Icon = NAV_KEYS.find((n) => n.id === tab).icon;
                 return <Icon className="h-4 w-4 text-brand-600" />;
               })()}
               <span className="font-bold text-slate-800 dark:text-slate-100">
-                {NAV_ITEMS.find((n) => n.id === tab)?.label}
+                {(() => { const item = NAV_KEYS.find((n) => n.id === tab); return item ? t[item.key] : ""; })()}
               </span>
             </div>
           </div>
@@ -392,10 +396,10 @@ export default function AdminDashboard() {
                 {/* Page heading */}
                 <div>
                   <h1 className="text-2xl font-black tracking-tight text-slate-900 dark:text-slate-100">
-                    Dashboard Overview
+                    {t.adminTitle}
                   </h1>
                   <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                    Live snapshot of school operations.
+                    {t.adminSubtitle}
                   </p>
                 </div>
 
@@ -404,39 +408,39 @@ export default function AdminDashboard() {
                   {[
                     {
                       icon: GraduationCap,
-                      label: "Total Students",
+                      label: t.totalStudents,
                       value: dashboard?.stats.totalStudents || 0,
                       gradient: "from-brand-500 to-emerald-600",
                       border: "border-brand-100 dark:border-brand-900",
                       num: "text-brand-900 dark:text-brand-200",
-                      desc: "enrolled"
+                      desc: t.enrolled
                     },
                     {
                       icon: UserRound,
-                      label: "Total Teachers",
+                      label: t.totalTeachers,
                       value: dashboard?.stats.totalTeachers || 0,
                       gradient: "from-violet-500 to-purple-600",
                       border: "border-violet-100 dark:border-violet-900",
                       num: "text-violet-900 dark:text-violet-200",
-                      desc: "on staff"
+                      desc: t.onStaff
                     },
                     {
                       icon: CheckCircle2,
-                      label: "Present Today",
+                      label: t.presentToday,
                       value: todayPresent,
                       gradient: "from-emerald-500 to-teal-600",
                       border: "border-emerald-100 dark:border-emerald-900",
                       num: "text-emerald-900 dark:text-emerald-200",
-                      desc: "checked in"
+                      desc: t.checkedIn
                     },
                     {
                       icon: XCircle,
-                      label: "Absent Today",
+                      label: t.absentToday,
                       value: todayAbsent,
                       gradient: "from-rose-500 to-red-600",
                       border: "border-rose-100 dark:border-rose-900",
                       num: "text-rose-900 dark:text-rose-200",
-                      desc: "not present"
+                      desc: t.notPresent
                     }
                   ].map(({ icon: Icon, label, value, gradient, border, num, desc }) => (
                     <div key={label} className={`card-hover border p-5 ${border}`}>
@@ -466,8 +470,8 @@ export default function AdminDashboard() {
                         <BookOpen className="h-5 w-5 text-white" />
                       </div>
                       <div>
-                        <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">Recent Absences</h2>
-                        <p className="text-sm text-slate-500 dark:text-slate-400">Latest students marked absent.</p>
+                        <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">{t.recentAbsences}</h2>
+                        <p className="text-sm text-slate-500 dark:text-slate-400">{t.recentAbsencesDesc}</p>
                       </div>
                     </div>
 
@@ -493,7 +497,7 @@ export default function AdminDashboard() {
                       ) : (
                         <div className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-200 py-8 text-center dark:border-slate-700">
                           <CheckCircle2 className="h-8 w-8 text-slate-300" />
-                          <p className="mt-2 text-sm text-slate-500">No absences recorded yet</p>
+                          <p className="mt-2 text-sm text-slate-500">{t.noAbsences}</p>
                         </div>
                       )}
                     </div>
@@ -506,37 +510,37 @@ export default function AdminDashboard() {
                         <Zap className="h-5 w-5 text-white" />
                       </div>
                       <div>
-                        <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">Quick Actions</h2>
-                        <p className="text-sm text-slate-500 dark:text-slate-400">Jump to common tasks.</p>
+                        <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">{t.quickActions}</h2>
+                        <p className="text-sm text-slate-500 dark:text-slate-400">{t.quickActionsDesc}</p>
                       </div>
                     </div>
 
                     <div className="grid gap-3 sm:grid-cols-2">
                       {[
                         {
-                          label: "Add Student",
-                          desc: "Create a new student account",
+                          label: t.addStudent,
+                          desc: t.addStudentDesc,
                           icon: UserPlus,
                           gradient: "from-brand-500 to-emerald-600",
                           action: () => { setForm({ ...emptyForm, role: "student" }); setEditingId(null); setShowForm(true); setTab("users"); setUserSubTab("students"); }
                         },
                         {
-                          label: "Add Teacher",
-                          desc: "Create a new teacher account",
+                          label: t.addTeacher,
+                          desc: t.addTeacherDesc,
                           icon: GraduationCap,
                           gradient: "from-violet-500 to-purple-600",
                           action: () => { setForm({ ...emptyForm, role: "teacher" }); setEditingId(null); setShowForm(true); setTab("users"); setUserSubTab("teachers"); }
                         },
                         {
-                          label: "View Payments",
-                          desc: "Manage fees and invoices",
+                          label: t.viewPayments,
+                          desc: t.viewPaymentsDesc,
                           icon: Wallet,
                           gradient: "from-emerald-500 to-teal-600",
                           action: () => navigateTo("payments")
                         },
                         {
-                          label: "View Timetable",
-                          desc: "Manage class schedules",
+                          label: t.viewTimetable,
+                          desc: t.viewTimetableDesc,
                           icon: CalendarDays,
                           gradient: "from-amber-500 to-orange-500",
                           action: () => navigateTo("timetable")
@@ -567,9 +571,9 @@ export default function AdminDashboard() {
               <>
                 <div className="flex flex-wrap items-center justify-between gap-4">
                   <div>
-                    <h1 className="text-2xl font-black tracking-tight text-slate-900 dark:text-slate-100">Users</h1>
+                    <h1 className="text-2xl font-black tracking-tight text-slate-900 dark:text-slate-100">{t.usersTitle}</h1>
                     <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                      {students.length} students · {teachers.length} teachers
+                      {t.usersSubtitle(students.length, teachers.length)}
                     </p>
                   </div>
                   <button
@@ -577,7 +581,7 @@ export default function AdminDashboard() {
                     onClick={() => { setForm(emptyForm); setEditingId(null); setShowForm(true); }}
                   >
                     <Plus className="h-4 w-4" />
-                    Add user
+                    {t.addUser}
                   </button>
                 </div>
 
@@ -604,7 +608,7 @@ export default function AdminDashboard() {
                   <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                   <input
                     className="input pl-10"
-                    placeholder={`Search ${userSubTab}...`}
+                    placeholder={t.searchUsers(userSubTab)}
                     value={userSearch}
                     onChange={(e) => setUserSearch(e.target.value)}
                   />
@@ -620,52 +624,52 @@ export default function AdminDashboard() {
                             {editingId ? <Pencil className="h-5 w-5 text-white" /> : <Plus className="h-5 w-5 text-white" />}
                           </div>
                           <div>
-                            <h2 className="text-lg font-bold dark:text-slate-100">{editingId ? "Edit user" : "Create user"}</h2>
+                            <h2 className="text-lg font-bold dark:text-slate-100">{editingId ? t.updateUser : t.createUser}</h2>
                             <p className="text-sm text-slate-500 dark:text-slate-400">
-                              {editingId ? "Update the selected account" : "Add a new school account"}
+                              {editingId ? t.updateAccount : t.addNewAccount}
                             </p>
                           </div>
                         </div>
                         <button type="button" className="btn-secondary" onClick={resetForm}>
-                          <X className="h-4 w-4" /> Cancel
+                          <X className="h-4 w-4" /> {t.cancel}
                         </button>
                       </div>
 
                       <form className="grid gap-4" onSubmit={handleSubmit}>
                         <div className="grid gap-4 sm:grid-cols-2">
                           <label className="field">
-                            Role
+                            {t.role}
                             <select className="input" value={form.role} disabled={Boolean(editingId)} onChange={(e) => updateForm("role", e.target.value)}>
-                              <option value="student">Student</option>
-                              <option value="teacher">Teacher</option>
+                              <option value="student">{t.student}</option>
+                              <option value="teacher">{t.teacher}</option>
                               <option value="sous-admin">Sous-Admin</option>
                               <option value="moderator">Moderator</option>
                               <option value="admin">Admin</option>
                             </select>
                           </label>
                           <label className="field">
-                            Status
+                            {t.status}
                             <select className="input" value={form.status} onChange={(e) => updateForm("status", e.target.value)}>
-                              <option value="active">Active</option>
-                              <option value="inactive">Inactive</option>
+                              <option value="active">{t.active}</option>
+                              <option value="inactive">{t.inactive}</option>
                             </select>
                           </label>
                         </div>
 
                         <div className="grid gap-4 sm:grid-cols-2">
                           <label className="field">
-                            Full name
+                            {t.fullName}
                             <input className="input" value={form.name} onChange={(e) => updateForm("name", e.target.value)} required />
                           </label>
                           <label className="field">
-                            Email
+                            {t.email}
                             <input className="input" type="email" value={form.email} onChange={(e) => updateForm("email", e.target.value)} required />
                           </label>
                         </div>
 
                         <div className="grid gap-4 sm:grid-cols-2">
                           <label className="field">
-                            Password
+                            {t.password}
                             <input
                               className="input"
                               type="password"
@@ -673,11 +677,11 @@ export default function AdminDashboard() {
                               onChange={(e) => updateForm("password", e.target.value)}
                               minLength={8}
                               required={!editingId}
-                              placeholder={editingId ? "Leave blank to keep current" : ""}
+                              placeholder={editingId ? t.leaveBlankPassword : ""}
                             />
                           </label>
                           <label className="field">
-                            Phone{form.role === "student" && <span className="ml-1 text-rose-500">*</span>}
+                            {t.phone}{form.role === "student" && <span className="ml-1 text-rose-500">*</span>}
                             <input className="input" value={form.phone} onChange={(e) => updateForm("phone", e.target.value)} required={form.role === "student"} />
                           </label>
                         </div>
@@ -712,15 +716,15 @@ export default function AdminDashboard() {
                         {form.role === "teacher" && (
                           <div className="grid gap-4 sm:grid-cols-2">
                             <label className="field">
-                              Subject
+                              {t.subject}
                               <input className="input" value={form.teacherProfile.subject} onChange={(e) => updateForm("teacherProfile.subject", e.target.value)} required />
                             </label>
                             <label className="field">
-                              Date of birth
+                              {t.dateOfBirth}
                               <input className="input" type="date" value={form.teacherProfile.dateOfBirth} onChange={(e) => updateForm("teacherProfile.dateOfBirth", e.target.value)} />
                             </label>
                             <label className="field sm:col-span-2">
-                              Contact info
+                              {t.contactInfo}
                               <input className="input" value={form.teacherProfile.contactInfo} onChange={(e) => updateForm("teacherProfile.contactInfo", e.target.value)} />
                             </label>
                           </div>
@@ -729,35 +733,35 @@ export default function AdminDashboard() {
                         {form.role === "student" && (
                           <div className="grid gap-4 sm:grid-cols-2">
                             <label className="field">
-                              Age <span className="ml-1 text-rose-500">*</span>
+                              {t.age} <span className="ml-1 text-rose-500">*</span>
                               <input className="input" type="number" min="3" max="80" value={form.studentProfile.age} onChange={(e) => updateForm("studentProfile.age", e.target.value)} required />
                             </label>
                             <label className="field">
-                              Date of birth <span className="text-slate-400 text-xs font-normal">(optional)</span>
+                              {t.dateOfBirth} <span className="text-slate-400 text-xs font-normal">({t.optional})</span>
                               <input className="input" type="date" value={form.studentProfile.dateOfBirth} onChange={(e) => updateForm("studentProfile.dateOfBirth", e.target.value)} />
                             </label>
                             <label className="field">
-                              Course <span className="ml-1 text-rose-500">*</span>
+                              {t.course} <span className="ml-1 text-rose-500">*</span>
                               <input className="input" value={form.studentProfile.course} onChange={(e) => updateForm("studentProfile.course", e.target.value)} required />
                             </label>
                             <label className="field">
-                              Parent name <span className="text-slate-400 text-xs font-normal">(optional)</span>
+                              {t.parentName} <span className="text-slate-400 text-xs font-normal">({t.optional})</span>
                               <input className="input" value={form.studentProfile.parentName} onChange={(e) => updateForm("studentProfile.parentName", e.target.value)} />
                             </label>
                             <label className="field">
-                              Parent email <span className="text-slate-400 text-xs font-normal">(optional)</span>
+                              {t.parentEmail} <span className="text-slate-400 text-xs font-normal">({t.optional})</span>
                               <input className="input" type="email" value={form.studentProfile.parentEmail} onChange={(e) => updateForm("studentProfile.parentEmail", e.target.value)} />
                             </label>
                             <label className="field">
-                              Parent phone <span className="text-slate-400 text-xs font-normal">(optional)</span>
+                              {t.parentPhone} <span className="text-slate-400 text-xs font-normal">({t.optional})</span>
                               <input className="input" value={form.studentProfile.parentPhone} onChange={(e) => updateForm("studentProfile.parentPhone", e.target.value)} />
                             </label>
                             <label className="field">
-                              Mark <span className="text-slate-400 text-xs font-normal">(optional)</span>
+                              {t.mark} <span className="text-slate-400 text-xs font-normal">({t.optional})</span>
                               <input className="input" value={form.studentProfile.mark} onChange={(e) => updateForm("studentProfile.mark", e.target.value)} />
                             </label>
                             <label className="field sm:col-span-2">
-                              RFID card
+                              {t.rfidCard}
                               <span className="relative">
                                 <CreditCard className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                                 <input
@@ -774,9 +778,9 @@ export default function AdminDashboard() {
                               </span>
                             </label>
                             <label className="field sm:col-span-2">
-                              Assigned teacher <span className="ml-1 text-rose-500">*</span>
+                              {t.assignedTeacher} <span className="ml-1 text-rose-500">*</span>
                               <select className="input" required value={form.studentProfile.teacher} onChange={(e) => updateForm("studentProfile.teacher", e.target.value)}>
-                                <option value="">— Select a teacher —</option>
+                                <option value="">{t.selectTeacher}</option>
                                 {teachers.map((t) => (
                                   <option key={t._id} value={t._id}>
                                     {t.name} — {t.teacherProfile?.subject || "Teacher"}
@@ -789,7 +793,7 @@ export default function AdminDashboard() {
 
                         <button className="btn-primary mt-1 justify-center" type="submit" disabled={saving}>
                           {editingId ? <Pencil className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
-                          {saving ? "Saving…" : editingId ? "Update user" : "Create user"}
+                          {saving ? t.saving : editingId ? t.updateUser : t.createUser}
                         </button>
                       </form>
                     </div>
@@ -802,7 +806,7 @@ export default function AdminDashboard() {
                     <table className="min-w-full text-sm">
                       <thead>
                         <tr className="border-b border-slate-100 bg-slate-50 dark:border-slate-700 dark:bg-slate-800/60">
-                          {["Name", "Role", "Course / Subject", "Contact", "Actions"].map((h) => (
+                          {[t.name, t.role, t.courseOrSubject, t.contact, t.actions].map((h) => (
                             <th key={h} className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider text-slate-400">{h}</th>
                           ))}
                         </tr>
@@ -829,7 +833,7 @@ export default function AdminDashboard() {
                             <td className="px-4 py-3 text-slate-600 dark:text-slate-300 text-xs">
                               {u.role === "student" ? u.studentProfile?.course
                                : u.role === "teacher" ? u.teacherProfile?.subject
-                               : "Management"}
+                               : t.management}
                             </td>
                             <td className="px-4 py-3 text-xs text-slate-600 dark:text-slate-400">
                               {u.role === "student"
@@ -862,7 +866,7 @@ export default function AdminDashboard() {
                         {filteredUsers.length === 0 && (
                           <tr>
                             <td className="py-12 text-center text-sm text-slate-400" colSpan="5">
-                              No {userSubTab} found{userSearch ? ` matching "${userSearch}"` : ""}.
+                              {t.noUsersFound(userSubTab, userSearch)}
                             </td>
                           </tr>
                         )}
