@@ -1,7 +1,10 @@
+import crypto from "crypto";
 import express from "express";
 import rateLimit from "express-rate-limit";
 import { protect, allowRoles } from "../middleware/auth.js";
 import { Enrollment } from "../models/Enrollment.js";
+import { User } from "../models/User.js";
+import { Payment } from "../models/Payment.js";
 import { recordAudit } from "../utils/audit.js";
 
 export const enrollmentRouter = express.Router();
@@ -29,6 +32,9 @@ enrollmentRouter.post("/", publicLimiter, async (req, res, next) => {
       phone: req.body.phone,
       age: req.body.age || undefined,
       course: req.body.course,
+      courseId: req.body.courseId,
+      price: req.body.price || undefined,
+      priceUnit: req.body.priceUnit || undefined,
       parentName: req.body.parentName,
       parentPhone: req.body.parentPhone,
       message: (req.body.message || "").slice(0, 600)
@@ -70,14 +76,49 @@ enrollmentRouter.patch("/:id", async (req, res, next) => {
     );
     if (!enrollment) return res.status(404).json({ message: "Application not found." });
 
-    await recordAudit({
-      req,
-      action: status,
-      entity: "enrollment",
-      entityLabel: enrollment.name
-    });
+    await recordAudit({ req, action: status, entity: "enrollment", entityLabel: enrollment.name });
 
-    res.json({ enrollment });
+    let credentials = null;
+    if (status === "approved") {
+      // Auto-create student account
+      const slug = enrollment.name.trim().toLowerCase().replace(/\s+/g, ".").replace(/[^a-z0-9.]/g, "");
+      const rand = Math.floor(1000 + Math.random() * 9000);
+      let email = `${slug}@tfcschool.dz`;
+      const exists = await User.findOne({ email });
+      if (exists) email = `${slug}.${rand}@tfcschool.dz`;
+      const tempPassword = `Tfc@${crypto.randomBytes(8).toString("base64url").slice(0, 10)}`;
+
+      const student = await User.create({
+        role: "student",
+        name: enrollment.name.trim(),
+        email,
+        password: tempPassword,
+        phone: enrollment.phone || "",
+        status: "active",
+        studentProfile: {
+          age: enrollment.age,
+          course: enrollment.course,
+          parentName: enrollment.parentName || "",
+          parentPhone: enrollment.parentPhone || ""
+        }
+      });
+
+      // Create unpaid payment record if price was set
+      if (enrollment.price) {
+        await Payment.create({
+          student: student._id,
+          amount: enrollment.price,
+          paidAmount: 0,
+          status: "unpaid",
+          note: enrollment.course,
+          recordedBy: req.user._id
+        });
+      }
+
+      credentials = { email, password: tempPassword, studentId: student._id };
+    }
+
+    res.json({ enrollment, credentials });
   } catch (error) {
     next(error);
   }

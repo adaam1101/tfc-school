@@ -12,6 +12,9 @@ const enrollmentSchema = new Schema(
     parentName: { type: String, trim: true },
     parentPhone: { type: String, trim: true },
     message: { type: String, trim: true, maxlength: 600 },
+    courseId: { type: String, trim: true },
+    price: { type: Number, min: 0 },
+    priceUnit: { type: String, trim: true },
     status: {
       type: String,
       enum: ["pending", "approved", "rejected"],
