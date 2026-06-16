@@ -10,9 +10,11 @@ import {
   UserRound,
   IdCard,
   Clock,
-  Smartphone
+  Smartphone,
+  LayoutList
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import TeacherGroupsPanel from "../../components/TeacherGroupsPanel.jsx";
 import { useEffect, useMemo, useState } from "react";
 import { api, getApiError } from "../../api/http.js";
 import ErrorAlert from "../../components/ErrorAlert.jsx";
@@ -25,6 +27,7 @@ import TimetableGrid from "../../components/TimetableGrid.jsx";
 
 const TABS = [
   { id: "attendance", label: "Attendance", icon: ClipboardCheck },
+  { id: "groups",     label: "Students & Groups", icon: LayoutList },
   { id: "timetable",  label: "Timetable",  icon: CalendarDays }
 ];
 
@@ -199,6 +202,13 @@ export default function TeacherDashboard() {
             );
           })}
         </div>
+
+        {/* ── Students & Groups tab ── */}
+        {tab === "groups" && (
+          <section>
+            <TeacherGroupsPanel />
+          </section>
+        )}
 
         {/* ── Timetable tab ── */}
         {tab === "timetable" && (

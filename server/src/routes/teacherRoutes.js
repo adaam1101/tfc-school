@@ -3,6 +3,7 @@ import { protect, allowRoles } from "../middleware/auth.js";
 import { validate } from "../middleware/validate.js";
 import { Attendance } from "../models/Attendance.js";
 import { User } from "../models/User.js";
+import { Group } from "../models/Group.js";
 import { dateKey, daysAgo } from "../utils/dates.js";
 import { sendAbsenceNotification } from "../utils/email.js";
 import { attendanceSchema } from "../validators/schemas.js";
@@ -128,4 +129,129 @@ teacherRouter.post("/attendance", validate(attendanceSchema), async (req, res, n
   } catch (error) {
     next(error);
   }
+});
+
+// ── Student management ────────────────────────────────────────────────────────
+
+// List all students available to assign (unassigned or already mine)
+teacherRouter.get("/available-students", async (req, res, next) => {
+  try {
+    const students = await User.find({ role: "student" })
+      .select("name email studentProfile photo")
+      .sort({ name: 1 });
+    res.json({ students });
+  } catch (err) { next(err); }
+});
+
+// Add a student to this teacher's class
+teacherRouter.post("/students/add", async (req, res, next) => {
+  try {
+    const { studentId } = req.body;
+    if (!studentId) return res.status(400).json({ message: "studentId is required." });
+
+    const student = await User.findOne({ _id: studentId, role: "student" });
+    if (!student) return res.status(404).json({ message: "Student not found." });
+
+    // Update student's assigned teacher
+    student.studentProfile.teacher = req.user._id;
+    await student.save();
+
+    // Add to teacher's assignedStudents list
+    await User.updateOne(
+      { _id: req.user._id },
+      { $addToSet: { "teacherProfile.assignedStudents": studentId } }
+    );
+
+    res.json({ message: `${student.name} added to your class.`, student });
+  } catch (err) { next(err); }
+});
+
+// Remove a student from this teacher's class
+teacherRouter.delete("/students/:studentId", async (req, res, next) => {
+  try {
+    const student = await User.findOne({ _id: req.params.studentId, role: "student" });
+    if (!student) return res.status(404).json({ message: "Student not found." });
+
+    // Only remove if they're actually assigned to this teacher
+    if (String(student.studentProfile?.teacher) !== String(req.user._id)) {
+      return res.status(403).json({ message: "This student is not in your class." });
+    }
+
+    student.studentProfile.teacher = undefined;
+    await student.save();
+
+    await User.updateOne(
+      { _id: req.user._id },
+      { $pull: { "teacherProfile.assignedStudents": student._id } }
+    );
+
+    // Also remove from any groups
+    await Group.updateMany(
+      { teacher: req.user._id },
+      { $pull: { students: student._id } }
+    );
+
+    res.json({ message: `${student.name} removed from your class.` });
+  } catch (err) { next(err); }
+});
+
+// ── Group management ──────────────────────────────────────────────────────────
+
+// List this teacher's groups
+teacherRouter.get("/groups", async (req, res, next) => {
+  try {
+    const groups = await Group.find({ teacher: req.user._id })
+      .populate("students", "name email studentProfile photo")
+      .sort({ createdAt: 1 });
+    res.json({ groups });
+  } catch (err) { next(err); }
+});
+
+// Create a group
+teacherRouter.post("/groups", async (req, res, next) => {
+  try {
+    const { name, description, color, students = [] } = req.body;
+    if (!name?.trim()) return res.status(400).json({ message: "Group name is required." });
+
+    const count = await Group.countDocuments({ teacher: req.user._id });
+    if (count >= 20) return res.status(400).json({ message: "Maximum 20 groups per teacher." });
+
+    const group = await Group.create({
+      name: name.trim(),
+      description: description?.trim(),
+      color: color || "#3B82F6",
+      teacher: req.user._id,
+      students
+    });
+
+    const populated = await group.populate("students", "name email studentProfile photo");
+    res.status(201).json({ group: populated });
+  } catch (err) { next(err); }
+});
+
+// Update a group (name, description, color, students)
+teacherRouter.put("/groups/:id", async (req, res, next) => {
+  try {
+    const group = await Group.findOne({ _id: req.params.id, teacher: req.user._id });
+    if (!group) return res.status(404).json({ message: "Group not found." });
+
+    const { name, description, color, students } = req.body;
+    if (name  !== undefined) group.name        = name.trim();
+    if (description !== undefined) group.description = description?.trim();
+    if (color !== undefined) group.color       = color;
+    if (students !== undefined) group.students = students;
+
+    await group.save();
+    const populated = await group.populate("students", "name email studentProfile photo");
+    res.json({ group: populated });
+  } catch (err) { next(err); }
+});
+
+// Delete a group
+teacherRouter.delete("/groups/:id", async (req, res, next) => {
+  try {
+    const group = await Group.findOneAndDelete({ _id: req.params.id, teacher: req.user._id });
+    if (!group) return res.status(404).json({ message: "Group not found." });
+    res.json({ message: "Group deleted." });
+  } catch (err) { next(err); }
 });
