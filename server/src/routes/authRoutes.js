@@ -166,3 +166,45 @@ authRouter.post("/reset-password", sensitiveLimiter, validate(resetPasswordSchem
 authRouter.get("/me", protect, (req, res) => {
   res.json({ user: req.user });
 });
+
+// Self-service profile update — teachers, moderators (and any logged-in user)
+authRouter.patch("/profile", protect, async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user._id);
+    if (!user) return res.status(404).json({ message: "User not found." });
+
+    const { currentPassword, newPassword, phone, photo, dateOfBirth, contactInfo } = req.body;
+
+    // Password change: require current password verification
+    if (newPassword) {
+      if (!currentPassword) {
+        return res.status(400).json({ message: "Current password is required to set a new one." });
+      }
+      const match = await user.comparePassword(currentPassword);
+      if (!match) {
+        return res.status(400).json({ message: "Current password is incorrect." });
+      }
+      if (newPassword.length < 8) {
+        return res.status(400).json({ message: "New password must be at least 8 characters." });
+      }
+      user.password = newPassword;
+    }
+
+    if (phone !== undefined)  user.phone = phone;
+    if (photo !== undefined)  user.photo = photo;
+
+    // Role-specific profile fields
+    if (user.role === "teacher" || user.role === "moderator" || user.role === "sous-admin") {
+      if (!user.teacherProfile) user.teacherProfile = {};
+      if (dateOfBirth !== undefined) user.teacherProfile.dateOfBirth  = dateOfBirth;
+      if (contactInfo  !== undefined) user.teacherProfile.contactInfo  = contactInfo;
+    }
+
+    await user.save();
+
+    const updated = await User.findById(user._id).select("-password");
+    res.json({ user: updated, message: "Profile updated successfully." });
+  } catch (err) {
+    next(err);
+  }
+});

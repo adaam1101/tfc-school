@@ -9,15 +9,16 @@ import {
   LogOut,
   RefreshCcw,
   MessageSquareText,
-  Bell,
   ChevronDown,
   ChevronUp,
   CalendarDays,
   BookOpen,
   Clock,
   Wifi,
-  WifiOff
+  WifiOff,
+  UserPen
 } from "lucide-react";
+import ProfileEditModal from "../../components/ProfileEditModal.jsx";
 import { api, getApiError } from "../../api/http.js";
 import { useAuth } from "../../context/AuthContext.jsx";
 import { schoolLogo, schoolInfo } from "../../config/branding.js";
@@ -353,21 +354,34 @@ function AttendanceScreen({ data, onMark, savingId, notes, onNote, onRefresh, lo
 
 function ProfileScreen({ user, onLogout }) {
   const { dark, toggle } = useTheme();
+  const [showEdit, setShowEdit] = useState(false);
   const teacher = user?.teacherProfile;
 
   return (
     <div className="flex-1 overflow-y-auto px-4 pt-5 pb-8 space-y-5">
+      {showEdit && <ProfileEditModal onClose={() => setShowEdit(false)} />}
+
       {/* Avatar card */}
       <div className="rounded-3xl bg-gradient-to-br from-brand-600 to-brand-800 p-6 text-white shadow-lg">
         <div className="flex flex-col items-center text-center">
-          <div className="flex h-20 w-20 items-center justify-center rounded-3xl bg-white/20 text-2xl font-black text-white shadow-inner mb-3">
-            {initials(user?.name)}
-          </div>
+          {user?.photo ? (
+            <img src={user.photo} alt={user.name} className="h-20 w-20 rounded-3xl object-cover ring-4 ring-white/30 shadow-lg mb-3" />
+          ) : (
+            <div className="flex h-20 w-20 items-center justify-center rounded-3xl bg-white/20 text-2xl font-black text-white shadow-inner mb-3">
+              {initials(user?.name)}
+            </div>
+          )}
           <h2 className="text-xl font-black">{user?.name}</h2>
           <p className="text-brand-200 text-sm mt-0.5">{teacher?.subject || "Teacher"}</p>
           <span className="mt-2 rounded-full bg-white/20 px-3 py-1 text-xs font-bold capitalize">
             {user?.role}
           </span>
+          <button
+            onClick={() => setShowEdit(true)}
+            className="mt-3 inline-flex items-center gap-2 rounded-xl bg-white/20 px-4 py-2 text-sm font-bold text-white hover:bg-white/30 active:scale-95 transition-all"
+          >
+            <UserPen className="h-4 w-4" /> Edit Profile
+          </button>
         </div>
       </div>
 

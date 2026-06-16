@@ -1,9 +1,10 @@
 import React, { useState } from "react";
-import { LogOut, Moon, ScanLine, Star, Sun } from "lucide-react";
+import { LogOut, Moon, ScanLine, Star, Sun, UserPen } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { schoolLogo, schoolInfo } from "../config/branding.js";
 import { useAuth } from "../context/AuthContext.jsx";
 import RatingModal from "../components/RatingModal.jsx";
+import ProfileEditModal from "../components/ProfileEditModal.jsx";
 import { useTheme } from "../hooks/useTheme.js";
 
 export default function AppLayout({ title, subtitle, children, fullHeight = false }) {
@@ -11,6 +12,8 @@ export default function AppLayout({ title, subtitle, children, fullHeight = fals
   const location = useLocation();
   const isRfid = location.pathname === "/rfid-attendance";
   const [showRating, setShowRating] = useState(false);
+  const [showProfile, setShowProfile] = useState(false);
+  const canEditProfile = ["teacher", "moderator", "sous-admin"].includes(user?.role);
   const { dark, toggle } = useTheme();
 
   const initials = user?.name ? user.name.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase() : "??";
@@ -48,12 +51,25 @@ export default function AppLayout({ title, subtitle, children, fullHeight = fals
             </button>
 
             <div className="flex items-center gap-2.5">
-              <div className={`flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br ${gradient} text-xs font-black text-white shadow-sm`}>{initials}</div>
+              {user?.photo ? (
+                <img src={user.photo} alt={user.name} className="h-9 w-9 rounded-xl object-cover ring-2 ring-brand-200 dark:ring-brand-800 shadow-sm" />
+              ) : (
+                <div className={`flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br ${gradient} text-xs font-black text-white shadow-sm`}>{initials}</div>
+              )}
               <div className="hidden md:block">
                 <p className="text-sm font-bold leading-tight">{user?.name}</p>
                 <p className="text-xs capitalize text-slate-500 dark:text-slate-400">{user?.role}</p>
               </div>
             </div>
+            {canEditProfile && (
+              <button
+                onClick={() => setShowProfile(true)}
+                className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-600 shadow-sm transition-all hover:border-brand-200 hover:bg-brand-50 hover:text-brand-700 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-400 dark:hover:border-brand-600 dark:hover:bg-slate-700"
+                title="Edit profile"
+              >
+                <UserPen className="h-4 w-4" /><span className="hidden sm:inline">Profile</span>
+              </button>
+            )}
             <button type="button" onClick={logout} className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-600 shadow-sm transition-all hover:border-rose-200 hover:bg-rose-50 hover:text-rose-700 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-400 dark:hover:border-rose-800 dark:hover:bg-rose-950 dark:hover:text-rose-400">
               <LogOut className="h-4 w-4" /><span className="hidden sm:inline">Logout</span>
             </button>
@@ -77,7 +93,8 @@ export default function AppLayout({ title, subtitle, children, fullHeight = fals
           </div>
         </footer>
       )}
-      {showRating && <RatingModal onClose={() => setShowRating(false)} />}
+      {showRating   && <RatingModal      onClose={() => setShowRating(false)}  />}
+      {showProfile  && <ProfileEditModal onClose={() => setShowProfile(false)} />}
     </div>
   );
 }

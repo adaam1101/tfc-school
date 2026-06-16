@@ -54,6 +54,13 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
+  const updateProfile = async (payload) => {
+    const { data } = await api.patch("/auth/profile", payload);
+    localStorage.setItem("tfc_user", JSON.stringify(data.user));
+    setUser(data.user);
+    return data.message;
+  };
+
   const value = useMemo(
     () => ({
       token,
@@ -63,7 +70,8 @@ export const AuthProvider = ({ children }) => {
       verifyTwoFactor,
       forgotPassword,
       resetPassword,
-      logout
+      logout,
+      updateProfile
     }),
     [token, user]
   );
