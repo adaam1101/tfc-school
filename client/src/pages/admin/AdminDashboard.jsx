@@ -869,19 +869,19 @@ export default function AdminDashboard() {
                               ) : null}
                             </td>
                             <td className="px-4 py-3">
-                              <div className="flex gap-2">
-                                <button type="button" className="icon-btn" onClick={() => editUser(u)} title="Edit">
+                              <div className="flex gap-1">
+                                <button type="button" className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 shadow-sm transition-all hover:border-brand-200 hover:bg-brand-50 hover:text-brand-700 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-400 dark:hover:border-brand-500 dark:hover:bg-slate-700 dark:hover:text-brand-400" onClick={() => editUser(u)} title="Edit">
                                   <Pencil className="h-3.5 w-3.5" />
                                 </button>
                                 {u.role !== "admin" && (
-                                  <button type="button" className="icon-btn" onClick={() => setIdCardStudent(u)} title="ID card">
+                                  <button type="button" className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 shadow-sm transition-all hover:border-brand-200 hover:bg-brand-50 hover:text-brand-700 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-400 dark:hover:border-brand-500 dark:hover:bg-slate-700 dark:hover:text-brand-400" onClick={() => setIdCardStudent(u)} title="ID card">
                                     <IdCard className="h-3.5 w-3.5" />
                                   </button>
                                 )}
-                                <button type="button" className="icon-btn" onClick={() => resetUserPassword(u)} title="Reset password">
+                                <button type="button" className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 shadow-sm transition-all hover:border-brand-200 hover:bg-brand-50 hover:text-brand-700 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-400 dark:hover:border-brand-500 dark:hover:bg-slate-700 dark:hover:text-brand-400" onClick={() => resetUserPassword(u)} title="Reset password">
                                   <KeyRound className="h-3.5 w-3.5" />
                                 </button>
-                                <button type="button" className="icon-btn-danger" onClick={() => deleteUser(u)} title="Delete">
+                                <button type="button" className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-rose-100 bg-white text-rose-500 shadow-sm transition-all hover:bg-rose-50 hover:text-rose-700 dark:border-rose-900 dark:bg-slate-800 dark:hover:bg-rose-950" onClick={() => deleteUser(u)} title="Delete">
                                   <Trash2 className="h-3.5 w-3.5" />
                                 </button>
                               </div>
