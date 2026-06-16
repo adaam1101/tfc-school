@@ -26,7 +26,9 @@ import {
   UserPlus,
   ChevronRight,
   Menu,
-  X
+  X,
+  KeyRound,
+  Copy
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { api, getApiError } from "../../api/http.js";
@@ -250,6 +252,16 @@ export default function AdminDashboard() {
       await loadData();
     } catch (deleteError) {
       setError(getApiError(deleteError));
+    }
+  };
+
+  const [resetLink, setResetLink] = useState(null);
+  const resetUserPassword = async (u) => {
+    try {
+      const { data } = await api.post(`/admin/users/${u._id}/reset-password`);
+      setResetLink({ name: u.name, url: data.resetUrl });
+    } catch (err) {
+      setError(getApiError(err));
     }
   };
 
@@ -856,6 +868,9 @@ export default function AdminDashboard() {
                                     <IdCard className="h-3.5 w-3.5" />
                                   </button>
                                 )}
+                                <button type="button" className="icon-btn" onClick={() => resetUserPassword(u)} title="Reset password">
+                                  <KeyRound className="h-3.5 w-3.5" />
+                                </button>
                                 <button type="button" className="icon-btn-danger" onClick={() => deleteUser(u)} title="Delete">
                                   <Trash2 className="h-3.5 w-3.5" />
                                 </button>
@@ -881,6 +896,35 @@ export default function AdminDashboard() {
       </div>
 
       {idCardStudent && <IDCardModal user={idCardStudent} onClose={() => setIdCardStudent(null)} />}
+
+      {resetLink && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+          <div className="w-full max-w-md rounded-2xl bg-white shadow-2xl p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="rounded-xl bg-brand-100 p-2.5"><KeyRound className="h-5 w-5 text-brand-700" /></div>
+              <div>
+                <h3 className="font-bold text-slate-900">Password reset link</h3>
+                <p className="text-xs text-slate-500">{resetLink.name} · expires in 30 min</p>
+              </div>
+            </div>
+            <div className="rounded-xl bg-slate-50 border border-slate-200 p-3 break-all text-xs font-mono text-slate-700">
+              {resetLink.url}
+            </div>
+            <p className="mt-3 text-xs text-slate-400 text-center">Share this link with the user so they can set a new password.</p>
+            <div className="mt-4 flex gap-2">
+              <button
+                onClick={() => navigator.clipboard?.writeText(resetLink.url)}
+                className="flex-1 flex items-center justify-center gap-2 rounded-xl border border-slate-200 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50">
+                <Copy className="h-4 w-4" /> Copy link
+              </button>
+              <button onClick={() => setResetLink(null)}
+                className="flex-1 rounded-xl bg-brand-600 py-2.5 text-sm font-bold text-white hover:bg-brand-700">
+                Done
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </AppLayout>
   );
 }

@@ -224,6 +224,25 @@ adminRouter.put("/users/:id", adminOrSousAdmin, validate(updateUserSchema), asyn
   }
 });
 
+adminRouter.post("/users/:id/reset-password", async (req, res, next) => {
+  try {
+    const user = await User.findById(req.params.id).select("+passwordResetToken +passwordResetExpires");
+    if (!user) return res.status(404).json({ message: "User not found." });
+
+    const rawToken = user.createPasswordResetToken();
+    await user.save();
+
+    const base = process.env.CLIENT_URL || "http://localhost:5173";
+    const resetUrl = `${base}/reset-password?token=${rawToken}`;
+
+    await recordAudit({ req, action: "reset-password", entity: "user", entityLabel: user.name });
+
+    res.json({ resetUrl, expiresIn: "30 minutes" });
+  } catch (error) {
+    next(error);
+  }
+});
+
 adminRouter.delete("/users/:id", onlyAdmin, validate(idParamSchema), async (req, res, next) => {
   try {
     if (String(req.user._id) === req.params.id) {
