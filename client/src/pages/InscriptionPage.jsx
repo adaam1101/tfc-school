@@ -36,6 +36,8 @@ const T = {
     feesNote: "💡 رسوم التسجيل: 800 دج",
     feesFree: "✅ إذا سجّلت في دورتين أو لغتين، تُعفى من رسوم التسجيل",
     feesOrphan: "🤝 الأيتام يستفيدون من تخفيض 50% على جميع الدورات",
+    feesNoteNM: "💡 رسوم التسجيل: 1000 دج",
+    feesFreeNM: "✅ التسجيل في دورتين → رسوم التسجيل مجانية",
     submit: "أرسل طلب التسجيل",
     sending: "جارٍ الإرسال...",
     successTitle: "تم إرسال طلبك بنجاح! 🎉",
@@ -70,6 +72,8 @@ const T = {
     feesNote: "💡 Frais d'inscription : 800 DA",
     feesFree: "✅ Inscription à 2 formations ou 2 langues → frais d'inscription offerts",
     feesOrphan: "🤝 Les orphelins bénéficient de 50% de réduction sur toutes les formations",
+    feesNoteNM: "💡 Frais d'inscription : 1 000 DA",
+    feesFreeNM: "✅ Inscription à 2 formations → frais d'inscription offerts",
     submit: "Envoyer la demande d'inscription",
     sending: "Envoi en cours...",
     successTitle: "Demande envoyée avec succès ! 🎉",
@@ -361,11 +365,19 @@ export default function InscriptionPage() {
 
               {/* Inscription fees info — TFC only */}
               {schoolInfo.short === "TFC" && (
-              <div className="rounded-2xl border border-brand-100 bg-brand-50/60 px-4 py-3 grid gap-1.5 text-xs text-slate-600">
-                <p className="font-bold text-brand-700">{t.feesNote}</p>
-                <p>{t.feesFree}</p>
-                <p>{t.feesOrphan}</p>
-              </div>
+                <div className="rounded-2xl border border-brand-100 bg-brand-50/60 px-4 py-3 grid gap-1.5 text-xs text-slate-600">
+                  <p className="font-bold text-brand-700">{t.feesNote}</p>
+                  <p>{t.feesFree}</p>
+                  <p>{t.feesOrphan}</p>
+                </div>
+              )}
+
+              {/* Inscription fees info — NextMind only */}
+              {schoolInfo.short !== "TFC" && (
+                <div className="rounded-2xl border border-brand-100 bg-brand-50/60 px-4 py-3 grid gap-1.5 text-xs text-slate-600">
+                  <p className="font-bold text-brand-700">{t.feesNoteNM}</p>
+                  <p>{t.feesFreeNM}</p>
+                </div>
               )}
 
               {/* Submit */}
