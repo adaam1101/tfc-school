@@ -6,11 +6,13 @@ import { COURSES } from "../config/courses.js";
 
 
 const LEVELS = [
-  { id: "test", ar: "اختبار تحديد المستوى", fr: "Test de niveau" },
-  { id: "A1",   ar: "مستوى A1 (مبتدئ)",    fr: "Niveau A1 (Débutant)" },
-  { id: "A2",   ar: "مستوى A2 (أساسي)",     fr: "Niveau A2 (Élémentaire)" },
-  { id: "B1",   ar: "مستوى B1 (متوسط)",     fr: "Niveau B1 (Intermédiaire)" },
-  { id: "B2",   ar: "مستوى B2 (فوق المتوسط)", fr: "Niveau B2 (Intermédiaire supérieur)" },
+  { id: "test",  ar: "اختبار تحديد المستوى",      fr: "Test de niveau" },
+  { id: "A1",    ar: "A1 — مبتدئ",                fr: "A1 — Starter / Beginner" },
+  { id: "A2",    ar: "A2 — أساسي",                fr: "A2 — Élémentaire" },
+  { id: "B1",    ar: "B1 — متوسط",                fr: "B1 — Intermédiaire" },
+  { id: "B1-B2", ar: "B1-B2 — فوق المتوسط",      fr: "B1-B2 — Pré-Intermédiaire" },
+  { id: "B2",    ar: "B2 — متقدم",                fr: "B2 — Upper Intermediate" },
+  { id: "C1",    ar: "C1 — متقدم جداً",           fr: "C1 — Advanced" },
 ];
 
 const T = {
@@ -108,6 +110,11 @@ export default function InscriptionPage() {
   const isKid      = isLangCourse && age !== null && age >= 0 && age <= 12;
   const needsLevel = isLangCourse && age !== null && age >= 13 && age <= 50;
 
+  // For courses with per-level pricing, derive the active price from selected level
+  const activePrice = courseObj?.pricePerLevel
+    ? (form.level && courseObj.pricePerLevel[form.level]) || null
+    : courseObj?.price || null;
+
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
   const handleSubmit = async (e) => {
@@ -143,7 +150,7 @@ export default function InscriptionPage() {
         age:       age || undefined,
         course:    courseLabel,
         courseId:  courseObj?.id,
-        price:     courseObj?.price,
+        price:     activePrice || courseObj?.price,
         priceUnit: courseObj?.priceUnit ? (isAr ? courseObj.priceUnit.ar : courseObj.priceUnit.fr) : undefined,
         message:   messageparts,
       });
@@ -276,8 +283,8 @@ export default function InscriptionPage() {
                 </div>
               </div>
 
-              {/* Course info card — only shown when price/duration info is available */}
-              {courseObj?.price && (
+              {/* Course info card */}
+              {(activePrice || (courseObj && !courseObj.pricePerLevel && courseObj.price)) && (
                 <div className="animate-fade-slide-up rounded-2xl bg-brand-50 border border-brand-200 px-4 py-4 grid gap-2">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold uppercase tracking-wider text-brand-600">{t.priceLabel}</span>
@@ -286,7 +293,7 @@ export default function InscriptionPage() {
                         <span className="rounded-full bg-rose-100 text-rose-700 text-[10px] font-bold px-2 py-0.5 uppercase">{t.promoLabel}</span>
                       )}
                       <span className="text-lg font-black text-brand-800">
-                        {courseObj.price.toLocaleString()} {t.dzd}
+                        {(activePrice || courseObj.price).toLocaleString()} {t.dzd}
                         {courseObj.priceUnit ? <span className="text-sm font-semibold text-brand-500"> {isAr ? courseObj.priceUnit.ar : courseObj.priceUnit.fr}</span> : null}
                       </span>
                     </div>
@@ -303,6 +310,19 @@ export default function InscriptionPage() {
                       <span className="font-bold">{isAr ? courseObj.sessions.ar : courseObj.sessions.fr}</span>
                     </div>
                   )}
+                  {courseObj.hours && (
+                    <div className="flex items-center justify-between text-xs text-slate-600">
+                      <span className="font-semibold text-slate-500">{isAr ? "المدة" : "Volume"}</span>
+                      <span className="font-bold">{courseObj.hours}h</span>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* For level-priced courses: show hint before level is chosen */}
+              {courseObj?.pricePerLevel && !activePrice && (
+                <div className="animate-fade-slide-up rounded-2xl bg-slate-50 border border-slate-200 px-4 py-3 text-xs text-slate-500 text-center">
+                  {isAr ? "اختر مستواك لعرض السعر" : "Sélectionnez votre niveau pour voir le tarif"}
                 </div>
               )}
 

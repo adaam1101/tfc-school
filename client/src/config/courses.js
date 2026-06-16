@@ -220,22 +220,79 @@ const TFC_COURSES = [
   }
 ];
 
-// NextMind Academy courses (unchanged)
+// NextMind Academy courses
 const NEXTMIND_COURSES = [
-  { id: "design-graphique", ar: "تصميم غرافيك",             fr: "Design Graphique" },
-  { id: "ui-ux",            ar: "تصميم واجهات المستخدم",    fr: "UI/UX Design" },
-  { id: "digital-art",      ar: "الفن الرقمي",               fr: "Digital Art" },
-  { id: "3d",               ar: "النمذجة ثلاثية الأبعاد",    fr: "Modélisation 3D & Product Visualization" },
-  { id: "video",            ar: "مونتاج الفيديو",            fr: "Video Editing" },
-  { id: "motion",           ar: "موشن غرافيك",               fr: "Motion Graphics" },
-  { id: "photo",            ar: "التصوير الفوتوغرافي",       fr: "Photographie & Vidéographie" },
-  { id: "web",              ar: "تطوير المواقع",              fr: "Développement Web" },
-  { id: "mobile",           ar: "تطوير التطبيقات",           fr: "Développement d'Applications Mobiles" },
-  { id: "python",           ar: "بايثون",                    fr: "Python" },
-  { id: "ai",               ar: "الذكاء الاصطناعي",          fr: "Intelligence Artificielle" },
-  { id: "cyber",            ar: "الأمن السيبراني",           fr: "Cybersécurité" },
-  { id: "anglais-general",  ar: "اللغة الإنجليزية العامة",  fr: "Anglais Général", lang: true },
-  { id: "francais-general", ar: "اللغة الفرنسية العامة",    fr: "Français Général", lang: true },
+  // ── Design ────────────────────────────────────────────────────────────────
+  {
+    id: "design-graphique",
+    ar: "التصميم الغرافيكي",
+    fr: "Design Graphique",
+    price: 26000,
+    hours: 24,
+    duration: { ar: "شهر", fr: "1 mois" },
+    sessions: { ar: "مرتين في الأسبوع", fr: "2 fois / semaine" }
+  },
+  {
+    id: "ui-ux",
+    ar: "تصميم واجهات المستخدم — Figma",
+    fr: "UI/UX Design — Figma",
+    price: 26000,
+    hours: 24,
+    duration: { ar: "شهر", fr: "1 mois" },
+    sessions: { ar: "مرتين في الأسبوع", fr: "2 fois / semaine" }
+  },
+  {
+    id: "digital-art",
+    ar: "الفن الرقمي",
+    fr: "Digital Art",
+    price: 35000,
+    hours: 36,
+    duration: { ar: "شهرين", fr: "2 mois" },
+    sessions: { ar: "مرتين في الأسبوع", fr: "2 fois / semaine" }
+  },
+  { id: "3d",     ar: "النمذجة ثلاثية الأبعاد", fr: "Modélisation 3D & Product Visualization" },
+  {
+    id: "video",
+    ar: "مونتاج فيديو",
+    fr: "Video Editing",
+    price: 26000,
+    hours: 24,
+    duration: { ar: "شهر", fr: "1 mois" },
+    sessions: { ar: "مرتين في الأسبوع", fr: "2 fois / semaine" }
+  },
+  { id: "motion", ar: "موشن غرافيك",             fr: "Motion Graphics" },
+  { id: "photo",  ar: "التصوير الفوتوغرافي",     fr: "Photographie & Vidéographie" },
+
+  // ── Dev ───────────────────────────────────────────────────────────────────
+  { id: "web",    ar: "تطوير المواقع",            fr: "Développement Web" },
+  { id: "mobile", ar: "تطوير التطبيقات",          fr: "Développement d'Applications Mobiles" },
+  { id: "python", ar: "بايثون",                   fr: "Python" },
+  { id: "ai",     ar: "الذكاء الاصطناعي",         fr: "Intelligence Artificielle" },
+  { id: "cyber",  ar: "الأمن السيبراني",           fr: "Cybersécurité" },
+
+  // ── Languages ─────────────────────────────────────────────────────────────
+  {
+    id: "anglais-general",
+    ar: "اللغة الإنجليزية للكبار",
+    fr: "Anglais adultes",
+    lang: true,
+    pricePerLevel: { test: 6000, A1: 6000, A2: 6000, "B1-B2": 6500, B1: 6500, B2: 7000, C1: 8000 },
+    priceUnit: { ar: "/ شهر", fr: "/ mois" },
+    duration: { ar: "شهري / مستوى", fr: "Mensuel / niveau" },
+    sessions: { ar: "مرتين في الأسبوع", fr: "2 fois / semaine" }
+  },
+  {
+    id: "esp",
+    ar: "الإنجليزية للأغراض الخاصة (ESP)",
+    fr: "ESP — Anglais pour Objectifs Spécifiques",
+    price: 8000,
+    hours: 20,
+    duration: { ar: "حسب الطلب", fr: "Selon le besoin" },
+    sessions: { ar: "حسب الطلب", fr: "Selon le besoin" }
+  },
+  { id: "francais-general",  ar: "اللغة الفرنسية العامة",    fr: "Français Général",      lang: true },
+  { id: "business-english",  ar: "إنجليزية الأعمال",          fr: "Business English",      lang: true },
+  { id: "francais-affaires", ar: "فرنسية الأعمال",            fr: "Français des Affaires", lang: true },
 ];
 
 const schoolShort = import.meta.env.VITE_SCHOOL_SHORT || "TFC";
