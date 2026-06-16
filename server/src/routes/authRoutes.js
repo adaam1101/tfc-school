@@ -1,3 +1,4 @@
+import crypto from "node:crypto";
 import express from "express";
 import rateLimit from "express-rate-limit";
 import { protect } from "../middleware/auth.js";
@@ -57,8 +58,9 @@ authRouter.post("/login", sensitiveLimiter, validate(loginSchema), async (req, r
       return res.status(401).json({ message: "Invalid email or password." });
     }
 
+    // Use timing-safe comparison to avoid leaking whether the email exists under a different role.
     if (role && user.role !== role) {
-      return res.status(403).json({ message: `This account is not a ${role} account.` });
+      return res.status(401).json({ message: "Invalid email or password." });
     }
 
     if (user.status !== "active") {
@@ -121,7 +123,8 @@ authRouter.post("/forgot-password", sensitiveLimiter, validate(forgotPasswordSch
     } else {
       const rawToken = user.createPasswordResetToken();
       await user.save();
-      const base = process.env.CLIENT_URL || req.headers.origin || "";
+      // Never use the request Origin header — an attacker can forge it.
+      const base = process.env.CLIENT_URL || "http://localhost:5173";
       const resetUrl = `${base}/reset-password?token=${rawToken}`;
       try {
         await sendPasswordResetEmail({ user, resetUrl });
@@ -180,7 +183,7 @@ authRouter.patch("/profile", protect, async (req, res, next) => {
       if (!currentPassword) {
         return res.status(400).json({ message: "Current password is required to set a new one." });
       }
-      const match = await user.comparePassword(currentPassword);
+      const match = await user.matchPassword(currentPassword);
       if (!match) {
         return res.status(400).json({ message: "Current password is incorrect." });
       }

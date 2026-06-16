@@ -39,12 +39,16 @@ const allowedOrigins = [
   "http://localhost:5173"
 ].map((origin) => origin?.trim()).filter(Boolean);
 
-app.use(helmet());
+app.use(helmet({
+  hsts: { maxAge: 31536000, includeSubDomains: true },
+  contentSecurityPolicy: false // React SPA manages its own CSP via meta tags
+}));
 app.use(mongoSanitize());
 app.use(cors({ origin: (origin, callback) => { if (!origin || allowedOrigins.includes(origin)) return callback(null, true); return callback(new Error("Origin is not allowed by CORS.")); }, credentials: true }));
 app.use(express.json({ limit: "5mb" })); // allow base64 ID-card photos
-app.use(morgan("dev"));
-app.use(rateLimit({ windowMs: 15 * 60 * 1000, max: 300, standardHeaders: true, legacyHeaders: false, validate: { xForwardedForHeader: false } }));
+app.use(morgan(process.env.NODE_ENV === "production" ? "combined" : "dev"));
+// Tightened from 300 → 100 to reduce enumeration surface
+app.use(rateLimit({ windowMs: 15 * 60 * 1000, max: 100, standardHeaders: true, legacyHeaders: false, validate: { xForwardedForHeader: false } }));
 
 app.get("/api/health", (_req, res) => { res.json({ status: "ok", app: "TFC School API" }); });
 

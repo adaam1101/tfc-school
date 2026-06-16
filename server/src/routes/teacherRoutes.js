@@ -1,3 +1,4 @@
+import crypto from "node:crypto";
 import express from "express";
 import { protect, allowRoles } from "../middleware/auth.js";
 import { validate } from "../middleware/validate.js";
@@ -150,7 +151,7 @@ teacherRouter.post("/students/register", async (req, res, next) => {
     const exists = await User.findOne({ email });
     if (exists) email = `${slug}.${rand}@tfcschool.dz`;
 
-    const tempPassword = `Tfc@${rand}${Math.floor(10 + Math.random() * 90)}`;
+    const tempPassword = `Tfc@${crypto.randomBytes(8).toString("base64url").slice(0, 10)}`;
 
     const student = await User.create({
       role: "student",
@@ -196,8 +197,9 @@ teacherRouter.post("/students/register", async (req, res, next) => {
 // List all students available to assign (unassigned or already mine)
 teacherRouter.get("/available-students", async (req, res, next) => {
   try {
+    // Exclude email — teachers only need name/profile to assign students
     const students = await User.find({ role: "student" })
-      .select("name email studentProfile photo")
+      .select("name studentProfile photo")
       .sort({ name: 1 });
     res.json({ students });
   } catch (err) { next(err); }
