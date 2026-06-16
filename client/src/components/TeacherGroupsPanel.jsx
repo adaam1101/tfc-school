@@ -17,14 +17,16 @@ import {
   UserRoundPlus
 } from "lucide-react";
 import { api, getApiError } from "../api/http.js";
+import { useAuth } from "../context/AuthContext.jsx";
 import ErrorAlert from "./ErrorAlert.jsx";
 
 // ── Register new student modal ────────────────────────────────────────────────
 
-function RegisterStudentModal({ onDone, onClose }) {
-  const COURSES = ["English", "French", "Arabic", "Math", "Science", "Other"];
+function RegisterStudentModal({ onDone, onClose, teacherSubject }) {
+  const subject = teacherSubject?.trim();
+  const defaultCourse = subject || "English";
   const [form, setForm] = useState({
-    name: "", age: "", course: "English", phone: "",
+    name: "", age: "", course: defaultCourse, phone: "",
     parentName: "", parentPhone: "", parentEmail: "", dateOfBirth: ""
   });
   const [saving, setSaving]   = useState(false);
@@ -130,9 +132,13 @@ function RegisterStudentModal({ onDone, onClose }) {
                 </label>
                 <label className="block">
                   <span className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1 block">Course <span className="text-rose-500">*</span></span>
-                  <select className="w-full rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 px-3 py-2.5 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-400" value={form.course} onChange={e => set("course", e.target.value)}>
-                    {COURSES.map(c => <option key={c}>{c}</option>)}
-                  </select>
+                  <input
+                    className="w-full rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 px-3 py-2.5 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-400"
+                    value={form.course}
+                    onChange={e => set("course", e.target.value)}
+                    required
+                    placeholder="e.g. English"
+                  />
                 </label>
                 <label className="block sm:col-span-2">
                   <span className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1 block">Phone <span className="text-rose-500">*</span></span>
@@ -215,6 +221,127 @@ function Toast({ msg, type = "success" }) {
         : "border border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300"
     }`}>
       {msg}
+    </div>
+  );
+}
+
+// ── Group attendance panel ────────────────────────────────────────────────────
+
+function GroupAttendancePanel({ group, onClose }) {
+  const today = new Date().toISOString().slice(0, 10);
+  const label = new Date().toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" });
+
+  const [statuses, setStatuses]   = useState({}); // studentId -> "Present"|"Absent"
+  const [saving, setSaving]       = useState("");
+  const [done, setDone]           = useState({});  // studentId -> true when saved
+  const [error, setError]         = useState("");
+
+  const mark = async (student, status) => {
+    setSaving(student._id); setError("");
+    try {
+      await api.post("/teacher/attendance", { studentId: student._id, status, date: today });
+      setStatuses(s => ({ ...s, [student._id]: status }));
+      setDone(d => ({ ...d, [student._id]: true }));
+    } catch (err) {
+      setError(getApiError(err));
+    } finally {
+      setSaving("");
+    }
+  };
+
+  const students = group.students || [];
+  const marked = Object.keys(done).length;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 backdrop-blur-sm p-0 sm:p-4">
+      <div className="w-full sm:max-w-lg max-h-[90vh] flex flex-col rounded-t-3xl sm:rounded-3xl bg-white dark:bg-slate-800 shadow-2xl overflow-hidden">
+
+        {/* Header */}
+        <div className="shrink-0 px-5 py-4 border-b border-slate-100 dark:border-slate-700">
+          <div className="flex items-center justify-between mb-1">
+            <h3 className="font-black text-slate-900 dark:text-slate-100 flex items-center gap-2">
+              <span className="inline-block h-3 w-3 rounded-full" style={{ backgroundColor: group.color }} />
+              {group.name}
+            </h3>
+            <button onClick={onClose} className="flex h-8 w-8 items-center justify-center rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700">
+              <X className="h-5 w-5 text-slate-500" />
+            </button>
+          </div>
+          <p className="text-xs text-slate-400">{label} · {marked}/{students.length} marked</p>
+          {error && <p className="mt-2 text-xs text-rose-600 dark:text-rose-400">{error}</p>}
+        </div>
+
+        {/* Progress bar */}
+        <div className="h-1 bg-slate-100 dark:bg-slate-700 shrink-0">
+          <div
+            className="h-full bg-gradient-to-r from-brand-500 to-emerald-500 transition-all duration-500"
+            style={{ width: students.length ? `${(marked / students.length) * 100}%` : "0%" }}
+          />
+        </div>
+
+        {/* Student list */}
+        <div className="flex-1 overflow-y-auto p-4 space-y-2">
+          {students.length === 0 && (
+            <p className="text-center text-sm text-slate-400 py-10">No students in this group.</p>
+          )}
+          {students.map((s) => {
+            const status = statuses[s._id];
+            const isSaving = saving === s._id;
+            return (
+              <div
+                key={s._id}
+                className={`flex items-center gap-3 rounded-2xl border-2 px-3 py-3 transition-all ${
+                  status === "Present" ? "border-emerald-300 bg-emerald-50 dark:border-emerald-700 dark:bg-emerald-950/30"
+                  : status === "Absent" ? "border-rose-300 bg-rose-50 dark:border-rose-700 dark:bg-rose-950/30"
+                  : "border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800"
+                }`}
+              >
+                <Avatar student={s} />
+                <div className="flex-1 min-w-0">
+                  <p className="font-bold text-sm text-slate-900 dark:text-slate-100 truncate">{s.name}</p>
+                  <p className="text-xs text-slate-400 truncate">{s.studentProfile?.course} · Age {s.studentProfile?.age || "–"}</p>
+                </div>
+                <div className="flex gap-2 shrink-0">
+                  <button
+                    disabled={isSaving}
+                    onClick={() => mark(s, "Present")}
+                    className={`flex items-center gap-1.5 rounded-xl px-3 py-2 text-sm font-bold transition-all active:scale-95 disabled:opacity-50 ${
+                      status === "Present"
+                        ? "bg-emerald-500 text-white shadow-sm"
+                        : "border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-500 hover:text-white dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-400"
+                    }`}
+                  >
+                    {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
+                    <span className="hidden sm:inline">Present</span>
+                  </button>
+                  <button
+                    disabled={isSaving}
+                    onClick={() => mark(s, "Absent")}
+                    className={`flex items-center gap-1.5 rounded-xl px-3 py-2 text-sm font-bold transition-all active:scale-95 disabled:opacity-50 ${
+                      status === "Absent"
+                        ? "bg-rose-500 text-white shadow-sm"
+                        : "border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-500 hover:text-white dark:border-rose-800 dark:bg-rose-950/40 dark:text-rose-400"
+                    }`}
+                  >
+                    {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <X className="h-4 w-4" />}
+                    <span className="hidden sm:inline">Absent</span>
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Footer */}
+        {marked === students.length && students.length > 0 && (
+          <div className="shrink-0 px-5 py-4 border-t border-slate-100 dark:border-slate-700 bg-emerald-50 dark:bg-emerald-950/30">
+            <div className="flex items-center justify-between">
+              <p className="text-sm font-bold text-emerald-700 dark:text-emerald-400">All students marked ✓</p>
+              <button onClick={onClose} className="rounded-xl bg-emerald-500 px-4 py-2 text-sm font-bold text-white hover:bg-emerald-600 transition-all">Done</button>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -373,7 +500,8 @@ function GroupForm({ myStudents, initial, onSave, onCancel }) {
 // ── Group card ────────────────────────────────────────────────────────────────
 
 function GroupCard({ group, myStudents, onEdit, onDelete }) {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen]             = useState(false);
+  const [showAttendance, setShowAtt] = useState(false);
 
   return (
     <div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 overflow-hidden shadow-sm">
@@ -394,6 +522,13 @@ function GroupCard({ group, myStudents, onEdit, onDelete }) {
             </div>
           </div>
           <div className="flex items-center gap-1.5 shrink-0">
+            <button
+              onClick={() => setShowAtt(true)}
+              className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-brand-600 to-emerald-600 px-3 py-1.5 text-xs font-bold text-white shadow-sm hover:from-brand-700 hover:to-emerald-700 transition-all"
+              title="Mark attendance for this group"
+            >
+              <CheckCircle2 className="h-3.5 w-3.5" /> Attendance
+            </button>
             <button onClick={() => onEdit(group)} className="flex h-8 w-8 items-center justify-center rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-400 hover:text-brand-600 transition-colors">
               <Pencil className="h-4 w-4" />
             </button>
@@ -424,6 +559,10 @@ function GroupCard({ group, myStudents, onEdit, onDelete }) {
           </div>
         )}
       </div>
+
+      {showAttendance && (
+        <GroupAttendancePanel group={group} onClose={() => setShowAtt(false)} />
+      )}
     </div>
   );
 }
@@ -520,6 +659,8 @@ function AddStudentModal({ myStudents, onAdd, onClose }) {
 // ── Main panel ────────────────────────────────────────────────────────────────
 
 export default function TeacherGroupsPanel() {
+  const { user } = useAuth();
+  const teacherSubject = user?.teacherProfile?.subject || "";
   const [myStudents, setMyStudents] = useState([]);
   const [groups, setGroups]         = useState([]);
   const [loading, setLoading]       = useState(true);
@@ -760,6 +901,7 @@ export default function TeacherGroupsPanel() {
       {showRegisterStudent && (
         <RegisterStudentModal
           onDone={load}
+          teacherSubject={teacherSubject}
           onClose={() => setShowRegisterStudent(false)}
         />
       )}

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { LogOut, Moon, ScanLine, Star, Sun, UserPen } from "lucide-react";
+import { LogOut, Moon, ScanLine, Sun, UserPen, MoreVertical, Star } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { schoolLogo, schoolInfo } from "../config/branding.js";
 import { useAuth } from "../context/AuthContext.jsx";
@@ -11,71 +11,123 @@ export default function AppLayout({ title, subtitle, children, fullHeight = fals
   const { user, logout } = useAuth();
   const location = useLocation();
   const isRfid = location.pathname === "/rfid-attendance";
-  const [showRating, setShowRating] = useState(false);
+  const [showRating, setShowRating]   = useState(false);
   const [showProfile, setShowProfile] = useState(false);
+  const [showMore, setShowMore]       = useState(false);
   const canEditProfile = ["teacher", "moderator", "sous-admin"].includes(user?.role);
   const { dark, toggle } = useTheme();
 
-  const initials = user?.name ? user.name.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase() : "??";
-  const roleGradients = { admin: "from-violet-600 to-purple-700", teacher: "from-brand-600 to-brand-700", student: "from-brand-600 to-emerald-700" };
+  const initials = user?.name
+    ? user.name.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()
+    : "??";
+  const roleGradients = {
+    admin:      "from-violet-600 to-purple-700",
+    teacher:    "from-brand-600 to-brand-700",
+    student:    "from-brand-600 to-emerald-700",
+    moderator:  "from-slate-500 to-slate-700",
+    "sous-admin": "from-indigo-500 to-indigo-700"
+  };
   const gradient = roleGradients[user?.role] || roleGradients.admin;
 
   return (
     <div className={`flex text-slate-950 dark:text-slate-100 bg-gradient-to-br from-slate-50 via-slate-100 to-slate-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-900 ${fullHeight ? "h-screen overflow-hidden flex-col" : "min-h-screen flex-col"}`}>
-      <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/85 backdrop-blur-md shadow-sm dark:border-slate-700 dark:bg-slate-900/90">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
-          <Link to={`/${user?.role || "admin"}`} className="group flex items-center gap-3">
-            <img src={schoolLogo} alt={schoolInfo.short} className="h-14 w-auto max-w-[180px] object-contain transition" />
-            <div className="hidden sm:block">
-              <p className="text-sm font-black leading-tight tracking-tight">{schoolInfo.short} School</p>
-              <p className="text-xs text-slate-500 dark:text-slate-400">{schoolInfo.city}</p>
+      <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/90 backdrop-blur-md shadow-sm dark:border-slate-700 dark:bg-slate-900/90">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-2.5 sm:px-6 lg:px-8">
+
+          {/* Logo */}
+          <Link to={`/${user?.role || "admin"}`} className="flex items-center gap-2.5 shrink-0">
+            <img src={schoolLogo} alt={schoolInfo.short} className="h-9 w-auto max-w-[120px] object-contain" />
+            <div className="hidden sm:block leading-tight">
+              <p className="text-sm font-black tracking-tight">{schoolInfo.short}</p>
+              <p className="text-[10px] text-slate-400">{schoolInfo.city}</p>
             </div>
           </Link>
-          <div className="flex items-center gap-2">
-            {(user?.role === "admin" || user?.role === "teacher") && (
-              <Link to="/rfid-attendance" className={`inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-bold transition-all duration-200 ${isRfid ? "bg-gradient-to-r from-brand-600 to-emerald-700 text-white shadow-sm" : "border border-slate-200 bg-white text-slate-700 hover:border-brand-200 hover:bg-brand-50 hover:text-brand-800 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"}`}>
-                <ScanLine className="h-4 w-4" /><span className="hidden sm:inline">RFID</span>
-              </Link>
-            )}
-            <button onClick={() => setShowRating(true)} className="inline-flex items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm font-bold text-amber-700 transition-all hover:bg-amber-100 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-400 dark:hover:bg-amber-900">
-              <Star className="h-4 w-4 fill-amber-500 text-amber-500" /><span className="hidden sm:inline">Rate</span>
-            </button>
 
-            {/* Dark mode toggle */}
+          {/* Right side */}
+          <div className="flex items-center gap-1.5">
+
+            {/* Dark mode — always visible, icon only */}
             <button
               onClick={toggle}
-              className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 shadow-sm transition-all hover:border-brand-200 hover:bg-brand-50 hover:text-brand-700 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-400 dark:hover:border-brand-500 dark:hover:text-brand-400"
-              title={dark ? "Switch to light mode" : "Switch to dark mode"}
+              className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition-all hover:bg-brand-50 hover:text-brand-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400 dark:hover:text-brand-400"
+              title={dark ? "Light mode" : "Dark mode"}
             >
               {dark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </button>
 
-            <div className="flex items-center gap-2.5">
+            {/* RFID — icon only, admin/teacher only */}
+            {(user?.role === "admin" || user?.role === "teacher") && (
+              <Link
+                to="/rfid-attendance"
+                className={`flex h-9 w-9 items-center justify-center rounded-xl border transition-all ${
+                  isRfid
+                    ? "bg-brand-600 border-brand-600 text-white"
+                    : "border-slate-200 bg-white text-slate-500 hover:bg-brand-50 hover:text-brand-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400"
+                }`}
+                title="RFID Attendance"
+              >
+                <ScanLine className="h-4 w-4" />
+              </Link>
+            )}
+
+            {/* User avatar + name */}
+            <div className="flex items-center gap-2 pl-1">
               {user?.photo ? (
-                <img src={user.photo} alt={user.name} className="h-9 w-9 rounded-xl object-cover ring-2 ring-brand-200 dark:ring-brand-800 shadow-sm" />
+                <img src={user.photo} alt={user.name} className="h-8 w-8 rounded-xl object-cover ring-2 ring-brand-200 dark:ring-brand-800" />
               ) : (
-                <div className={`flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br ${gradient} text-xs font-black text-white shadow-sm`}>{initials}</div>
+                <div className={`flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br ${gradient} text-[11px] font-black text-white`}>{initials}</div>
               )}
-              <div className="hidden md:block">
-                <p className="text-sm font-bold leading-tight">{user?.name}</p>
-                <p className="text-xs capitalize text-slate-500 dark:text-slate-400">{user?.role}</p>
+              <div className="hidden lg:block leading-tight">
+                <p className="text-sm font-bold">{user?.name}</p>
+                <p className="text-[10px] capitalize text-slate-400">{user?.role}</p>
               </div>
             </div>
+
+            {/* Profile — visible if allowed */}
             {canEditProfile && (
               <button
                 onClick={() => setShowProfile(true)}
-                className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-600 shadow-sm transition-all hover:border-brand-200 hover:bg-brand-50 hover:text-brand-700 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-400 dark:hover:border-brand-600 dark:hover:bg-slate-700"
+                className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition-all hover:bg-brand-50 hover:text-brand-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400"
                 title="Edit profile"
               >
-                <UserPen className="h-4 w-4" /><span className="hidden sm:inline">Profile</span>
+                <UserPen className="h-4 w-4" />
               </button>
             )}
-            <button type="button" onClick={logout} className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-600 shadow-sm transition-all hover:border-rose-200 hover:bg-rose-50 hover:text-rose-700 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-400 dark:hover:border-rose-800 dark:hover:bg-rose-950 dark:hover:text-rose-400">
-              <LogOut className="h-4 w-4" /><span className="hidden sm:inline">Logout</span>
-            </button>
+
+            {/* More menu (Rate) — hidden in a dropdown to save space */}
+            <div className="relative">
+              <button
+                onClick={() => setShowMore(v => !v)}
+                className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition-all hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400"
+                title="More"
+              >
+                <MoreVertical className="h-4 w-4" />
+              </button>
+              {showMore && (
+                <>
+                  <div className="fixed inset-0 z-30" onClick={() => setShowMore(false)} />
+                  <div className="absolute right-0 top-11 z-40 w-44 rounded-2xl border border-slate-100 bg-white dark:border-slate-700 dark:bg-slate-800 shadow-xl overflow-hidden">
+                    <button
+                      onClick={() => { setShowRating(true); setShowMore(false); }}
+                      className="flex w-full items-center gap-3 px-4 py-3 text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700"
+                    >
+                      <Star className="h-4 w-4 text-amber-500 fill-amber-400" /> Rate the app
+                    </button>
+                    <button
+                      onClick={() => { logout(); setShowMore(false); }}
+                      className="flex w-full items-center gap-3 px-4 py-3 text-sm font-medium text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40"
+                    >
+                      <LogOut className="h-4 w-4" /> Sign out
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+
           </div>
         </div>
       </header>
+
       <main className={`w-full animate-fade-in ${fullHeight ? "flex-1 overflow-hidden" : `flex-1 ${title ? "mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8" : ""}`}`}>
         {title && (
           <div className="mb-8 animate-fade-slide-up">
@@ -85,16 +137,17 @@ export default function AppLayout({ title, subtitle, children, fullHeight = fals
         )}
         {children}
       </main>
+
       {!fullHeight && (
-        <footer className="border-t border-slate-200 bg-white/60 py-5 text-center backdrop-blur-sm dark:border-slate-700 dark:bg-slate-900/60">
+        <footer className="border-t border-slate-200 bg-white/60 py-4 text-center backdrop-blur-sm dark:border-slate-700 dark:bg-slate-900/60">
           <div className="mx-auto max-w-7xl px-6">
             <p className="text-xs text-slate-400">© {new Date().getFullYear()} {schoolInfo.short} — {schoolInfo.name} · {schoolInfo.address}</p>
-            <p className="mt-0.5 text-xs text-slate-300 dark:text-slate-600">{schoolInfo.credit}</p>
           </div>
         </footer>
       )}
-      {showRating   && <RatingModal      onClose={() => setShowRating(false)}  />}
-      {showProfile  && <ProfileEditModal onClose={() => setShowProfile(false)} />}
+
+      {showRating  && <RatingModal      onClose={() => setShowRating(false)}  />}
+      {showProfile && <ProfileEditModal onClose={() => setShowProfile(false)} />}
     </div>
   );
 }
