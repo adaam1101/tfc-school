@@ -42,10 +42,8 @@ paymentRouter.get("/report/monthly", allowRoles("admin", "sous-admin"), async (r
   }
 });
 
-// ── Admin / sous-admin: manage payments ──
-paymentRouter.use(allowRoles("admin", "sous-admin"));
-
-paymentRouter.get("/", async (req, res, next) => {
+// ── Admin / sous-admin / moderator: read payments ──
+paymentRouter.get("/", allowRoles("admin", "sous-admin", "moderator"), async (req, res, next) => {
   try {
     const filter = {};
     if (req.query.status) filter.status = req.query.status;
@@ -67,6 +65,9 @@ paymentRouter.get("/", async (req, res, next) => {
     next(error);
   }
 });
+
+// ── Admin / sous-admin only: write operations ──
+paymentRouter.use(allowRoles("admin", "sous-admin"));
 
 paymentRouter.post("/", async (req, res, next) => {
   try {
