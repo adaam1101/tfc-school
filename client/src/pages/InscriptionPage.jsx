@@ -359,12 +359,14 @@ export default function InscriptionPage() {
                 </div>
               )}
 
-              {/* Inscription fees info */}
+              {/* Inscription fees info — TFC only */}
+              {schoolInfo.short === "TFC" && (
               <div className="rounded-2xl border border-brand-100 bg-brand-50/60 px-4 py-3 grid gap-1.5 text-xs text-slate-600">
                 <p className="font-bold text-brand-700">{t.feesNote}</p>
                 <p>{t.feesFree}</p>
                 <p>{t.feesOrphan}</p>
               </div>
+              )}
 
               {/* Submit */}
               <button type="submit" disabled={loading}
