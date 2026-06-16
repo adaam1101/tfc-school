@@ -172,4 +172,26 @@ textarea {
   .card-hover {
     @apply card hover:shadow-md hover:-translate-y-0.5;
   }
+
+  .stat-card {
+    @apply relative overflow-hidden rounded-2xl border border-slate-200/60 p-5 shadow-sm transition-all duration-200 hover:shadow-md
+           dark:border-slate-700 dark:bg-slate-800;
+    background: linear-gradient(135deg, white 0%, color-mix(in srgb, var(--accent, #085580) 4%, white) 100%);
+    border-left: 3px solid var(--accent, #085580);
+  }
+  .dark .stat-card {
+    background: linear-gradient(135deg, #1e293b 0%, color-mix(in srgb, var(--accent, #085580) 8%, #1e293b) 100%);
+  }
+
+  .page-header {
+    @apply mb-6 flex flex-wrap items-center justify-between gap-4;
+  }
+
+  .section-title {
+    @apply mb-3 text-xs font-bold uppercase tracking-widest text-slate-400;
+  }
+
+  .table-row {
+    @apply border-l-2 border-l-transparent transition-colors hover:border-l-brand-400 hover:bg-brand-50/30 dark:hover:bg-slate-700/30;
+  }
 }

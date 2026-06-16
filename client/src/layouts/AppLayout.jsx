@@ -36,7 +36,7 @@ export default function AppLayout({ title, subtitle, children, fullHeight = fals
   return (
     <div className={`flex text-slate-950 dark:text-slate-100 bg-gradient-to-br from-slate-50 via-slate-100 to-slate-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-900 ${fullHeight ? "h-screen overflow-hidden flex-col" : "min-h-screen flex-col"}`}>
       <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/90 backdrop-blur-md shadow-sm dark:border-slate-700 dark:bg-slate-900/90">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-2.5 sm:px-6 lg:px-8">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6 lg:px-8">
 
           {/* Logo */}
           <Link to={`/${user?.role || "admin"}`} className="flex items-center gap-2.5 shrink-0">
@@ -48,18 +48,18 @@ export default function AppLayout({ title, subtitle, children, fullHeight = fals
           </Link>
 
           {/* Right side */}
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-2">
 
             {/* Language switcher */}
-            <div className="flex items-center gap-0.5 rounded-xl border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-800 p-0.5">
+            <div className="flex items-center gap-0.5">
               {LANGS.map((l) => (
                 <button
                   key={l.code}
                   onClick={() => setLang(l.code)}
-                  className={`rounded-lg px-2 py-1 text-[11px] font-bold transition-all ${
+                  className={`rounded-full px-2.5 py-1 text-[11px] font-bold transition-all ${
                     lang === l.code
                       ? "bg-brand-600 text-white shadow-sm"
-                      : "text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-700"
+                      : "text-slate-400 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
                   }`}
                 >
                   {l.label}
@@ -70,7 +70,7 @@ export default function AppLayout({ title, subtitle, children, fullHeight = fals
             {/* Dark mode — always visible, icon only */}
             <button
               onClick={toggle}
-              className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition-all hover:bg-brand-50 hover:text-brand-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400 dark:hover:text-brand-400"
+              className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition-all hover:bg-brand-50 hover:text-brand-700 hover:border-brand-200 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400 dark:hover:text-brand-400 dark:hover:border-brand-600"
               title={dark ? "Light mode" : "Dark mode"}
             >
               {dark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
@@ -82,8 +82,8 @@ export default function AppLayout({ title, subtitle, children, fullHeight = fals
                 to="/rfid-attendance"
                 className={`flex h-9 w-9 items-center justify-center rounded-xl border transition-all ${
                   isRfid
-                    ? "bg-brand-600 border-brand-600 text-white"
-                    : "border-slate-200 bg-white text-slate-500 hover:bg-brand-50 hover:text-brand-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400"
+                    ? "bg-brand-600 border-brand-600 text-white shadow-sm"
+                    : "border-slate-200 bg-white text-slate-500 hover:bg-brand-50 hover:text-brand-700 hover:border-brand-200 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400 dark:hover:border-brand-600"
                 }`}
                 title="RFID Attendance"
               >
@@ -94,13 +94,13 @@ export default function AppLayout({ title, subtitle, children, fullHeight = fals
             {/* User avatar + name */}
             <div className="flex items-center gap-2 pl-1">
               {user?.photo ? (
-                <img src={user.photo} alt={user.name} className="h-8 w-8 rounded-xl object-cover ring-2 ring-brand-200 dark:ring-brand-800" />
+                <img src={user.photo} alt={user.name} className="h-9 w-9 rounded-xl object-cover ring-2 ring-brand-300 dark:ring-brand-700 shadow-sm" />
               ) : (
-                <div className={`flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br ${gradient} text-[11px] font-black text-white`}>{initials}</div>
+                <div className={`flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br ${gradient} text-[11px] font-black text-white ring-2 ring-white/30 shadow-sm`}>{initials}</div>
               )}
               <div className="hidden lg:block leading-tight">
-                <p className="text-sm font-bold">{user?.name}</p>
-                <p className="text-[10px] capitalize text-slate-400">{user?.role}</p>
+                <p className="text-sm font-bold text-slate-800 dark:text-slate-100">{user?.name}</p>
+                <p className="text-[10px] capitalize text-slate-400 dark:text-slate-500">{user?.role}</p>
               </div>
             </div>
 

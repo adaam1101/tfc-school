@@ -316,9 +316,9 @@ export default function AdminDashboard() {
           }`}
         >
           {/* Sidebar header */}
-          <div className="flex items-center justify-between px-5 py-6 border-b border-brand-600/50">
+          <div className="flex items-center justify-between px-5 py-6 border-b border-white/10">
             <div className="flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/20 backdrop-blur-sm text-white font-black text-base shadow-inner">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/20 backdrop-blur-sm text-white font-black text-base ring-2 ring-white/20 shadow-lg">
                 {initials}
               </div>
               <div>
@@ -346,9 +346,9 @@ export default function AdminDashboard() {
                 <button
                   key={item.id}
                   onClick={() => navigateTo(item.id)}
-                  className={`w-full flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-semibold transition-all duration-150 ${
+                  className={`w-full flex items-center gap-3 rounded-xl py-3 px-4 text-sm font-semibold transition-all duration-150 ${
                     active
-                      ? "bg-white text-brand-800 shadow-sm"
+                      ? "bg-white text-brand-800 shadow-md"
                       : "text-brand-100 hover:bg-white/10 hover:text-white"
                   }`}
                 >
@@ -393,7 +393,7 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          <div className="p-4 sm:p-6 lg:p-8 grid gap-6">
+          <div className="p-6 lg:p-8 grid gap-6">
             <ErrorAlert message={error} />
 
             {/* Panel-based tabs */}
@@ -408,12 +408,10 @@ export default function AdminDashboard() {
               <>
                 {/* Page heading */}
                 <div>
-                  <h1 className="text-2xl font-black tracking-tight text-slate-900 dark:text-slate-100">
-                    {t.adminTitle}
-                  </h1>
-                  <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                    {t.adminSubtitle}
-                  </p>
+                  <div className="flex items-center gap-3 mb-1">
+                    <h1 className="text-2xl font-black tracking-tight text-slate-900 dark:text-slate-100">{t.adminTitle}</h1>
+                  </div>
+                  <p className="text-sm text-slate-500 mb-6">{t.adminSubtitle}</p>
                 </div>
 
                 {/* Stats row */}
@@ -456,20 +454,24 @@ export default function AdminDashboard() {
                       desc: t.notPresent
                     }
                   ].map(({ icon: Icon, label, value, gradient, border, num, desc }) => (
-                    <div key={label} className={`card-hover border p-5 ${border}`}>
-                      <div className="flex items-start justify-between gap-3">
+                    <div key={label} className="relative overflow-hidden rounded-2xl border border-slate-200/60 bg-white p-5 shadow-sm transition-all hover:shadow-md dark:border-slate-700 dark:bg-slate-800/90">
+                      {/* Colored accent top bar */}
+                      <div className={`absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r ${gradient}`} />
+                      <div className="flex items-start justify-between gap-4">
                         <div>
-                          <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">{label}</p>
-                          <p className={`mt-2 text-4xl font-black tracking-tight ${num}`}>{value}</p>
-                          <p className="mt-1 flex items-center gap-1 text-xs text-slate-500">
+                          <p className="text-xs font-semibold uppercase tracking-widest text-slate-400">{label}</p>
+                          <p className={`mt-3 text-4xl font-black tabular-nums tracking-tight ${num}`}>{value}</p>
+                          <p className="mt-2 flex items-center gap-1.5 text-xs font-medium text-slate-400">
                             <TrendingUp className="h-3 w-3" />
                             {desc}
                           </p>
                         </div>
-                        <div className={`rounded-2xl bg-gradient-to-br p-3 shadow-sm ${gradient}`}>
-                          <Icon className="h-6 w-6 text-white" aria-hidden="true" />
+                        <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br ${gradient} shadow-lg`}>
+                          <Icon className="h-5 w-5 text-white" aria-hidden="true" />
                         </div>
                       </div>
+                      {/* Subtle bg glow */}
+                      <div className={`absolute -bottom-4 -right-4 h-20 w-20 rounded-full bg-gradient-to-br ${gradient} opacity-5`} />
                     </div>
                   ))}
                 </section>
@@ -562,15 +564,16 @@ export default function AdminDashboard() {
                         <button
                           key={label}
                           onClick={action}
-                          className="group flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 text-left transition-all hover:border-brand-200 hover:bg-brand-50 hover:shadow-sm dark:border-slate-700 dark:bg-slate-800/50 dark:hover:border-brand-600 dark:hover:bg-slate-800"
+                          className="group relative flex items-center gap-4 rounded-xl border border-slate-200/80 bg-white p-4 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:border-brand-200 hover:shadow-md dark:border-slate-700 dark:bg-slate-800 dark:hover:border-brand-600"
                         >
-                          <div className={`rounded-xl bg-gradient-to-br p-2.5 shadow-sm ${gradient}`}>
-                            <Icon className="h-4 w-4 text-white" />
+                          <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br ${gradient} shadow-sm`}>
+                            <Icon className="h-5 w-5 text-white" />
                           </div>
-                          <div>
-                            <p className="text-sm font-bold text-slate-800 dark:text-slate-100 group-hover:text-brand-700 dark:group-hover:text-brand-300">{label}</p>
-                            <p className="text-xs text-slate-500 dark:text-slate-400">{desc}</p>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-bold text-slate-800 dark:text-slate-100">{label}</p>
+                            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{desc}</p>
                           </div>
+                          <ChevronRight className="h-4 w-4 text-slate-300 transition-transform group-hover:translate-x-0.5 group-hover:text-brand-500 shrink-0" />
                         </button>
                       ))}
                     </div>
@@ -822,7 +825,7 @@ export default function AdminDashboard() {
                   <div className="overflow-x-auto">
                     <table className="min-w-full text-sm">
                       <thead>
-                        <tr className="border-b border-slate-100 bg-slate-50 dark:border-slate-700 dark:bg-slate-800/60">
+                        <tr className="border-b border-slate-100 bg-gradient-to-r from-slate-50 to-slate-100/50 dark:border-slate-700 dark:from-slate-800 dark:to-slate-800/50">
                           {[t.name, t.role, t.courseOrSubject, t.contact, t.actions].map((h) => (
                             <th key={h} className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider text-slate-400">{h}</th>
                           ))}
@@ -830,10 +833,12 @@ export default function AdminDashboard() {
                       </thead>
                       <tbody className="divide-y divide-slate-50 dark:divide-slate-700/50">
                         {filteredUsers.map((u) => (
-                          <tr key={u._id} className="hover:bg-slate-50/80 transition-colors dark:hover:bg-slate-700/30">
+                          <tr key={u._id} className="border-l-2 border-l-transparent hover:border-l-brand-500 hover:bg-brand-50/30 transition-colors dark:hover:bg-slate-700/30">
                             <td className="px-4 py-3">
                               <div className="flex items-center gap-3">
-                                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-brand-400 to-brand-600 text-xs font-bold text-white">
+                                <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br text-xs font-bold text-white ${
+                                  u.role === "teacher" ? "from-violet-400 to-violet-600" : u.role === "student" ? "from-brand-400 to-brand-600" : "from-slate-400 to-slate-600"
+                                }`}>
                                   {u.name?.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase() || "?"}
                                 </div>
                                 <div>
@@ -843,7 +848,7 @@ export default function AdminDashboard() {
                               </div>
                             </td>
                             <td className="px-4 py-3">
-                              <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${roleBadge[u.role]}`}>
+                              <span className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${roleBadge[u.role]}`}>
                                 {roleLabel[u.role]}
                               </span>
                             </td>
