@@ -270,8 +270,8 @@ export default function InscriptionPage() {
                 </div>
               </div>
 
-              {/* Course info card */}
-              {courseObj && (
+              {/* Course info card — only shown when price/duration info is available */}
+              {courseObj?.price && (
                 <div className="animate-fade-slide-up rounded-2xl bg-brand-50 border border-brand-200 px-4 py-4 grid gap-2">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold uppercase tracking-wider text-brand-600">{t.priceLabel}</span>
@@ -280,19 +280,23 @@ export default function InscriptionPage() {
                         <span className="rounded-full bg-rose-100 text-rose-700 text-[10px] font-bold px-2 py-0.5 uppercase">{t.promoLabel}</span>
                       )}
                       <span className="text-lg font-black text-brand-800">
-                        {courseObj.price?.toLocaleString()} {t.dzd}
+                        {courseObj.price.toLocaleString()} {t.dzd}
                         {courseObj.priceUnit ? <span className="text-sm font-semibold text-brand-500"> {isAr ? courseObj.priceUnit.ar : courseObj.priceUnit.fr}</span> : null}
                       </span>
                     </div>
                   </div>
-                  <div className="flex items-center justify-between text-xs text-slate-600">
-                    <span className="font-semibold text-slate-500">{t.durationLabel}</span>
-                    <span className="font-bold">{isAr ? courseObj.duration.ar : courseObj.duration.fr}</span>
-                  </div>
-                  <div className="flex items-center justify-between text-xs text-slate-600">
-                    <span className="font-semibold text-slate-500">{t.sessionsLabel}</span>
-                    <span className="font-bold">{isAr ? courseObj.sessions.ar : courseObj.sessions.fr}</span>
-                  </div>
+                  {courseObj.duration && (
+                    <div className="flex items-center justify-between text-xs text-slate-600">
+                      <span className="font-semibold text-slate-500">{t.durationLabel}</span>
+                      <span className="font-bold">{isAr ? courseObj.duration.ar : courseObj.duration.fr}</span>
+                    </div>
+                  )}
+                  {courseObj.sessions && (
+                    <div className="flex items-center justify-between text-xs text-slate-600">
+                      <span className="font-semibold text-slate-500">{t.sessionsLabel}</span>
+                      <span className="font-bold">{isAr ? courseObj.sessions.ar : courseObj.sessions.fr}</span>
+                    </div>
+                  )}
                 </div>
               )}
 
