@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback } from "react";
 import {
   Check, Inbox, Mail, Phone, RefreshCcw, UserRound, X,
   Users, GraduationCap, BookOpen, CheckCircle2, XCircle,
-  Clock, Search, BadgeCheck, AlertCircle
+  Clock, Search, BadgeCheck, AlertCircle, DollarSign, Save
 } from "lucide-react";
 import { api, getApiError } from "../../api/http.js";
 import ErrorAlert from "../../components/ErrorAlert.jsx";
@@ -34,6 +34,158 @@ const TABS = [
   { id: "enrollments",label: "Enrollments", icon: Inbox }
 ];
 
+// ── Payment Modal ─────────────────────────────────────────────────────────────
+
+function PaymentModal({ student, payment, onClose, onSaved }) {
+  const currentMonth = new Date().toISOString().slice(0, 7); // YYYY-MM
+  const [status, setStatus]       = useState(payment?.status || "unpaid");
+  const [amount, setAmount]       = useState(payment?.amount ?? "");
+  const [paidAmount, setPaid]     = useState(payment?.paidAmount ?? "");
+  const [month, setMonth]         = useState(payment?.month || currentMonth);
+  const [note, setNote]           = useState(payment?.note || "");
+  const [saving, setSaving]       = useState(false);
+  const [error, setError]         = useState("");
+
+  // Auto-derive status from amounts
+  const handlePaidChange = (val) => {
+    setPaid(val);
+    const paid = Number(val);
+    const total = Number(amount);
+    if (total > 0 && paid >= total) setStatus("paid");
+    else if (paid > 0 && paid < total) setStatus("partial");
+    else if (paid === 0) setStatus("unpaid");
+  };
+
+  const save = async () => {
+    setSaving(true); setError("");
+    try {
+      const body = {
+        student: student._id,
+        month,
+        amount:     Number(amount) || 0,
+        paidAmount: Number(paidAmount) || 0,
+        status,
+        note
+      };
+      if (payment?._id) {
+        await api.put(`/payments/${payment._id}`, body);
+      } else {
+        await api.post("/payments", body);
+      }
+      onSaved();
+      onClose();
+    } catch (err) {
+      setError(getApiError(err));
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const remaining = (Number(amount) || 0) - (Number(paidAmount) || 0);
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+      <div className="w-full max-w-md rounded-2xl bg-white dark:bg-slate-800 shadow-2xl">
+        {/* Header */}
+        <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 px-5 py-4">
+          <div>
+            <h2 className="font-black text-slate-900 dark:text-white">Payment</h2>
+            <p className="text-xs text-slate-500">{student.name}</p>
+          </div>
+          <button onClick={onClose} className="rounded-xl p-2 hover:bg-slate-100 dark:hover:bg-slate-700 transition">
+            <X className="h-4 w-4 text-slate-500" />
+          </button>
+        </div>
+
+        <div className="p-5 space-y-4">
+          <ErrorAlert message={error} />
+
+          {/* Month */}
+          <div>
+            <label className="block text-xs font-bold text-slate-500 mb-1">Month</label>
+            <input
+              type="month"
+              className="input w-full"
+              value={month}
+              onChange={e => setMonth(e.target.value)}
+            />
+          </div>
+
+          {/* Total fee */}
+          <div>
+            <label className="block text-xs font-bold text-slate-500 mb-1">Total fee (DZD)</label>
+            <input
+              type="number"
+              min="0"
+              className="input w-full"
+              placeholder="e.g. 5000"
+              value={amount}
+              onChange={e => setAmount(e.target.value)}
+            />
+          </div>
+
+          {/* Amount paid */}
+          <div>
+            <label className="block text-xs font-bold text-slate-500 mb-1">Amount paid (DZD)</label>
+            <input
+              type="number"
+              min="0"
+              className="input w-full"
+              placeholder="0"
+              value={paidAmount}
+              onChange={e => handlePaidChange(e.target.value)}
+            />
+          </div>
+
+          {/* Remaining */}
+          {Number(amount) > 0 && (
+            <div className={`rounded-xl px-4 py-3 text-sm font-semibold ${
+              remaining <= 0
+                ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300"
+                : "bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300"
+            }`}>
+              {remaining <= 0
+                ? "Fully paid"
+                : `Remaining: ${remaining.toLocaleString()} DZD`}
+            </div>
+          )}
+
+          {/* Status override */}
+          <div>
+            <label className="block text-xs font-bold text-slate-500 mb-1">Status</label>
+            <select className="input w-full" value={status} onChange={e => setStatus(e.target.value)}>
+              <option value="paid">Paid</option>
+              <option value="partial">Partial</option>
+              <option value="unpaid">Unpaid</option>
+              <option value="overdue">Overdue</option>
+            </select>
+          </div>
+
+          {/* Note */}
+          <div>
+            <label className="block text-xs font-bold text-slate-500 mb-1">Note (optional)</label>
+            <input
+              type="text"
+              className="input w-full"
+              placeholder="e.g. paid in cash"
+              value={note}
+              onChange={e => setNote(e.target.value)}
+            />
+          </div>
+        </div>
+
+        <div className="flex justify-end gap-2 border-t border-slate-100 dark:border-slate-700 px-5 py-4">
+          <button onClick={onClose} className="btn-secondary">Cancel</button>
+          <button onClick={save} disabled={saving} className="btn-primary flex items-center gap-2">
+            <Save className="h-4 w-4" />
+            {saving ? "Saving…" : "Save payment"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── Students tab ──────────────────────────────────────────────────────────────
 
 function StudentsTab() {
@@ -42,6 +194,7 @@ function StudentsTab() {
   const [loading, setLoading]     = useState(true);
   const [error, setError]         = useState("");
   const [search, setSearch]       = useState("");
+  const [editStudent, setEditStudent] = useState(null); // student being edited
 
   const load = useCallback(async () => {
     setLoading(true); setError("");
@@ -52,7 +205,6 @@ function StudentsTab() {
       ]);
       setStudents(usersRes.data.users || []);
 
-      // Map studentId → most recent payment
       const map = {};
       for (const p of (paymentsRes.data.payments || [])) {
         const sid = p.student?._id || p.student;
@@ -77,7 +229,6 @@ function StudentsTab() {
     (s.studentProfile?.teacher?.name || "").toLowerCase().includes(q)
   );
 
-  const present = students.length;
   const paidCount   = students.filter(s => payments[s._id]?.status === "paid").length;
   const unpaidCount = students.filter(s => !payments[s._id] || payments[s._id]?.status === "unpaid" || payments[s._id]?.status === "overdue").length;
 
@@ -85,12 +236,21 @@ function StudentsTab() {
     <div className="space-y-5">
       <ErrorAlert message={error} />
 
+      {editStudent && (
+        <PaymentModal
+          student={editStudent}
+          payment={payments[editStudent._id]}
+          onClose={() => setEditStudent(null)}
+          onSaved={load}
+        />
+      )}
+
       {/* Summary stats */}
       <div className="grid grid-cols-3 gap-3">
         {[
-          { icon: Users,        label: "Total students", value: present,    color: "from-brand-500 to-brand-700",     bg: "bg-brand-50 dark:bg-brand-950/40",    num: "text-brand-800 dark:text-brand-200" },
-          { icon: CheckCircle2, label: "Paid",            value: paidCount,  color: "from-emerald-500 to-teal-600",   bg: "bg-emerald-50 dark:bg-emerald-950/40", num: "text-emerald-800 dark:text-emerald-200" },
-          { icon: XCircle,      label: "Unpaid / overdue",value: unpaidCount, color: "from-rose-500 to-red-600",       bg: "bg-rose-50 dark:bg-rose-950/40",       num: "text-rose-800 dark:text-rose-200" }
+          { icon: Users,        label: "Total students",  value: students.length, color: "from-brand-500 to-brand-700",   bg: "bg-brand-50 dark:bg-brand-950/40",     num: "text-brand-800 dark:text-brand-200" },
+          { icon: CheckCircle2, label: "Paid",            value: paidCount,       color: "from-emerald-500 to-teal-600",  bg: "bg-emerald-50 dark:bg-emerald-950/40", num: "text-emerald-800 dark:text-emerald-200" },
+          { icon: XCircle,      label: "Unpaid / overdue",value: unpaidCount,     color: "from-rose-500 to-red-600",      bg: "bg-rose-50 dark:bg-rose-950/40",       num: "text-rose-800 dark:text-rose-200" }
         ].map(({ icon: Icon, label, value, color, bg, num }) => (
           <div key={label} className={`rounded-2xl p-4 ${bg}`}>
             <div className={`mb-2 inline-flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br ${color}`}>
@@ -122,7 +282,7 @@ function StudentsTab() {
             <table className="min-w-full text-sm">
               <thead>
                 <tr className="border-b border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60">
-                  {["Student", "Course", "Teacher", "Subject", "Phone", "Payment"].map(h => (
+                  {["Student", "Course", "Teacher", "Subject", "Phone", "Payment", ""].map(h => (
                     <th key={h} className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider text-slate-400">{h}</th>
                   ))}
                 </tr>
@@ -130,7 +290,7 @@ function StudentsTab() {
               <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
                 {filtered.length === 0 && (
                   <tr>
-                    <td colSpan={6} className="px-4 py-10 text-center text-slate-400">No students found.</td>
+                    <td colSpan={7} className="px-4 py-10 text-center text-slate-400">No students found.</td>
                   </tr>
                 )}
                 {filtered.map(s => {
@@ -166,10 +326,27 @@ function StudentsTab() {
                         }
                       </td>
                       <td className="px-4 py-3">
-                        <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase ${paymentColor[payStatus] || paymentColor.pending}`}>
-                          {payStatus === "paid" ? <BadgeCheck className="h-3 w-3" /> : <AlertCircle className="h-3 w-3" />}
-                          {payStatus}
-                        </span>
+                        <div>
+                          <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase ${paymentColor[payStatus] || paymentColor.pending}`}>
+                            {payStatus === "paid" ? <BadgeCheck className="h-3 w-3" /> : <AlertCircle className="h-3 w-3" />}
+                            {payStatus}
+                          </span>
+                          {pay && payStatus === "partial" && (
+                            <p className="text-[10px] text-slate-400 mt-0.5">
+                              {(pay.paidAmount || 0).toLocaleString()} / {(pay.amount || 0).toLocaleString()} DZD
+                            </p>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-4 py-3">
+                        <button
+                          onClick={() => setEditStudent(s)}
+                          className="inline-flex items-center gap-1 rounded-xl bg-brand-50 px-2.5 py-1.5 text-[11px] font-bold text-brand-700 hover:bg-brand-100 dark:bg-brand-950/40 dark:text-brand-300 dark:hover:bg-brand-900/60 transition"
+                          title="Edit payment"
+                        >
+                          <DollarSign className="h-3 w-3" />
+                          Pay
+                        </button>
                       </td>
                     </tr>
                   );

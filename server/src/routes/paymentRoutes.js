@@ -66,8 +66,8 @@ paymentRouter.get("/", allowRoles("admin", "sous-admin", "moderator"), async (re
   }
 });
 
-// ── Admin / sous-admin only: write operations ──
-paymentRouter.use(allowRoles("admin", "sous-admin"));
+// ── Admin / sous-admin / moderator: write operations (no delete) ──
+paymentRouter.use(allowRoles("admin", "sous-admin", "moderator"));
 
 paymentRouter.post("/", async (req, res, next) => {
   try {
