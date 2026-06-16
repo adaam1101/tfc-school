@@ -107,8 +107,8 @@ export default function InscriptionPage() {
   const age        = getAge(form.dob);
   const courseObj  = COURSES.find(c => c.id === form.course);
   const isLangCourse = courseObj?.lang === true;
-  const isKid      = isLangCourse && age !== null && age >= 0 && age <= 12;
-  const needsLevel = isLangCourse && age !== null && age >= 13 && age <= 50;
+  const isKid      = isLangCourse && !courseObj?.pricePerLevel && age !== null && age >= 0 && age <= 12;
+  const needsLevel = courseObj?.pricePerLevel || (isLangCourse && age !== null && age >= 13 && age <= 50);
 
   // For courses with per-level pricing, derive the active price from selected level
   const activePrice = courseObj?.pricePerLevel
