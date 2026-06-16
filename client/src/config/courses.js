@@ -59,6 +59,17 @@ const TFC_COURSES = [
     lang: true
   },
 
+  // ── Photography ───────────────────────────────────────────────────────────
+  {
+    id: "photographie",
+    ar: "التصوير الفوتوغرافي",
+    fr: "Photographie",
+    price: 18000,
+    duration: { ar: "دورة كاملة", fr: "Formation complète" },
+    sessions: { ar: "حصص أسبوعية", fr: "Séances hebdomadaires" },
+    lang: false
+  },
+
   // ── Sewing & Fashion ───────────────────────────────────────────────────────
   {
     id: "couture",
@@ -134,8 +145,9 @@ const TFC_COURSES = [
     id: "langues-enfants",
     ar: "إنجليزية وفرنسية للأطفال",
     fr: "Anglais & Français enfants",
-    price: 2500,
-    duration: { ar: "شهرين ونصف", fr: "2 mois ½" },
+    price: 2700,
+    priceUnit: { ar: "/ شهر", fr: "/ mois" },
+    duration: { ar: "شهري", fr: "Mensuel" },
     sessions: { ar: "حصتان / أسبوع", fr: "2 séances / semaine" },
     lang: false,
     kids: true
