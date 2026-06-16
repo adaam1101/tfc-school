@@ -131,6 +131,66 @@ teacherRouter.post("/attendance", validate(attendanceSchema), async (req, res, n
   }
 });
 
+// ── Register a new student (teacher self-service) ─────────────────────────────
+
+teacherRouter.post("/students/register", async (req, res, next) => {
+  try {
+    const { name, age, course, phone, parentName, parentPhone, parentEmail, dateOfBirth } = req.body;
+
+    if (!name?.trim()) return res.status(400).json({ message: "Full name is required." });
+    if (!age)          return res.status(400).json({ message: "Age is required." });
+    if (!course?.trim()) return res.status(400).json({ message: "Course is required." });
+
+    // Auto-generate email + temporary password
+    const slug = name.trim().toLowerCase().replace(/\s+/g, ".").replace(/[^a-z0-9.]/g, "");
+    const rand = Math.floor(1000 + Math.random() * 9000);
+    let email = `${slug}@tfcschool.dz`;
+
+    // Ensure email uniqueness
+    const exists = await User.findOne({ email });
+    if (exists) email = `${slug}.${rand}@tfcschool.dz`;
+
+    const tempPassword = `Tfc@${rand}${Math.floor(10 + Math.random() * 90)}`;
+
+    const student = await User.create({
+      role: "student",
+      name: name.trim(),
+      email,
+      password: tempPassword,
+      phone: phone || "",
+      status: "active",
+      studentProfile: {
+        age: Number(age),
+        dateOfBirth: dateOfBirth || "",
+        course: course.trim(),
+        parentName: parentName || "",
+        parentPhone: parentPhone || "",
+        parentEmail: parentEmail || "",
+        teacher: req.user._id
+      }
+    });
+
+    // Link student to this teacher
+    await User.updateOne(
+      { _id: req.user._id },
+      { $addToSet: { "teacherProfile.assignedStudents": student._id } }
+    );
+
+    res.status(201).json({
+      message: `${student.name} registered successfully.`,
+      student: {
+        _id:   student._id,
+        name:  student.name,
+        email: student.email,
+        studentProfile: student.studentProfile
+      },
+      credentials: { email, tempPassword }
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
 // ── Student management ────────────────────────────────────────────────────────
 
 // List all students available to assign (unassigned or already mine)

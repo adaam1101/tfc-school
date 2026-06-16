@@ -12,10 +12,177 @@ import {
   ChevronDown,
   ChevronUp,
   Search,
-  CheckCircle2
+  CheckCircle2,
+  ClipboardCopy,
+  UserRoundPlus
 } from "lucide-react";
 import { api, getApiError } from "../api/http.js";
 import ErrorAlert from "./ErrorAlert.jsx";
+
+// ── Register new student modal ────────────────────────────────────────────────
+
+function RegisterStudentModal({ onDone, onClose }) {
+  const COURSES = ["English", "French", "Arabic", "Math", "Science", "Other"];
+  const [form, setForm] = useState({
+    name: "", age: "", course: "English", phone: "",
+    parentName: "", parentPhone: "", parentEmail: "", dateOfBirth: ""
+  });
+  const [saving, setSaving]   = useState(false);
+  const [error, setError]     = useState("");
+  const [result, setResult]   = useState(null); // { email, tempPassword, name }
+  const [copied, setCopied]   = useState(false);
+
+  const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setSaving(true); setError("");
+    try {
+      const { data } = await api.post("/teacher/students/register", form);
+      setResult(data);
+      onDone();
+    } catch (err) {
+      setError(getApiError(err));
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const copyCredentials = () => {
+    const text = `Name: ${result.student.name}\nEmail: ${result.credentials.email}\nPassword: ${result.credentials.tempPassword}`;
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+      <div className="w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-3xl bg-white dark:bg-slate-800 shadow-2xl">
+
+        {/* Header */}
+        <div className="sticky top-0 bg-white dark:bg-slate-800 flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-700 z-10">
+          <h3 className="font-black text-slate-900 dark:text-slate-100 flex items-center gap-2">
+            <UserRoundPlus className="h-5 w-5 text-brand-600" /> Register New Student
+          </h3>
+          <button onClick={onClose} className="flex h-8 w-8 items-center justify-center rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700">
+            <X className="h-5 w-5 text-slate-500" />
+          </button>
+        </div>
+
+        {/* Success state */}
+        {result ? (
+          <div className="p-6 space-y-5">
+            <div className="flex flex-col items-center text-center gap-2">
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-100 dark:bg-emerald-900/40">
+                <CheckCircle2 className="h-8 w-8 text-emerald-600 dark:text-emerald-400" />
+              </div>
+              <h4 className="font-black text-slate-900 dark:text-slate-100 text-lg">{result.student.name} registered!</h4>
+              <p className="text-sm text-slate-500">Share these login credentials with the student or their parent.</p>
+            </div>
+
+            <div className="rounded-2xl bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 p-4 space-y-2">
+              <div className="flex justify-between items-center text-sm">
+                <span className="text-slate-500 font-medium">Email</span>
+                <span className="font-bold text-slate-800 dark:text-slate-200 font-mono">{result.credentials.email}</span>
+              </div>
+              <div className="flex justify-between items-center text-sm">
+                <span className="text-slate-500 font-medium">Password</span>
+                <span className="font-bold text-slate-800 dark:text-slate-200 font-mono">{result.credentials.tempPassword}</span>
+              </div>
+            </div>
+
+            <p className="text-xs text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 rounded-xl px-3 py-2">
+              ⚠️ Save these credentials now — the password won't be shown again.
+            </p>
+
+            <div className="flex gap-3">
+              <button
+                onClick={copyCredentials}
+                className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 dark:border-slate-600 py-2.5 text-sm font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all"
+              >
+                <ClipboardCopy className="h-4 w-4" />
+                {copied ? "Copied!" : "Copy credentials"}
+              </button>
+              <button
+                onClick={onClose}
+                className="flex-1 rounded-xl bg-gradient-to-r from-brand-600 to-brand-700 py-2.5 text-sm font-bold text-white hover:from-brand-700 hover:to-brand-800 transition-all"
+              >
+                Done
+              </button>
+            </div>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit} className="p-6 space-y-5">
+            <ErrorAlert message={error} />
+
+            {/* Required */}
+            <div>
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Required info</p>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <label className="block sm:col-span-2">
+                  <span className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1 block">Full name <span className="text-rose-500">*</span></span>
+                  <input className="w-full rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 px-3 py-2.5 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-400" value={form.name} onChange={e => set("name", e.target.value)} required placeholder="Student full name" />
+                </label>
+                <label className="block">
+                  <span className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1 block">Age <span className="text-rose-500">*</span></span>
+                  <input type="number" min="3" max="80" className="w-full rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 px-3 py-2.5 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-400" value={form.age} onChange={e => set("age", e.target.value)} required placeholder="Age" />
+                </label>
+                <label className="block">
+                  <span className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1 block">Course <span className="text-rose-500">*</span></span>
+                  <select className="w-full rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 px-3 py-2.5 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-400" value={form.course} onChange={e => set("course", e.target.value)}>
+                    {COURSES.map(c => <option key={c}>{c}</option>)}
+                  </select>
+                </label>
+                <label className="block sm:col-span-2">
+                  <span className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1 block">Phone <span className="text-rose-500">*</span></span>
+                  <input className="w-full rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 px-3 py-2.5 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-400" value={form.phone} onChange={e => set("phone", e.target.value)} required placeholder="+213 …" />
+                </label>
+              </div>
+            </div>
+
+            {/* Optional */}
+            <div>
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Optional info</p>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <label className="block">
+                  <span className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1 block">Date of birth</span>
+                  <input type="date" className="w-full rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 px-3 py-2.5 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-400" value={form.dateOfBirth} onChange={e => set("dateOfBirth", e.target.value)} />
+                </label>
+                <label className="block">
+                  <span className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1 block">Parent name</span>
+                  <input className="w-full rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 px-3 py-2.5 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-400" value={form.parentName} onChange={e => set("parentName", e.target.value)} placeholder="Parent / guardian name" />
+                </label>
+                <label className="block">
+                  <span className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1 block">Parent phone</span>
+                  <input className="w-full rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 px-3 py-2.5 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-400" value={form.parentPhone} onChange={e => set("parentPhone", e.target.value)} placeholder="+213 …" />
+                </label>
+                <label className="block">
+                  <span className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1 block">Parent email</span>
+                  <input type="email" className="w-full rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 px-3 py-2.5 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-400" value={form.parentEmail} onChange={e => set("parentEmail", e.target.value)} placeholder="parent@email.com" />
+                </label>
+              </div>
+            </div>
+
+            <p className="text-xs text-slate-400 dark:text-slate-500 bg-slate-50 dark:bg-slate-700/50 rounded-xl px-3 py-2">
+              Login credentials (email + temporary password) will be generated automatically and shown after registration.
+            </p>
+
+            <div className="flex gap-3">
+              <button type="button" onClick={onClose} className="flex-1 rounded-xl border border-slate-200 dark:border-slate-600 py-2.5 text-sm font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all">
+                Cancel
+              </button>
+              <button type="submit" disabled={saving} className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-brand-600 to-brand-700 py-2.5 text-sm font-bold text-white disabled:opacity-60 transition-all">
+                {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <UserRoundPlus className="h-4 w-4" />}
+                {saving ? "Registering…" : "Register student"}
+              </button>
+            </div>
+          </form>
+        )}
+      </div>
+    </div>
+  );
+}
 
 const GROUP_COLORS = [
   "#3B82F6", "#10B981", "#8B5CF6", "#F59E0B",
@@ -357,7 +524,8 @@ export default function TeacherGroupsPanel() {
   const [groups, setGroups]         = useState([]);
   const [loading, setLoading]       = useState(true);
   const [subTab, setSubTab]         = useState("students"); // "students" | "groups"
-  const [showAddStudent, setShowAddStudent] = useState(false);
+  const [showAddStudent, setShowAddStudent]       = useState(false);
+  const [showRegisterStudent, setShowRegisterStudent] = useState(false);
   const [showGroupForm, setShowGroupForm]   = useState(false);
   const [editingGroup, setEditingGroup]     = useState(null);
   const [removingId, setRemovingId]         = useState("");
@@ -478,16 +646,24 @@ export default function TeacherGroupsPanel() {
       {/* ── Students tab ──────────────────────────────────────────────────────── */}
       {subTab === "students" && (
         <div className="space-y-4">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-wrap items-center justify-between gap-2">
             <p className="text-sm text-slate-500 dark:text-slate-400">
               {myStudents.length === 0 ? "No students yet." : `${myStudents.length} student${myStudents.length > 1 ? "s" : ""} in your class`}
             </p>
-            <button
-              onClick={() => setShowAddStudent(true)}
-              className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-brand-600 to-brand-700 px-4 py-2 text-sm font-bold text-white shadow-sm hover:from-brand-700 hover:to-brand-800 transition-all"
-            >
-              <UserPlus className="h-4 w-4" /> Add student
-            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setShowRegisterStudent(true)}
+                className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-700 px-4 py-2 text-sm font-bold text-white shadow-sm hover:from-emerald-700 hover:to-teal-800 transition-all"
+              >
+                <UserRoundPlus className="h-4 w-4" /> Register new
+              </button>
+              <button
+                onClick={() => setShowAddStudent(true)}
+                className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-brand-600 to-brand-700 px-4 py-2 text-sm font-bold text-white shadow-sm hover:from-brand-700 hover:to-brand-800 transition-all"
+              >
+                <UserPlus className="h-4 w-4" /> Add existing
+              </button>
+            </div>
           </div>
 
           {myStudents.length === 0 && (
@@ -578,6 +754,13 @@ export default function TeacherGroupsPanel() {
           myStudents={myStudents}
           onAdd={handleAddStudent}
           onClose={() => setShowAddStudent(false)}
+        />
+      )}
+
+      {showRegisterStudent && (
+        <RegisterStudentModal
+          onDone={load}
+          onClose={() => setShowRegisterStudent(false)}
         />
       )}
     </div>
