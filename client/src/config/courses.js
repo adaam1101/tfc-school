@@ -134,9 +134,8 @@ const TFC_COURSES = [
     id: "langues-enfants",
     ar: "إنجليزية وفرنسية للأطفال",
     fr: "Anglais & Français enfants",
-    price: 2700,
-    priceUnit: { ar: "/ شهر", fr: "/ mois" },
-    duration: { ar: "شهري", fr: "Mensuel" },
+    price: 2500,
+    duration: { ar: "شهرين ونصف", fr: "2 mois ½" },
     sessions: { ar: "حصتان / أسبوع", fr: "2 séances / semaine" },
     lang: false,
     kids: true
