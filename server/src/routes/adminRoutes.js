@@ -110,8 +110,8 @@ adminRouter.get("/dashboard", adminOrSousAdmin, async (_req, res, next) => {
 
 adminRouter.get("/users", async (req, res, next) => {
   try {
-    // Moderators can only list students
-    if (req.user.role === "moderator") {
+    // Moderators can only list students and teachers
+    if (req.user.role === "moderator" && !["student", "teacher"].includes(req.query.role)) {
       req.query.role = "student";
     }
     const filter = req.query.role ? { role: req.query.role } : {};
