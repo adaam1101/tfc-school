@@ -2,7 +2,8 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import {
   Mail, Phone, MapPin, ShieldCheck, GraduationCap, UserRound,
-  Award, Users, BookOpen, Instagram, Facebook, Globe, Moon, Sun, ChevronRight
+  Award, Users, BookOpen, Instagram, Facebook, Globe, Moon, Sun, ChevronRight,
+  UserCog, ClipboardList
 } from "lucide-react";
 import { schoolLogo, schoolInfo } from "../config/branding.js";
 import { useTheme } from "../hooks/useTheme.js";
@@ -42,9 +43,11 @@ const translations = {
       ]
     },
     portals: [
-      { role: "admin",   label: "Admin",   sub: "Management portal" },
-      { role: "teacher", label: "Teacher", sub: "Attendance & students" },
-      { role: "student", label: "Student", sub: "Profile & schedule" }
+      { role: "admin",      label: "Admin",      sub: "Management portal" },
+      { role: "sous-admin", label: "Sous-Admin", sub: "Sub-management" },
+      { role: "moderator",  label: "Moderator",  sub: "Enrollment review" },
+      { role: "teacher",    label: "Teacher",    sub: "Attendance & students" },
+      { role: "student",    label: "Student",    sub: "Profile & schedule" }
     ]
   },
 
@@ -81,9 +84,11 @@ const translations = {
       ]
     },
     portals: [
-      { role: "admin",   label: "Admin",      sub: "Portail de gestion" },
-      { role: "teacher", label: "Enseignant", sub: "Présences & élèves" },
-      { role: "student", label: "Élève",      sub: "Profil & emploi du temps" }
+      { role: "admin",      label: "Admin",       sub: "Portail de gestion" },
+      { role: "sous-admin", label: "Sous-Admin",  sub: "Sous-gestion" },
+      { role: "moderator",  label: "Modérateur",  sub: "Gestion des inscriptions" },
+      { role: "teacher",    label: "Enseignant",  sub: "Présences & élèves" },
+      { role: "student",    label: "Élève",       sub: "Profil & emploi du temps" }
     ]
   },
 
@@ -120,17 +125,21 @@ const translations = {
       ]
     },
     portals: [
-      { role: "admin",   label: "الإدارة",  sub: "لوحة التحكم" },
-      { role: "teacher", label: "الأستاذ",  sub: "الحضور والطلاب" },
-      { role: "student", label: "الطالب",   sub: "الملف والجدول" }
+      { role: "admin",      label: "الإدارة",       sub: "لوحة التحكم" },
+      { role: "sous-admin", label: "نائب المدير",   sub: "الإدارة الفرعية" },
+      { role: "moderator",  label: "المشرف",        sub: "مراجعة التسجيلات" },
+      { role: "teacher",    label: "الأستاذ",       sub: "الحضور والطلاب" },
+      { role: "student",    label: "الطالب",        sub: "الملف والجدول" }
     ]
   }
 };
 
 const portalConfig = [
-  { role: "admin",   gradient: "from-violet-600 to-purple-700", icon: ShieldCheck,   link: "/admin/login" },
-  { role: "teacher", gradient: "from-brand-600 to-brand-700",   icon: GraduationCap, link: "/teacher/login" },
-  { role: "student", gradient: "from-brand-600 to-emerald-700", icon: UserRound,     link: "/student/login" }
+  { role: "admin",      gradient: "from-violet-600 to-purple-700",  icon: ShieldCheck,   link: "/admin/login" },
+  { role: "sous-admin", gradient: "from-indigo-500 to-indigo-700",  icon: UserCog,       link: "/sous-admin/login" },
+  { role: "moderator",  gradient: "from-slate-500 to-slate-700",    icon: ClipboardList, link: "/moderator/login" },
+  { role: "teacher",    gradient: "from-brand-600 to-brand-700",    icon: GraduationCap, link: "/teacher/login" },
+  { role: "student",    gradient: "from-brand-600 to-emerald-700",  icon: UserRound,     link: "/student/login" }
 ];
 
 const aboutStatIcons  = [Users, GraduationCap, BookOpen, Award];
