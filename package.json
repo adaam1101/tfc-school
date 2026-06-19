@@ -1,0 +1,14 @@
+{
+  "name": "tfc-school-platform",
+  "version": "1.0.0",
+  "description": "Multi-School Management Web App for TFC School & NextMind Academy",
+  "scripts": {
+    "install-all": "npm install && npm --prefix backend install && npm --prefix frontend install",
+    "start": "node run.js",
+    "backend": "npm --prefix backend start",
+    "frontend": "npm --prefix frontend run dev"
+  },
+  "dependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
