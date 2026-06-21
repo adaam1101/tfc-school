@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { api, getApiError } from "../../api/http.js";
 import ErrorAlert from "../../components/ErrorAlert.jsx";
+import { SkeletonTableRow } from "../../components/Skeleton.jsx";
 
 const statusBadge = {
   paid:    "bg-emerald-100 text-emerald-800",
@@ -364,7 +365,11 @@ export default function PaymentsPanel({ students = [] }) {
           </div>
 
           {loading ? (
-            <p className="text-sm text-slate-400">Loading…</p>
+            <div className="overflow-x-auto">
+              <table className="min-w-full text-sm">
+                <tbody>{Array.from({ length: 5 }).map((_, i) => <SkeletonTableRow key={i} cols={8} />)}</tbody>
+              </table>
+            </div>
           ) : filtered.length ? (
             <div className="overflow-x-auto">
               <table className="min-w-full text-sm">

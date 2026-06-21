@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Check, X, Trash2, Inbox, Phone, Mail, RefreshCcw, Copy, KeyRound } from "lucide-react";
 import { api, getApiError } from "../../api/http.js";
 import ErrorAlert from "../../components/ErrorAlert.jsx";
+import { SkeletonCard } from "../../components/Skeleton.jsx";
 
 const statusBadge = {
   pending: "bg-amber-100 text-amber-800",
@@ -114,7 +115,7 @@ export default function EnrollmentsPanel() {
       )}
 
       {loading ? (
-        <p className="text-sm text-slate-400">Loading…</p>
+        <SkeletonCard rows={4} />
       ) : items.length ? (
         <div className="grid gap-3">
           {items.map((e) => (

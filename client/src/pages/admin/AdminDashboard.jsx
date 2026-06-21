@@ -33,8 +33,8 @@ import {
 import { useEffect, useMemo, useState } from "react";
 import { api, getApiError } from "../../api/http.js";
 import ErrorAlert from "../../components/ErrorAlert.jsx";
-import LoadingState from "../../components/LoadingState.jsx";
 import StatusBadge from "../../components/StatusBadge.jsx";
+import { SkeletonStatCard, SkeletonListCard } from "../../components/Skeleton.jsx";
 import AppLayout from "../../layouts/AppLayout.jsx";
 import IDCardModal from "../../components/IDCardModal.jsx";
 import EnrollmentsPanel from "./EnrollmentsPanel.jsx";
@@ -279,8 +279,37 @@ export default function AdminDashboard() {
 
   if (loading) {
     return (
-      <AppLayout title={t.adminTitle} subtitle={t.adminSubtitle}>
-        <LoadingState label={t.loading} />
+      <AppLayout title="" subtitle="" fullHeight>
+        <div className="flex h-full">
+          <aside className="hidden lg:flex w-64 shrink-0 flex-col bg-gradient-to-b from-brand-700 to-brand-950">
+            <div className="px-5 py-6 border-b border-white/10 flex items-center gap-3">
+              <div className="animate-pulse h-12 w-12 rounded-xl bg-white/20" />
+              <div className="flex-1 space-y-2">
+                <div className="animate-pulse h-3.5 w-24 rounded bg-white/20" />
+                <div className="animate-pulse h-3 w-16 rounded bg-white/10" />
+              </div>
+            </div>
+            <div className="px-3 py-4 space-y-1">
+              {Array.from({ length: 7 }).map((_, i) => (
+                <div key={i} className="animate-pulse h-10 rounded-xl bg-white/10 mx-1" />
+              ))}
+            </div>
+          </aside>
+          <div className="flex-1 p-6 lg:p-8 grid gap-6 content-start">
+            <div className="animate-pulse h-28 rounded-2xl bg-brand-200 dark:bg-brand-900" />
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+              {Array.from({ length: 4 }).map((_, i) => <SkeletonStatCard key={i} />)}
+            </div>
+            <div className="grid gap-6 xl:grid-cols-2">
+              <div className="card p-5 space-y-3">
+                {Array.from({ length: 5 }).map((_, i) => <SkeletonListCard key={i} />)}
+              </div>
+              <div className="card p-5 space-y-3">
+                {Array.from({ length: 4 }).map((_, i) => <SkeletonListCard key={i} />)}
+              </div>
+            </div>
+          </div>
+        </div>
       </AppLayout>
     );
   }

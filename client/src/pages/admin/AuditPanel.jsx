@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { History, RefreshCcw, ShieldCheck, Trash2 } from "lucide-react";
 import { api, getApiError } from "../../api/http.js";
 import ErrorAlert from "../../components/ErrorAlert.jsx";
+import { SkeletonListCard } from "../../components/Skeleton.jsx";
 
 const actionColor = {
   create: "bg-emerald-100 text-emerald-700",
@@ -69,7 +70,7 @@ export default function AuditPanel() {
       <ErrorAlert message={error} />
 
       {loading ? (
-        <p className="text-sm text-slate-400">Loading…</p>
+        <div className="grid gap-2">{Array.from({ length: 6 }).map((_, i) => <SkeletonListCard key={i} />)}</div>
       ) : logs.length ? (
         <div className="grid gap-2">
           {logs.map((log) => (
