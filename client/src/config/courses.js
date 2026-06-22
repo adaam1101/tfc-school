@@ -270,6 +270,24 @@ const NEXTMIND_COURSES = [
   { id: "ai",     ar: "الذكاء الاصطناعي",         fr: "Intelligence Artificielle" },
   { id: "cyber",  ar: "الأمن السيبراني",           fr: "Cybersécurité" },
 
+  // ── Kids & Teens ──────────────────────────────────────────────────────────
+  {
+    id: "prog-kids",
+    ar: "البرمجة للأطفال (7 – 12 سنة)",
+    fr: "Programmation enfants (7 – 12 ans)",
+    price: 12000,
+    duration: { ar: "شهر", fr: "1 mois" },
+    sessions: { ar: "مرتين في الأسبوع", fr: "2 fois / semaine" }
+  },
+  {
+    id: "prog-teens",
+    ar: "البرمجة للمراهقين (13 – 17 سنة)",
+    fr: "Programmation adolescents (13 – 17 ans)",
+    price: 12000,
+    duration: { ar: "شهر", fr: "1 mois" },
+    sessions: { ar: "مرتين في الأسبوع", fr: "2 fois / semaine" }
+  },
+
   // ── Languages ─────────────────────────────────────────────────────────────
   {
     id: "anglais-general",
