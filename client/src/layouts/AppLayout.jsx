@@ -18,7 +18,7 @@ export default function AppLayout({ title, subtitle, children, fullHeight = fals
   const [showRating, setShowRating]   = useState(false);
   const [showProfile, setShowProfile] = useState(false);
   const [showMore, setShowMore]       = useState(false);
-  const canEditProfile = ["teacher", "moderator", "sous-admin"].includes(user?.role);
+  const canEditProfile = ["admin", "teacher", "moderator", "sous-admin"].includes(user?.role);
   const { dark, toggle } = useTheme();
 
   const initials = user?.name

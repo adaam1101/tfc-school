@@ -51,6 +51,7 @@ const userSchema = new Schema(
     },
     password: { type: String, required: true, minlength: 8, select: false },
     phone: { type: String, trim: true },
+    age: { type: Number, min: 3, max: 120 },
     photo: { type: String }, // base64 data URL for ID card photo
     status: { type: String, enum: ["active", "inactive"], default: "active" },
     twoFactorEnabled: { type: Boolean, default: true },

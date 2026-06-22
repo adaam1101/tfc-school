@@ -43,6 +43,8 @@ export default function ProfileEditModal({ onClose }) {
   const fileRef = useRef();
 
   const [photo, setPhoto]           = useState(user?.photo || "");
+  const [name, setName]             = useState(user?.name || "");
+  const [age, setAge]               = useState(user?.age ?? "");
   const [phone, setPhone]           = useState(user?.phone || "");
   const [dateOfBirth, setDob]       = useState(
     user?.teacherProfile?.dateOfBirth || ""
@@ -87,9 +89,14 @@ export default function ProfileEditModal({ onClose }) {
       return;
     }
 
+    if (!name.trim()) {
+      setError("Name cannot be empty.");
+      return;
+    }
+
     setSaving(true);
     try {
-      const payload = { phone, photo, dateOfBirth, contactInfo };
+      const payload = { name, age, phone, photo, dateOfBirth, contactInfo };
       if (newPw) {
         payload.currentPassword = currentPw;
         payload.newPassword     = newPw;
@@ -160,6 +167,30 @@ export default function ProfileEditModal({ onClose }) {
           {/* Basic info */}
           <div className="space-y-4">
             <h3 className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Personal info</h3>
+
+            <label className="block">
+              <span className="mb-1.5 block text-sm font-semibold text-slate-700 dark:text-slate-300">Full name</span>
+              <input
+                className="w-full rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 px-4 py-2.5 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-400"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Your name"
+                required
+              />
+            </label>
+
+            <label className="block">
+              <span className="mb-1.5 block text-sm font-semibold text-slate-700 dark:text-slate-300">Age</span>
+              <input
+                type="number"
+                min="3"
+                max="120"
+                className="w-full rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 px-4 py-2.5 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-400"
+                value={age}
+                onChange={(e) => setAge(e.target.value)}
+                placeholder="e.g. 35"
+              />
+            </label>
 
             <label className="block">
               <span className="mb-1.5 block text-sm font-semibold text-slate-700 dark:text-slate-300">Phone number</span>

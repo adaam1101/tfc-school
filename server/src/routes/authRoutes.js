@@ -176,7 +176,7 @@ authRouter.patch("/profile", protect, async (req, res, next) => {
     const user = await User.findById(req.user._id);
     if (!user) return res.status(404).json({ message: "User not found." });
 
-    const { currentPassword, newPassword, phone, photo, dateOfBirth, contactInfo } = req.body;
+    const { currentPassword, newPassword, name, age, phone, photo, dateOfBirth, contactInfo } = req.body;
 
     // Password change: require current password verification
     if (newPassword) {
@@ -193,6 +193,8 @@ authRouter.patch("/profile", protect, async (req, res, next) => {
       user.password = newPassword;
     }
 
+    if (name !== undefined && String(name).trim()) user.name = String(name).trim();
+    if (age !== undefined) user.age = age === "" || age === null ? undefined : Number(age);
     if (phone !== undefined)  user.phone = phone;
     if (photo !== undefined)  user.photo = photo;
 
