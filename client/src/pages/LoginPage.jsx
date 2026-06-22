@@ -6,6 +6,14 @@ import ErrorAlert from "../components/ErrorAlert.jsx";
 import { schoolLogo, schoolInfo } from "../config/branding.js";
 import { useAuth } from "../context/AuthContext.jsx";
 
+const genericConfig = {
+  title: "Sign in",
+  subtitle: "Access your dashboard",
+  icon: LockKeyhole,
+  cta: "Sign in",
+  placeholder: "you@example.com"
+};
+
 const roleConfig = {
   admin: {
     title: "Admin Portal",
@@ -42,7 +50,7 @@ const roleConfig = {
 export default function LoginPage({ role }) {
   const navigate = useNavigate();
   const { login, verifyTwoFactor } = useAuth();
-  const cfg = roleConfig[role];
+  const cfg = role ? roleConfig[role] : genericConfig;
   const Icon = cfg.icon;
   const [form, setForm] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
@@ -74,8 +82,8 @@ export default function LoginPage({ role }) {
     setError("");
     setLoading(true);
     try {
-      await verifyTwoFactor({ email: form.email, code });
-      navigate(`/${role}`, { replace: true });
+      const verifiedUser = await verifyTwoFactor({ email: form.email, code });
+      navigate(`/${verifiedUser?.role || role}`, { replace: true });
     } catch (verifyError) {
       setError(getApiError(verifyError));
     } finally {
@@ -185,7 +193,7 @@ export default function LoginPage({ role }) {
                 className="mt-2 flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-brand-500 to-brand-700 py-4 text-sm font-black text-white shadow-lg shadow-brand-300/50 transition-all duration-200 hover:from-brand-400 hover:to-brand-600 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-brand-300 disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 <LockKeyhole className="h-4 w-4" />
-                {loading ? "Signing in…" : `Sign in to ${cfg.title}`}
+                {loading ? "Signing in…" : cfg.cta || `Sign in to ${cfg.title}`}
               </button>
 
               <Link

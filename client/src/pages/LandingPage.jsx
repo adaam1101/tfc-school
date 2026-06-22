@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import {
   Mail, Phone, MapPin, ShieldCheck, GraduationCap, UserRound,
   Award, Users, BookOpen, Instagram, Facebook, Globe, Moon, Sun, ChevronRight,
-  UserCog, ClipboardList
+  UserCog, ClipboardList, LogIn
 } from "lucide-react";
 import { schoolLogo, schoolInfo } from "../config/branding.js";
 import { useTheme } from "../hooks/useTheme.js";
@@ -12,7 +12,9 @@ import { useTheme } from "../hooks/useTheme.js";
 const translations = {
   en: {
     dir: "ltr",
-    nav: { about: "About", contact: "Contact" },
+    nav: { about: "About", contact: "Contact", login: "Login" },
+    portalAccess: "Access your portal",
+    portalAccessSub: "Admin · Teacher · Student",
     hero: {
       welcome: "Welcome to",
       tagline: "Premier educational institution dedicated to academic excellence and professional growth.",
@@ -53,7 +55,9 @@ const translations = {
 
   fr: {
     dir: "ltr",
-    nav: { about: "À propos", contact: "Contact" },
+    nav: { about: "À propos", contact: "Contact", login: "Se connecter" },
+    portalAccess: "Accéder à votre espace",
+    portalAccessSub: "Admin · Enseignant · Élève",
     hero: {
       welcome: "Bienvenue à",
       tagline: "L'institution éducative de référence, dédiée à l'excellence académique et au développement professionnel.",
@@ -94,7 +98,9 @@ const translations = {
 
   ar: {
     dir: "rtl",
-    nav: { about: "من نحن", contact: "اتصل بنا" },
+    nav: { about: "من نحن", contact: "اتصل بنا", login: "تسجيل الدخول" },
+    portalAccess: "الدخول إلى حسابك",
+    portalAccessSub: "الإدارة · الأستاذ · الطالب",
     hero: {
       welcome: "مرحباً بكم في",
       tagline: "المؤسسة التعليمية الرائدة، ملتزمة بالتميز الأكاديمي والنمو المهني.",
@@ -194,6 +200,15 @@ export default function LandingPage() {
               <button onClick={() => scrollTo("contact")} className="hover:text-brand-700 dark:hover:text-brand-300 transition">{t.nav.contact}</button>
             </div>
 
+            {/* Login button */}
+            <Link
+              to="/login"
+              className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-brand-600 to-brand-700 px-4 py-2 text-sm font-bold text-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
+            >
+              <LogIn className="h-4 w-4" />
+              <span className="hidden sm:inline">{t.nav.login}</span>
+            </Link>
+
             {/* Lang switcher */}
             <div className="flex items-center gap-0.5 rounded-xl border border-brand-200 bg-brand-50 p-1 dark:border-slate-600 dark:bg-slate-800">
               <Globe className="h-3.5 w-3.5 text-brand-400 mx-1" />
@@ -248,25 +263,19 @@ export default function LandingPage() {
             {t.hero.btn}
           </Link>
 
-          {/* Portal buttons */}
-          <div className="mt-10 flex flex-wrap justify-center gap-3">
-            {portalConfig.map((p) => {
-              const pd = t.portals.find((x) => x.role === p.role);
-              return (
-                <Link
-                  key={p.role}
-                  to={p.link}
-                  className={`group inline-flex items-center gap-3 rounded-2xl bg-gradient-to-r ${p.gradient} px-6 py-3.5 font-bold text-white shadow-md transition-all hover:-translate-y-0.5 hover:shadow-lg`}
-                >
-                  <p.icon className="h-5 w-5" />
-                  <span>
-                    <span className="block text-sm">{pd.label}</span>
-                    <span className="block text-xs font-normal opacity-75">{pd.sub}</span>
-                  </span>
-                  <ChevronRight className="h-4 w-4 opacity-60 transition-transform group-hover:translate-x-0.5" />
-                </Link>
-              );
-            })}
+          {/* Smart login — auto-routes to the right dashboard by role */}
+          <div className="mt-10 flex justify-center">
+            <Link
+              to="/login"
+              className="group inline-flex items-center gap-3 rounded-2xl bg-gradient-to-r from-brand-600 to-brand-800 px-7 py-4 font-bold text-white shadow-md transition-all hover:-translate-y-0.5 hover:shadow-lg"
+            >
+              <LogIn className="h-5 w-5" />
+              <span className="text-start">
+                <span className="block text-sm">{t.portalAccess}</span>
+                <span className="block text-xs font-normal opacity-75">{t.portalAccessSub}</span>
+              </span>
+              <ChevronRight className="h-4 w-4 opacity-60 transition-transform group-hover:translate-x-0.5" />
+            </Link>
           </div>
         </div>
       </section>

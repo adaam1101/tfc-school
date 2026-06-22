@@ -21,6 +21,7 @@ export default function App() {
     <Routes>
       <Route path="/" element={<LandingPage />} />
       <Route path="/inscription" element={<InscriptionPage />} />
+      <Route path="/login"            element={<LoginPage />} />
       <Route path="/admin/login"      element={<LoginPage role="admin"      />} />
       <Route path="/sous-admin/login" element={<LoginPage role="sous-admin" />} />
       <Route path="/moderator/login"  element={<LoginPage role="moderator"  />} />
