@@ -9,5 +9,9 @@ export const connectDB = async () => {
 
   mongoose.set("strictQuery", true);
   const connection = await mongoose.connect(mongoUri);
-  console.log(`MongoDB connected: ${connection.connection.host}`);
+  // Log the database NAME (not just host) so each deployment's data scope is
+  // visible. If TFC and NextMind print the same name, they share data.
+  console.log(
+    `MongoDB connected: host=${connection.connection.host} db=${connection.connection.name} school=${process.env.SCHOOL_SHORT || "TFC"}`
+  );
 };
