@@ -39,6 +39,7 @@ const countStatus = (students, status) =>
 export default function TeacherDashboard() {
   const { lang } = useLang(); const t = T[lang];
   const [data, setData] = useState(null);
+  const [groups, setGroups] = useState([]);
   const [schedules, setSchedules] = useState([]);
   const [notes, setNotes] = useState({});
   const [savingId, setSavingId] = useState("");
@@ -48,7 +49,37 @@ export default function TeacherDashboard() {
   const [showIdCard, setShowIdCard] = useState(false);
   const [tab, setTab] = useState("attendance");
 
+  // Filtering states
+  const [selectedGroup, setSelectedGroup] = useState("all");
+  const [selectedCourse, setSelectedCourse] = useState("all");
+
   const students = data?.students || [];
+
+  const courses = useMemo(() => {
+    const list = new Set();
+    students.forEach((s) => {
+      if (s.studentProfile?.course) {
+        list.add(s.studentProfile.course);
+      }
+    });
+    return Array.from(list);
+  }, [students]);
+
+  const filteredStudents = useMemo(() => {
+    return students.filter((s) => {
+      if (selectedGroup !== "all") {
+        const group = groups.find((g) => g._id === selectedGroup);
+        if (!group) return false;
+        const studentIds = (group.students || []).map((st) => st._id || st);
+        if (!studentIds.includes(s._id)) return false;
+      }
+      if (selectedCourse !== "all") {
+        if (s.studentProfile?.course !== selectedCourse) return false;
+      }
+      return true;
+    });
+  }, [students, groups, selectedGroup, selectedCourse]);
+
   const presentCount = countStatus(students, "Present");
   const absentCount = countStatus(students, "Absent");
   const unmarkedCount = students.length - presentCount - absentCount;
@@ -57,10 +88,15 @@ export default function TeacherDashboard() {
     setError("");
     setLoading(true);
     try {
-      const { data: response } = await api.get("/teacher/dashboard");
-      setData(response);
+      const [dashRes, groupsRes] = await Promise.all([
+        api.get("/teacher/dashboard"),
+        api.get("/teacher/groups")
+      ]);
+      setData(dashRes.data);
+      setGroups(groupsRes.data.groups || []);
+      
       const nextNotes = {};
-      response.students.forEach((s) => {
+      dashRes.data.students.forEach((s) => {
         nextNotes[s._id] = s.todayAttendance?.note || "";
       });
       setNotes(nextNotes);
@@ -279,123 +315,182 @@ export default function TeacherDashboard() {
             </div>
 
             {/* Student cards grid */}
-            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-              {students.map((student) => {
-                const status = student.todayAttendance?.status;
-                const initials = student.name?.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase() || "?";
-                const avatarGradient =
-                  status === "Present" ? "from-emerald-400 to-teal-500"
-                  : status === "Absent" ? "from-rose-400 to-red-500"
-                  : "from-slate-400 to-slate-500";
-
-                return (
-                  <div
-                    key={student._id}
-                    className={`card overflow-hidden transition-all duration-200 ${
-                      status === "Present"
-                        ? "border-emerald-200 dark:border-emerald-800"
-                        : status === "Absent"
-                        ? "border-rose-200 dark:border-rose-800"
-                        : ""
-                    }`}
-                  >
-                    {/* Card top strip */}
-                    <div className={`h-1 w-full ${
-                      status === "Present" ? "bg-gradient-to-r from-emerald-400 to-teal-500"
-                      : status === "Absent" ? "bg-gradient-to-r from-rose-400 to-red-500"
-                      : "bg-gradient-to-r from-slate-200 to-slate-300 dark:from-slate-700 dark:to-slate-600"
-                    }`} />
-
-                    <div className="p-4">
-                      {/* Student info */}
-                      <div className="mb-3 flex items-center gap-3">
-                        <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br text-sm font-black text-white shadow-sm ${avatarGradient}`}>
-                          {initials}
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <div className="flex flex-wrap items-center gap-2">
-                            <h3 className="font-bold text-slate-900 dark:text-slate-100 truncate">{student.name}</h3>
-                            <StatusBadge value={status} />
-                          </div>
-                          <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400 truncate">
-                            {student.studentProfile?.course || "Course"} · Age {student.studentProfile?.age || "–"}
-                          </p>
-                          {student.studentProfile?.parentPhone && (
-                            <p className="mt-0.5 text-xs text-slate-400 dark:text-slate-500 truncate">
-                              Parent: {student.studentProfile.parentPhone}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Note */}
-                      <label className="field mb-3">
-                        <span className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
-                          <MessageSquareText className="h-3.5 w-3.5" />
-                          {t.optionalNote}
-                        </span>
-                        <textarea
-                          className="input min-h-[64px] text-xs resize-none"
-                          value={notes[student._id] ?? ""}
-                          onChange={(event) =>
-                            setNotes((current) => ({ ...current, [student._id]: event.target.value }))
-                          }
-                          placeholder={t.noteReason}
-                        />
-                      </label>
-
-                      {/* Action pill buttons */}
-                      <div className="flex gap-2">
-                        <button
-                          type="button"
-                          disabled={savingId === student._id}
-                          onClick={() => markAttendance(student, "Present")}
-                          className={`flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-sm font-bold transition-all duration-200 disabled:opacity-60 ${
-                            status === "Present"
-                              ? "bg-emerald-500 text-white shadow-sm shadow-emerald-200 dark:shadow-emerald-900"
-                              : "border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-500 hover:text-white hover:border-emerald-500 dark:border-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-400 dark:hover:bg-emerald-600 dark:hover:text-white"
-                          }`}
-                        >
-                          <CheckCircle2 className="h-4 w-4" />
-                          {t.present}
-                        </button>
-                        <button
-                          type="button"
-                          disabled={savingId === student._id}
-                          onClick={() => markAttendance(student, "Absent")}
-                          className={`flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-sm font-bold transition-all duration-200 disabled:opacity-60 ${
-                            status === "Absent"
-                              ? "bg-rose-500 text-white shadow-sm shadow-rose-200 dark:shadow-rose-900"
-                              : "border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-500 hover:text-white hover:border-rose-500 dark:border-rose-800 dark:bg-rose-950/50 dark:text-rose-400 dark:hover:bg-rose-600 dark:hover:text-white"
-                          }`}
-                        >
-                          <XCircle className="h-4 w-4" />
-                          {t.absent}
-                        </button>
-                      </div>
-
-                      {/* Notification status */}
-                      {status === "Absent" && (
-                        <p className="mt-2 text-center text-[10px] text-slate-400 dark:text-slate-500">
-                          Notification:{" "}
-                          {student.todayAttendance?.parentNotification?.sent
-                            ? t.emailSent
-                            : student.todayAttendance?.parentNotification?.error || t.notSent}
-                        </p>
-                      )}
-                    </div>
+            {students.length === 0 ? (
+              <div className="col-span-full flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-200 py-16 text-center dark:border-slate-700">
+                <UserRound className="h-12 w-12 text-slate-350 dark:text-slate-600 mb-3" />
+                <p className="text-sm font-bold text-slate-500 dark:text-slate-400">{t.noStudentsAssigned}</p>
+                <p className="text-xs text-slate-400 mt-1">{t.askAdmin}</p>
+              </div>
+            ) : (
+              <>
+                {/* Filter Bar */}
+                <div className="flex flex-wrap gap-4 items-center bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 p-4 rounded-2xl mb-6 shadow-sm">
+                  <div className="flex-1 min-w-[200px]">
+                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">
+                      Filter by Group
+                    </label>
+                    <select
+                      value={selectedGroup}
+                      onChange={(e) => setSelectedGroup(e.target.value)}
+                      className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/20 text-slate-700 dark:text-slate-250 font-bold"
+                    >
+                      <option value="all">📁 All Groups</option>
+                      {groups.map((g) => (
+                        <option key={g._id} value={g._id}>
+                          {g.name}
+                        </option>
+                      ))}
+                    </select>
                   </div>
-                );
-              })}
 
-              {students.length === 0 && (
-                <div className="col-span-full flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-200 py-16 text-center dark:border-slate-700">
-                  <UserRound className="h-12 w-12 text-slate-300 dark:text-slate-600" />
-                  <p className="mt-3 text-sm font-bold text-slate-500 dark:text-slate-400">{t.noStudentsAssigned}</p>
-                  <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">{t.askAdmin}</p>
+                  <div className="flex-1 min-w-[200px]">
+                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">
+                      Filter by Course / Level
+                    </label>
+                    <select
+                      value={selectedCourse}
+                      onChange={(e) => setSelectedCourse(e.target.value)}
+                      className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/20 text-slate-700 dark:text-slate-250 font-bold"
+                    >
+                      <option value="all">🎓 All Levels / Courses</option>
+                      {courses.map((c) => (
+                        <option key={c} value={c}>
+                          {c}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {(selectedGroup !== "all" || selectedCourse !== "all") && (
+                    <button
+                      type="button"
+                      onClick={() => { setSelectedGroup("all"); setSelectedCourse("all"); }}
+                      className="self-end rounded-xl border border-rose-250 bg-rose-50/50 hover:bg-rose-50 text-rose-700 dark:border-rose-900 dark:bg-rose-950/20 dark:text-rose-455 px-4 py-2 text-sm font-bold transition-all active:scale-95"
+                    >
+                      Reset Filters
+                    </button>
+                  )}
                 </div>
-              )}
-            </div>
+
+                {filteredStudents.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-700 py-14 text-center">
+                    <Users className="h-12 w-12 text-slate-350 dark:text-slate-650 mb-3 animate-pulse" />
+                    <p className="font-bold text-slate-500 dark:text-slate-400">No students match filters</p>
+                    <p className="text-xs text-slate-400 mt-1">Try resetting filters to show all students.</p>
+                  </div>
+                ) : (
+                  <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                    {filteredStudents.map((student) => {
+                      const status = student.todayAttendance?.status;
+                      const initials = student.name?.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase() || "?";
+                      const avatarGradient =
+                        status === "Present" ? "from-emerald-400 to-teal-500"
+                        : status === "Absent" ? "from-rose-400 to-red-500"
+                        : "from-slate-400 to-slate-500";
+
+                      return (
+                        <div
+                          key={student._id}
+                          className={`card overflow-hidden transition-all duration-200 ${
+                            status === "Present"
+                              ? "border-emerald-200 dark:border-emerald-800"
+                              : status === "Absent"
+                              ? "border-rose-200 dark:border-rose-800"
+                              : ""
+                          }`}
+                        >
+                          {/* Card top strip */}
+                          <div className={`h-1 w-full ${
+                            status === "Present" ? "bg-gradient-to-r from-emerald-400 to-teal-500"
+                            : status === "Absent" ? "bg-gradient-to-r from-rose-400 to-red-500"
+                            : "bg-gradient-to-r from-slate-200 to-slate-300 dark:from-slate-700 dark:to-slate-600"
+                          }`} />
+
+                          <div className="p-4">
+                            {/* Student info */}
+                            <div className="mb-3 flex items-center gap-3">
+                              <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br text-sm font-black text-white shadow-sm ${avatarGradient}`}>
+                                {initials}
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                <div className="flex flex-wrap items-center gap-2">
+                                  <h3 className="font-bold text-slate-900 dark:text-slate-100 truncate">{student.name}</h3>
+                                  <StatusBadge value={status} />
+                                </div>
+                                <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400 truncate">
+                                  {student.studentProfile?.course || "Course"} · Age {student.studentProfile?.age || "–"}
+                                </p>
+                                {student.studentProfile?.parentPhone && (
+                                  <p className="mt-0.5 text-xs text-slate-400 dark:text-slate-500 truncate">
+                                    Parent: {student.studentProfile.parentPhone}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+
+                            {/* Note */}
+                            <label className="field mb-3">
+                              <span className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
+                                <MessageSquareText className="h-3.5 w-3.5" />
+                                {t.optionalNote}
+                              </span>
+                              <textarea
+                                className="input min-h-[64px] text-xs resize-none"
+                                value={notes[student._id] ?? ""}
+                                onChange={(event) =>
+                                  setNotes((current) => ({ ...current, [student._id]: event.target.value }))
+                                }
+                                placeholder={t.noteReason}
+                              />
+                            </label>
+
+                            {/* Action pill buttons */}
+                            <div className="flex gap-2">
+                              <button
+                                type="button"
+                                disabled={savingId === student._id}
+                                onClick={() => markAttendance(student, "Present")}
+                                className={`flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-sm font-bold transition-all duration-200 disabled:opacity-60 ${
+                                  status === "Present"
+                                    ? "bg-emerald-500 text-white shadow-sm shadow-emerald-200 dark:shadow-emerald-900"
+                                    : "border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-500 hover:text-white hover:border-emerald-500 dark:border-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-450 dark:hover:bg-emerald-600 dark:hover:text-white"
+                                }`}
+                              >
+                                <CheckCircle2 className="h-4 w-4" />
+                                {t.present}
+                              </button>
+                              <button
+                                type="button"
+                                disabled={savingId === student._id}
+                                onClick={() => markAttendance(student, "Absent")}
+                                className={`flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-sm font-bold transition-all duration-200 disabled:opacity-60 ${
+                                  status === "Absent"
+                                    ? "bg-rose-500 text-white shadow-sm shadow-rose-200 dark:shadow-rose-900"
+                                    : "border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-500 hover:text-white hover:border-rose-500 dark:border-rose-800 dark:bg-rose-950/50 dark:text-rose-455 dark:hover:bg-rose-600 dark:hover:text-white"
+                                }`}
+                              >
+                                <XCircle className="h-4 w-4" />
+                                {t.absent}
+                              </button>
+                            </div>
+
+                            {/* Notification status */}
+                            {status === "Absent" && (
+                              <p className="mt-2 text-center text-[10px] text-slate-400 dark:text-slate-500">
+                                Notification:{" "}
+                                {student.todayAttendance?.parentNotification?.sent
+                                  ? t.emailSent
+                                  : student.todayAttendance?.parentNotification?.error || t.notSent}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </>
+            )}
           </section>
         )}
 
