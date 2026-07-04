@@ -363,6 +363,7 @@ adminRouter.post("/whatsapp/test", onlyAdmin, async (req, res, next) => {
     await sendWhatsAppMessage(phone, message);
     res.json({ message: "Test message sent successfully!" });
   } catch (err) {
-    next(err);
+    console.error("[WhatsApp Test Error]:", err);
+    res.status(400).json({ message: err.message || "Failed to send message." });
   }
 });

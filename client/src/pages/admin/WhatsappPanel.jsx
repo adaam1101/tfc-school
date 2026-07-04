@@ -24,7 +24,15 @@ export default function WhatsappPanel() {
 
   // Test message states
   const [testPhone, setTestPhone] = useState("");
-  const [testMessage, setTestMessage] = useState("");
+  const [testMessage, setTestMessage] = useState(
+    `TFC School / مركز TFC:\n\n` +
+    `Bonjour,\n` +
+    `Nous vous informons que votre enfant était absent(e) aujourd'hui.\n` +
+    `📞 Contact: 0561 502 098\n\n` +
+    `السلام عليكم،\n` +
+    `نحيطكم علماً بأن ابنكم/ابنتكم كان غائباً اليوم.\n` +
+    `📞 للتواصل: 0561 502 098`
+  );
   const [sendingTest, setSendingTest] = useState(false);
 
   const fetchStatus = useCallback(async (showLoader = false) => {
