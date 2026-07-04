@@ -134,18 +134,39 @@ export const sendAbsenceNotification = async ({ student, teacher, attendance }) 
 
   // ── WhatsApp ──────────────────────────────────────────
   const parentPhone = student.studentProfile?.parentPhone;
-  if (process.env.WHATSAPP_ENABLED === "true" && parentPhone) {
-    try {
-      const waText = 
-        `${process.env.SCHOOL_NAME || "TFC School"}:\n` +
-        `Bonjour ${parentName},\n` +
-        `Nous vous informons que votre enfant ${student.name} était absent(e) aujourd'hui le ${date}.\n` +
-        `📞 Contactez-nous: ${process.env.SCHOOL_PHONE || "+213 561 502 098"}\n\n` +
-        `السلام عليكم ${parentName}،\n` +
-        `نُعلمكم بأن ابنكم / ابنتكم ${student.name} كان/كانت غائباً/غائبة اليوم ${date}.\n` +
-        `📞 للتواصل: ${process.env.SCHOOL_PHONE || "0561 502 098"}`;
+  const studentPhone = student.phone;
+  const age = student.studentProfile?.age || student.age;
+  const isAdult = age >= 18 || !parentPhone;
+  const recipientPhone = isAdult ? studentPhone : parentPhone;
 
-      await sendWhatsAppMessage(parentPhone, waText);
+  if (process.env.WHATSAPP_ENABLED === "true" && recipientPhone) {
+    try {
+      let waText = "";
+      if (isAdult) {
+        // Message directly to the adult student
+        waText = 
+          `${process.env.SCHOOL_NAME || "TFC School"}:\n` +
+          `Bonjour ${student.name},\n` +
+          `Nous vous informons de votre absence aujourd'hui le ${date}. Veuillez contacter votre enseignant ou votre groupe pour la justification.\n` +
+          `📞 Contact: ${process.env.SCHOOL_PHONE || "+213 561 502 098"}\n\n` +
+          `${process.env.SCHOOL_NAME || "مركز TFC"}:\n` +
+          `السلام عليكم ${student.name}،\n` +
+          `نحيطكم علماً بتسجيل غيابكم اليوم ${date}. يرجى التواصل مع أستاذكم أو فوجكم لتبرير الغياب.\n` +
+          `📞 للتواصل: ${process.env.SCHOOL_PHONE || "0561 502 098"}`;
+      } else {
+        // Message to the parent (for kids/teens)
+        waText = 
+          `${process.env.SCHOOL_NAME || "TFC School"}:\n` +
+          `Bonjour ${parentName},\n` +
+          `Nous vous informons que votre enfant ${student.name} était absent(e) aujourd'hui le ${date}.\n` +
+          `📞 Contactez-nous: ${process.env.SCHOOL_PHONE || "+213 561 502 098"}\n\n` +
+          `${process.env.SCHOOL_NAME || "مركز TFC"}:\n` +
+          `السلام عليكم ${parentName}،\n` +
+          `نُعلمكم بأن ابنكم / ابنتكم ${student.name} كان/كانت غائباً/غائبة اليوم ${date}.\n` +
+          `📞 للتواصل: ${process.env.SCHOOL_PHONE || "0561 502 098"}`;
+      }
+
+      await sendWhatsAppMessage(recipientPhone, waText);
       waSent = true;
     } catch (err) {
       errors.push(`whatsapp: ${err.message}`);
