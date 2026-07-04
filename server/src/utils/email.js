@@ -136,7 +136,7 @@ export const sendAbsenceNotification = async ({ student, teacher, attendance }) 
   const parentPhone = student.studentProfile?.parentPhone;
   const studentPhone = student.phone;
   const age = student.studentProfile?.age || student.age;
-  const isAdult = age >= 18 || !parentPhone;
+  const isAdult = age >= 15 || !parentPhone;
   const recipientPhone = isAdult ? studentPhone : parentPhone;
 
   if (process.env.WHATSAPP_ENABLED === "true" && recipientPhone) {
