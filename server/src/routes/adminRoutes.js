@@ -13,7 +13,7 @@ import {
   idParamSchema,
   updateUserSchema
 } from "../validators/schemas.js";
-import { getWhatsappStatus, initWhatsapp, logoutWhatsapp } from "../utils/whatsapp.js";
+import { getWhatsappStatus, initWhatsapp, logoutWhatsapp, sendWhatsAppMessage } from "../utils/whatsapp.js";
 
 export const adminRouter = express.Router();
 
