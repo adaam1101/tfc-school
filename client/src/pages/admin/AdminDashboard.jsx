@@ -28,7 +28,8 @@ import {
   Menu,
   X,
   KeyRound,
-  Copy
+  Copy,
+  MessageSquare
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { api, getApiError } from "../../api/http.js";
