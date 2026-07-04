@@ -6,7 +6,8 @@ const groupSchema = new mongoose.Schema(
     description: { type: String, trim: true, maxlength: 300 },
     teacher:     { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
     students:    [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
-    color:       { type: String, default: "#3B82F6" }
+    color:       { type: String, default: "#3B82F6" },
+    days:        [{ type: String, enum: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"] }]
   },
   { timestamps: true }
 );

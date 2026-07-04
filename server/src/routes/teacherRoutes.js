@@ -272,7 +272,7 @@ teacherRouter.get("/groups", async (req, res, next) => {
 // Create a group
 teacherRouter.post("/groups", async (req, res, next) => {
   try {
-    const { name, description, color, students = [] } = req.body;
+    const { name, description, color, students = [], days = [] } = req.body;
     if (!name?.trim()) return res.status(400).json({ message: "Group name is required." });
 
     const count = await Group.countDocuments({ teacher: req.user._id });
@@ -283,7 +283,8 @@ teacherRouter.post("/groups", async (req, res, next) => {
       description: description?.trim(),
       color: color || "#3B82F6",
       teacher: req.user._id,
-      students
+      students,
+      days
     });
 
     const populated = await group.populate("students", "name email studentProfile photo");
@@ -291,17 +292,18 @@ teacherRouter.post("/groups", async (req, res, next) => {
   } catch (err) { next(err); }
 });
 
-// Update a group (name, description, color, students)
+// Update a group (name, description, color, students, days)
 teacherRouter.put("/groups/:id", async (req, res, next) => {
   try {
     const group = await Group.findOne({ _id: req.params.id, teacher: req.user._id });
     if (!group) return res.status(404).json({ message: "Group not found." });
 
-    const { name, description, color, students } = req.body;
+    const { name, description, color, students, days } = req.body;
     if (name  !== undefined) group.name        = name.trim();
     if (description !== undefined) group.description = description?.trim();
     if (color !== undefined) group.color       = color;
     if (students !== undefined) group.students = students;
+    if (days !== undefined) group.days         = days;
 
     await group.save();
     const populated = await group.populate("students", "name email studentProfile photo");
@@ -316,4 +318,32 @@ teacherRouter.delete("/groups/:id", async (req, res, next) => {
     if (!group) return res.status(404).json({ message: "Group not found." });
     res.json({ message: "Group deleted." });
   } catch (err) { next(err); }
+});
+
+// Get attendance history for a specific student (for teacher)
+teacherRouter.get("/students/:studentId/attendance", async (req, res, next) => {
+  try {
+    const { studentId } = req.params;
+    const student = await User.findOne({ _id: studentId, role: "student" });
+    if (!student) {
+      return res.status(404).json({ message: "Student not found." });
+    }
+
+    const assignedStudents = await getAssignedStudents(req.user);
+    const isAssigned = assignedStudents.some((assigned) => String(assigned._id) === studentId);
+    if (!isAssigned) {
+      return res.status(403).json({ message: "This student is not assigned to you." });
+    }
+
+    const attendanceHistory = await Attendance.find({ student: studentId })
+      .sort({ date: -1 })
+      .limit(90);
+
+    res.json({
+      student,
+      attendanceHistory
+    });
+  } catch (error) {
+    next(error);
+  }
 });

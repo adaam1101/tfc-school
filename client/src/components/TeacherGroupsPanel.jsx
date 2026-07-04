@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+﻿import React, { useEffect, useState, useCallback, useMemo } from "react";
 import {
   Users,
   Plus,
@@ -14,13 +14,14 @@ import {
   Search,
   CheckCircle2,
   ClipboardCopy,
-  UserRoundPlus
+  UserRoundPlus,
+  CalendarDays
 } from "lucide-react";
 import { api, getApiError } from "../api/http.js";
 import { useAuth } from "../context/AuthContext.jsx";
 import ErrorAlert from "./ErrorAlert.jsx";
 
-// ── Register new student modal ────────────────────────────────────────────────
+// â”€â”€ Register new student modal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function RegisterStudentModal({ onDone, onClose, teacherSubject }) {
   const subject = teacherSubject?.trim();
@@ -95,7 +96,7 @@ function RegisterStudentModal({ onDone, onClose, teacherSubject }) {
             </div>
 
             <p className="text-xs text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 rounded-xl px-3 py-2">
-              ⚠️ Save these credentials now — the password won't be shown again.
+              âš ï¸ Save these credentials now â€” the password won't be shown again.
             </p>
 
             <div className="flex gap-3">
@@ -142,7 +143,7 @@ function RegisterStudentModal({ onDone, onClose, teacherSubject }) {
                 </label>
                 <label className="block sm:col-span-2">
                   <span className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1 block">Phone <span className="text-rose-500">*</span></span>
-                  <input className="w-full rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 px-3 py-2.5 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-400" value={form.phone} onChange={e => set("phone", e.target.value)} required placeholder="+213 …" />
+                  <input className="w-full rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 px-3 py-2.5 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-400" value={form.phone} onChange={e => set("phone", e.target.value)} required placeholder="+213 â€¦" />
                 </label>
               </div>
             </div>
@@ -161,7 +162,7 @@ function RegisterStudentModal({ onDone, onClose, teacherSubject }) {
                 </label>
                 <label className="block">
                   <span className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1 block">Parent phone</span>
-                  <input className="w-full rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 px-3 py-2.5 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-400" value={form.parentPhone} onChange={e => set("parentPhone", e.target.value)} placeholder="+213 …" />
+                  <input className="w-full rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 px-3 py-2.5 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-400" value={form.parentPhone} onChange={e => set("parentPhone", e.target.value)} placeholder="+213 â€¦" />
                 </label>
                 <label className="block">
                   <span className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1 block">Parent email</span>
@@ -180,7 +181,7 @@ function RegisterStudentModal({ onDone, onClose, teacherSubject }) {
               </button>
               <button type="submit" disabled={saving} className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-brand-600 to-brand-700 py-2.5 text-sm font-bold text-white disabled:opacity-60 transition-all">
                 {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <UserRoundPlus className="h-4 w-4" />}
-                {saving ? "Registering…" : "Register student"}
+                {saving ? "Registeringâ€¦" : "Register student"}
               </button>
             </div>
           </form>
@@ -198,7 +199,7 @@ const GROUP_COLORS = [
 const initials = (name = "") =>
   name.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase() || "?";
 
-// ── Small helpers ─────────────────────────────────────────────────────────────
+// â”€â”€ Small helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function Avatar({ student, size = "sm" }) {
   const sz = size === "sm" ? "h-8 w-8 text-xs" : "h-10 w-10 text-sm";
@@ -225,7 +226,7 @@ function Toast({ msg, type = "success" }) {
   );
 }
 
-// ── Group attendance panel ────────────────────────────────────────────────────
+// â”€â”€ Group attendance panel â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function GroupAttendancePanel({ group, onClose }) {
   const today = new Date().toISOString().slice(0, 10);
@@ -267,7 +268,7 @@ function GroupAttendancePanel({ group, onClose }) {
               <X className="h-5 w-5 text-slate-500" />
             </button>
           </div>
-          <p className="text-xs text-slate-400">{label} · {marked}/{students.length} marked</p>
+          <p className="text-xs text-slate-400">{label} Â· {marked}/{students.length} marked</p>
           {error && <p className="mt-2 text-xs text-rose-600 dark:text-rose-400">{error}</p>}
         </div>
 
@@ -299,7 +300,7 @@ function GroupAttendancePanel({ group, onClose }) {
                 <Avatar student={s} />
                 <div className="flex-1 min-w-0">
                   <p className="font-bold text-sm text-slate-900 dark:text-slate-100 truncate">{s.name}</p>
-                  <p className="text-xs text-slate-400 truncate">{s.studentProfile?.course} · Age {s.studentProfile?.age || "–"}</p>
+                  <p className="text-xs text-slate-400 truncate">{s.studentProfile?.course} Â· Age {s.studentProfile?.age || "â€“"}</p>
                 </div>
                 <div className="flex gap-2 shrink-0">
                   <button
@@ -336,7 +337,7 @@ function GroupAttendancePanel({ group, onClose }) {
         {marked === students.length && students.length > 0 && (
           <div className="shrink-0 px-5 py-4 border-t border-slate-100 dark:border-slate-700 bg-emerald-50 dark:bg-emerald-950/30">
             <div className="flex items-center justify-between">
-              <p className="text-sm font-bold text-emerald-700 dark:text-emerald-400">All students marked ✓</p>
+              <p className="text-sm font-bold text-emerald-700 dark:text-emerald-400">All students marked âœ“</p>
               <button onClick={onClose} className="rounded-xl bg-emerald-500 px-4 py-2 text-sm font-bold text-white hover:bg-emerald-600 transition-all">Done</button>
             </div>
           </div>
@@ -346,12 +347,13 @@ function GroupAttendancePanel({ group, onClose }) {
   );
 }
 
-// ── Group form (create / edit) ────────────────────────────────────────────────
+// â”€â”€ Group form (create / edit) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function GroupForm({ myStudents, initial, onSave, onCancel }) {
   const [name, setName]         = useState(initial?.name || "");
   const [desc, setDesc]         = useState(initial?.description || "");
   const [color, setColor]       = useState(initial?.color || GROUP_COLORS[0]);
+  const [days, setDays]         = useState(initial?.days || []);
   const [picked, setPicked]     = useState(
     new Set((initial?.students || []).map((s) => s._id || s))
   );
@@ -376,7 +378,7 @@ function GroupForm({ myStudents, initial, onSave, onCancel }) {
     if (!name.trim()) { setError("Group name is required."); return; }
     setSaving(true); setError("");
     try {
-      await onSave({ name: name.trim(), description: desc.trim(), color, students: [...picked] });
+      await onSave({ name: name.trim(), description: desc.trim(), color, students: [...picked], days });
     } catch (err) {
       setError(getApiError(err));
       setSaving(false);
@@ -408,7 +410,7 @@ function GroupForm({ myStudents, initial, onSave, onCancel }) {
             className="w-full rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 px-3 py-2 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-400"
             value={desc}
             onChange={(e) => setDesc(e.target.value)}
-            placeholder="Age range, level…"
+            placeholder="Age range, levelâ€¦"
           />
         </label>
       </div>
@@ -425,6 +427,34 @@ function GroupForm({ myStudents, initial, onSave, onCancel }) {
               style={{ backgroundColor: c }}
             />
           ))}
+        </div>
+      </div>
+
+      {/* Weekly Days Picker */}
+      <div>
+        <span className="text-xs font-bold text-slate-500 uppercase tracking-wide mb-2 block">Weekly Schedule Days</span>
+        <div className="flex gap-2 flex-wrap">
+          {["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"].map((day) => {
+            const active = days.includes(day);
+            return (
+              <button
+                key={day}
+                type="button"
+                onClick={() => {
+                  setDays(prev =>
+                    prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day]
+                  );
+                }}
+                className={`rounded-xl px-3 py-1.5 text-xs font-bold transition-all border ${
+                  active
+                    ? "bg-gradient-to-r from-brand-600 to-brand-700 text-white border-brand-600 shadow-sm"
+                    : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-350 dark:hover:bg-slate-700"
+                }`}
+              >
+                {day}
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -449,7 +479,7 @@ function GroupForm({ myStudents, initial, onSave, onCancel }) {
               <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
               <input
                 className="w-full rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 pl-9 pr-3 py-2 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-400"
-                placeholder="Search students…"
+                placeholder="Search studentsâ€¦"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
@@ -470,7 +500,7 @@ function GroupForm({ myStudents, initial, onSave, onCancel }) {
                     <Avatar student={s} />
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 truncate">{s.name}</p>
-                      <p className="text-xs text-slate-400 truncate">{s.studentProfile?.course} · Age {s.studentProfile?.age || "–"}</p>
+                      <p className="text-xs text-slate-400 truncate">{s.studentProfile?.course} Â· Age {s.studentProfile?.age || "â€“"}</p>
                     </div>
                     {sel && <CheckCircle2 className="h-4 w-4 shrink-0 text-brand-500" />}
                   </button>
@@ -490,16 +520,16 @@ function GroupForm({ myStudents, initial, onSave, onCancel }) {
         </button>
         <button type="submit" disabled={saving} className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-brand-600 to-brand-700 py-2 text-sm font-bold text-white disabled:opacity-60">
           {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-          {saving ? "Saving…" : "Save group"}
+          {saving ? "Savingâ€¦" : "Save group"}
         </button>
       </div>
     </form>
   );
 }
 
-// ── Group card ────────────────────────────────────────────────────────────────
+// â”€â”€ Group card â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-function GroupCard({ group, myStudents, onEdit, onDelete }) {
+function GroupCard({ group, myStudents, onEdit, onDelete, onTrackStudent }) {
   const [open, setOpen]             = useState(false);
   const [showAttendance, setShowAtt] = useState(false);
 
@@ -547,12 +577,20 @@ function GroupCard({ group, myStudents, onEdit, onDelete }) {
               <p className="text-xs text-slate-400 italic text-center py-3">No students in this group yet.</p>
             ) : (
               group.students.map((s) => (
-                <div key={s._id} className="flex items-center gap-3 rounded-xl bg-slate-50 dark:bg-slate-700/50 px-3 py-2">
-                  <Avatar student={s} />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 truncate">{s.name}</p>
-                    <p className="text-xs text-slate-400 truncate">{s.studentProfile?.course} · Age {s.studentProfile?.age || "–"}</p>
+                <div key={s._id} className="flex items-center justify-between gap-3 rounded-xl bg-slate-50 dark:bg-slate-700/50 px-3 py-2">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <Avatar student={s} />
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 truncate">{s.name}</p>
+                      <p className="text-xs text-slate-400 truncate">{s.studentProfile?.course} Â· Age {s.studentProfile?.age || "â€“"}</p>
+                    </div>
                   </div>
+                  <button
+                    onClick={() => onTrackStudent(s, group)}
+                    className="shrink-0 inline-flex items-center gap-1 rounded-lg border border-slate-200 hover:border-brand-300 bg-white hover:bg-brand-50 px-2 py-1 text-xs font-bold text-slate-600 hover:text-brand-700 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-350 dark:hover:bg-slate-700 transition-all active:scale-95"
+                  >
+                    <CalendarDays className="h-3.5 w-3.5" /> Track
+                  </button>
                 </div>
               ))
             )}
@@ -567,7 +605,7 @@ function GroupCard({ group, myStudents, onEdit, onDelete }) {
   );
 }
 
-// ── Add student modal ─────────────────────────────────────────────────────────
+// â”€â”€ Add student modal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function AddStudentModal({ myStudents, onAdd, onClose }) {
   const [all, setAll]     = useState([]);
@@ -616,14 +654,14 @@ function AddStudentModal({ myStudents, onAdd, onClose }) {
             <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
             <input
               className="w-full rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 pl-9 pr-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400 text-slate-800 dark:text-slate-200"
-              placeholder="Search by name or course…"
+              placeholder="Search by name or courseâ€¦"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               autoFocus
             />
           </div>
           <div className="max-h-80 overflow-y-auto space-y-2">
-            {loading && <p className="text-center text-sm text-slate-400 py-6">Loading…</p>}
+            {loading && <p className="text-center text-sm text-slate-400 py-6">Loadingâ€¦</p>}
             {!loading && available.length === 0 && (
               <p className="text-center text-sm text-slate-400 py-6">
                 {all.length === 0 ? "No students in the system yet." : "All students are already in your class."}
@@ -635,28 +673,153 @@ function AddStudentModal({ myStudents, onAdd, onClose }) {
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 truncate">{s.name}</p>
                   <p className="text-xs text-slate-400 truncate">
-                    {s.studentProfile?.course || "–"} · Age {s.studentProfile?.age || "–"}
-                    {s.studentProfile?.teacher ? " · Already assigned" : ""}
-                  </p>
-                </div>
-                <button
-                  onClick={() => handleAdd(s)}
-                  disabled={adding === s._id}
-                  className="shrink-0 flex items-center gap-1.5 rounded-xl bg-brand-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-brand-700 disabled:opacity-60 transition-all"
-                >
-                  {adding === s._id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <UserPlus className="h-3.5 w-3.5" />}
-                  Add
-                </button>
-              </div>
-            ))}
+                    {s.studentProfile?.course || "â€“"} Â· Age {s.studentProfile?.age || "â// â”€â”€ Student tracking modal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+
+function StudentTrackingModal({ student, group, onClose }) {
+  const [history, setHistory] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [savingDate, setSavingDate] = useState("");
+
+  const loadHistory = useCallback(async () => {
+    setLoading(true); setError("");
+    try {
+      const { data } = await api.get(`/teacher/students/${student._id}/attendance`);
+      setHistory(data.attendanceHistory || []);
+    } catch (err) {
+      setError(getApiError(err));
+    } finally {
+      setLoading(false);
+    }
+  }, [student._id]);
+
+  useEffect(() => {
+    loadHistory();
+  }, [loadHistory]);
+
+  const groupDays = group.days || [];
+
+  // Generate course days for the last 60 days
+  const scheduledDates = useMemo(() => {
+    if (groupDays.length === 0) return [];
+    const dates = [];
+    const today = new Date();
+    // Go back 60 days
+    for (let i = 0; i <= 60; i++) {
+      const d = new Date();
+      d.setDate(today.getDate() - i);
+      
+      const weekday = d.toLocaleDateString("en-US", { weekday: "long" });
+      if (groupDays.includes(weekday)) {
+        // Format as YYYY-MM-DD local time
+        const yyyy = d.getFullYear();
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        const dd = String(d.getDate()).padStart(2, '0');
+        const formattedDate = `${yyyy}-${mm}-${dd}`;
+        
+        const label = d.toLocaleDateString("en-US", { weekday: "long", day: "numeric", month: "short" });
+        dates.push({ date: formattedDate, label, weekday });
+      }
+    }
+    return dates;
+  }, [groupDays]);
+
+  const markDateAttendance = async (dateStr, status) => {
+    setSavingDate(dateStr); setError("");
+    try {
+      await api.post("/teacher/attendance", {
+        studentId: student._id,
+        status,
+        date: dateStr
+      });
+      // reload history after saving
+      const { data } = await api.get(`/teacher/students/${student._id}/attendance`);
+      setHistory(data.attendanceHistory || []);
+    } catch (err) {
+      setError(getApiError(err));
+    } finally {
+      setSavingDate("");
+    }
+  };
+
+  const getStatusForDate = (dateStr) => {
+    const record = history.find(r => r.date === dateStr);
+    return record ? record.status : "Unmarked";
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+      <div className="w-full max-w-md rounded-3xl bg-white dark:bg-slate-800 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 dark:border-slate-700 shrink-0">
+          <div>
+            <h3 className="font-black text-slate-900 dark:text-slate-100">{student.name}</h3>
+            <p className="text-xs text-slate-400">Attendance tracking for group: {group.name}</p>
           </div>
+          <button onClick={onClose} className="flex h-8 w-8 items-center justify-center rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700">
+            <X className="h-5 w-5 text-slate-500" />
+          </button>
+        </div>
+
+        <div className="p-5 flex-1 overflow-y-auto space-y-4">
+          <ErrorAlert message={error} />
+
+          {groupDays.length === 0 ? (
+            <div className="text-center py-6 text-slate-500">
+              <p className="text-sm font-semibold">No schedule days selected for this group.</p>
+              <p className="text-xs text-slate-400 mt-1">Edit the group to select lesson days (e.g. Sunday, Monday).</p>
+            </div>
+          ) : loading ? (
+            <p className="text-center text-sm text-slate-400 py-6">Loading historyâ€¦</p>
+          ) : (
+            <div className="space-y-2">
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-wide mb-2">Scheduled days: {groupDays.join(", ")}</p>
+              <div className="space-y-2">
+                {scheduledDates.map((item) => {
+                  const status = getStatusForDate(item.date);
+                  const isSaving = savingDate === item.date;
+                  return (
+                    <div key={item.date} className="flex items-center justify-between gap-3 rounded-2xl border border-slate-150 dark:border-slate-700 bg-slate-50/60 dark:bg-slate-700/30 px-3.5 py-3">
+                      <div>
+                        <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">{item.label}</p>
+                        <p className="text-[10px] text-slate-400 font-mono">{item.date}</p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <button
+                          disabled={isSaving}
+                          onClick={() => markDateAttendance(item.date, "Present")}
+                          className={`rounded-lg px-2.5 py-1 text-xs font-bold transition-all ${
+                            status === "Present"
+                              ? "bg-emerald-500 text-white shadow-sm"
+                              : "border border-emerald-250 bg-emerald-50/50 text-emerald-700 hover:bg-emerald-500 hover:text-white dark:border-emerald-800 dark:bg-emerald-950/20 dark:text-emerald-450"
+                          }`}
+                        >
+                          Present
+                        </button>
+                        <button
+                          disabled={isSaving}
+                          onClick={() => markDateAttendance(item.date, "Absent")}
+                          className={`rounded-lg px-2.5 py-1 text-xs font-bold transition-all ${
+                            status === "Absent"
+                              ? "bg-rose-500 text-white shadow-sm"
+                              : "border border-rose-250 bg-rose-50/50 text-rose-700 hover:bg-rose-500 hover:text-white dark:border-rose-800 dark:bg-rose-950/20 dark:text-rose-455"
+                          }`}
+                        >
+                          Absent
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
   );
 }
 
-// ── Main panel ────────────────────────────────────────────────────────────────
+// â”€â”€ Main panel â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export default function TeacherGroupsPanel() {
   const { user } = useAuth();
@@ -672,6 +835,7 @@ export default function TeacherGroupsPanel() {
   const [removingId, setRemovingId]         = useState("");
   const [toast, setToast]           = useState({ msg: "", type: "success" });
   const [error, setError]           = useState("");
+  const [trackingStudent, setTrackingStudent] = useState(null); // { student, group }
 
   const showToast = (msg, type = "success") => {
     setToast({ msg, type });
@@ -696,7 +860,7 @@ export default function TeacherGroupsPanel() {
 
   useEffect(() => { load(); }, [load]);
 
-  // ── Student actions ──────────────────────────────────────────────────────────
+  // â”€â”€ Student actions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   const handleAddStudent = async (studentId) => {
     await api.post("/teacher/students/add", { studentId });
@@ -719,7 +883,7 @@ export default function TeacherGroupsPanel() {
     }
   };
 
-  // ── Group actions ────────────────────────────────────────────────────────────
+  // â”€â”€ Group actions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   const handleSaveGroup = async (payload) => {
     if (editingGroup) {
@@ -776,7 +940,7 @@ export default function TeacherGroupsPanel() {
             className={`inline-flex items-center gap-2 rounded-2xl px-5 py-2.5 text-sm font-bold transition-all ${
               subTab === id
                 ? "bg-gradient-to-r from-brand-600 to-brand-700 text-white shadow-md"
-                : "border border-slate-200 bg-white text-slate-600 hover:border-brand-200 hover:bg-brand-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+                : "border border-slate-200 bg-white text-slate-600 hover:border-brand-200 hover:bg-brand-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-350"
             }`}
           >
             <Icon className="h-4 w-4" /> {label}
@@ -784,7 +948,7 @@ export default function TeacherGroupsPanel() {
         ))}
       </div>
 
-      {/* ── Students tab ──────────────────────────────────────────────────────── */}
+      {/* â”€â”€ Students tab â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       {subTab === "students" && (
         <div className="space-y-4">
           <div className="flex flex-wrap items-center justify-between gap-2">
@@ -822,7 +986,7 @@ export default function TeacherGroupsPanel() {
                 <div className="flex-1 min-w-0">
                   <p className="font-bold text-slate-900 dark:text-slate-100 truncate">{s.name}</p>
                   <p className="text-xs text-slate-400 truncate">
-                    {s.studentProfile?.course || "–"} · Age {s.studentProfile?.age || "–"}
+                    {s.studentProfile?.course || "â€“"} Â· Age {s.studentProfile?.age || "â€“"}
                   </p>
                 </div>
                 <button
@@ -842,7 +1006,7 @@ export default function TeacherGroupsPanel() {
         </div>
       )}
 
-      {/* ── Groups tab ────────────────────────────────────────────────────────── */}
+      {/* â”€â”€ Groups tab â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       {subTab === "groups" && (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
@@ -884,6 +1048,56 @@ export default function TeacherGroupsPanel() {
                 myStudents={myStudents}
                 onEdit={handleEditGroup}
                 onDelete={handleDeleteGroup}
+                onTrackStudent={(student, group) => setTrackingStudent({ student, group })}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {showAddStudent && (
+        <AddStudentModal
+          myStudents={myStudents}
+          onAdd={handleAddStudent}
+          onClose={() => setShowAddStudent(false)}
+        />
+      )}
+
+      {showRegisterStudent && (
+        <RegisterStudentModal
+          onDone={load}
+          teacherSubject={teacherSubject}
+          onClose={() => setShowRegisterStudent(false)}
+        />
+      )}
+
+      {trackingStudent && (
+        <StudentTrackingModal
+          student={trackingStudent.student}
+          group={trackingStudent.group}
+          onClose={() => setTrackingStudent(null)}
+        />
+      )}
+    </div>
+  );
+}         )}
+
+          {groups.length === 0 && !showGroupForm && (
+            <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-700 py-14 text-center">
+              <Users className="h-12 w-12 text-slate-300 dark:text-slate-600 mb-3" />
+              <p className="font-bold text-slate-500 dark:text-slate-400">No groups yet</p>
+              <p className="text-xs text-slate-400 mt-1">Create groups to organise your students by age or level.</p>
+            </div>
+          )}
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            {groups.map((g) => (
+              <GroupCard
+                key={g._id}
+                group={g}
+                myStudents={myStudents}
+                onEdit={handleEditGroup}
+                onDelete={handleDeleteGroup}
               />
             ))}
           </div>
@@ -908,3 +1122,4 @@ export default function TeacherGroupsPanel() {
     </div>
   );
 }
+
