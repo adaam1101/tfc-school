@@ -1,5 +1,6 @@
 import https from "node:https";
 import { sendAbsenceSMS, smsReady } from "./sms.js";
+import { sendWhatsAppMessage } from "./whatsapp.js";
 
 const notificationsEnabled = () => process.env.NOTIFICATIONS_ENABLED === "true";
 
@@ -80,6 +81,7 @@ export const sendAbsenceNotification = async ({ student, teacher, attendance }) 
 
   let emailSent = false;
   let smsSent   = false;
+  let waSent    = false;
   let errors    = [];
 
   // ── Email ──────────────────────────────────────────────
@@ -130,14 +132,39 @@ export const sendAbsenceNotification = async ({ student, teacher, attendance }) 
     }
   }
 
-  const sent    = emailSent || smsSent;
-  const channel = emailSent && smsSent ? "email+sms" : emailSent ? "email" : smsSent ? "sms" : "none";
+  // ── WhatsApp ──────────────────────────────────────────
+  const parentPhone = student.studentProfile?.parentPhone;
+  if (process.env.WHATSAPP_ENABLED === "true" && parentPhone) {
+    try {
+      const waText = 
+        `${process.env.SCHOOL_NAME || "TFC School"}:\n` +
+        `Bonjour ${parentName},\n` +
+        `Nous vous informons que votre enfant ${student.name} était absent(e) aujourd'hui le ${date}.\n` +
+        `📞 Contactez-nous: ${process.env.SCHOOL_PHONE || "+213 561 502 098"}\n\n` +
+        `السلام عليكم ${parentName}،\n` +
+        `نُعلمكم بأن ابنكم / ابنتكم ${student.name} كان/كانت غائباً/غائبة اليوم ${date}.\n` +
+        `📞 للتواصل: ${process.env.SCHOOL_PHONE || "0561 502 098"}`;
+
+      await sendWhatsAppMessage(parentPhone, waText);
+      waSent = true;
+    } catch (err) {
+      errors.push(`whatsapp: ${err.message}`);
+    }
+  }
+
+  const sent    = emailSent || smsSent || waSent;
+  const channels = [];
+  if (emailSent) channels.push("email");
+  if (smsSent)   channels.push("sms");
+  if (waSent)    channels.push("whatsapp");
+  const channel = channels.join("+") || "none";
 
   return {
     sent,
     channel,
     emailSent,
     smsSent,
+    waSent,
     error: errors.length > 0 ? errors.join(" | ") : undefined
   };
 };

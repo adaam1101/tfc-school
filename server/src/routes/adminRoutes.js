@@ -13,6 +13,7 @@ import {
   idParamSchema,
   updateUserSchema
 } from "../validators/schemas.js";
+import { getWhatsappStatus, initWhatsapp, logoutWhatsapp } from "../utils/whatsapp.js";
 
 export const adminRouter = express.Router();
 
@@ -328,6 +329,39 @@ adminRouter.post("/test-email", onlyAdmin, async (req, res, next) => {
       text: `This is a test email from ${process.env.SCHOOL_NAME || "TFC School"}.\n\nIf you received this, email notifications are working correctly.\n\nSent at: ${new Date().toISOString()}`
     });
     res.json({ message: `Test email sent to ${to}.`, status });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// ── WhatsApp configuration ──────────────────────────────────────────────────
+adminRouter.get("/whatsapp/status", onlyAdmin, (req, res) => {
+  res.json(getWhatsappStatus());
+});
+
+adminRouter.post("/whatsapp/init", onlyAdmin, async (req, res, next) => {
+  try {
+    await initWhatsapp();
+    res.json({ message: "WhatsApp client initializing..." });
+  } catch (err) {
+    next(err);
+  }
+});
+
+adminRouter.post("/whatsapp/logout", onlyAdmin, async (req, res, next) => {
+  try {
+    await logoutWhatsapp();
+    res.json({ message: "Logged out of WhatsApp." });
+  } catch (err) {
+    next(err);
+  }
+});
+
+adminRouter.post("/whatsapp/test", onlyAdmin, async (req, res, next) => {
+  const { phone, message } = req.body;
+  try {
+    await sendWhatsAppMessage(phone, message);
+    res.json({ message: "Test message sent successfully!" });
   } catch (err) {
     next(err);
   }

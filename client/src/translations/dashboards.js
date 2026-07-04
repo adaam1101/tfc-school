@@ -93,6 +93,7 @@ export const T = {
     timetable: "Timetable",
     announcements: "Announcements",
     activity: "Activity",
+    whatsapp: "WhatsApp",
     // Moderator
     modTitle: "Moderator Dashboard",
     modSubtitle: "Monitor students, teachers and enrollment applications.",
@@ -278,6 +279,7 @@ export const T = {
     timetable: "Emploi du temps",
     announcements: "Annonces",
     activity: "Activité",
+    whatsapp: "WhatsApp",
     modTitle: "Tableau de bord Modérateur",
     modSubtitle: "Suivi des élèves, enseignants et demandes d'inscription.",
     totalStudentsLabel: "Total élèves",
@@ -458,6 +460,7 @@ export const T = {
     timetable: "الجدول الزمني",
     announcements: "الإعلانات",
     activity: "النشاط",
+    whatsapp: "واتساب",
     modTitle: "لوحة تحكم المشرف",
     modSubtitle: "مراقبة الطلاب والأساتذة وطلبات التسجيل.",
     totalStudentsLabel: "إجمالي الطلاب",

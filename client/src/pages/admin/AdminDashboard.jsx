@@ -42,6 +42,7 @@ import PaymentsPanel from "./PaymentsPanel.jsx";
 import AnnouncementsPanel from "./AnnouncementsPanel.jsx";
 import AuditPanel from "./AuditPanel.jsx";
 import SchedulePanel from "./SchedulePanel.jsx";
+import WhatsappPanel from "./WhatsappPanel.jsx";
 import { useAuth } from "../../context/AuthContext.jsx";
 import { useLang } from "../../context/LanguageContext.jsx";
 import { T } from "../../translations/dashboards.js";
@@ -53,7 +54,8 @@ const NAV_KEYS = [
   { id: "payments",      key: "payments",       icon: Wallet },
   { id: "timetable",     key: "timetable",      icon: BookOpen },
   { id: "announcements", key: "announcements",  icon: Megaphone },
-  { id: "audit",         key: "activity",       icon: History }
+  { id: "audit",         key: "activity",       icon: History },
+  { id: "whatsapp",      key: "whatsapp",       icon: MessageSquare }
 ];
 
 const emptyForm = {
@@ -431,6 +433,7 @@ export default function AdminDashboard() {
             {tab === "timetable"     && <SchedulePanel teachers={teachers} />}
             {tab === "announcements" && <AnnouncementsPanel />}
             {tab === "audit"         && <AuditPanel />}
+            {tab === "whatsapp"      && <WhatsappPanel />}
 
             {/* ── OVERVIEW ── */}
             {tab === "overview" && (
