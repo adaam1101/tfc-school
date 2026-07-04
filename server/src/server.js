@@ -48,8 +48,8 @@ app.use(mongoSanitize());
 app.use(cors({ origin: (origin, callback) => { if (!origin || allowedOrigins.includes(origin)) return callback(null, true); return callback(new Error("Origin is not allowed by CORS.")); }, credentials: true }));
 app.use(express.json({ limit: "5mb" })); // allow base64 ID-card photos
 app.use(morgan(process.env.NODE_ENV === "production" ? "combined" : "dev"));
-// Tightened from 300 → 100 to reduce enumeration surface
-app.use(rateLimit({ windowMs: 15 * 60 * 1000, max: 100, standardHeaders: true, legacyHeaders: false, validate: { xForwardedForHeader: false } }));
+// Increased from 100 → 500 to support polling dashboard widgets without lockout
+app.use(rateLimit({ windowMs: 15 * 60 * 1000, max: 500, standardHeaders: true, legacyHeaders: false, validate: { xForwardedForHeader: false } }));
 
 app.get("/api/health", (_req, res) => { res.json({ status: "ok", app: "TFC School API" }); });
 

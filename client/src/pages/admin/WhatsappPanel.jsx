@@ -48,14 +48,17 @@ export default function WhatsappPanel() {
     }
   }, []);
 
-  // Poll status every 4 seconds when connecting or waiting for QR scan
+  // Poll status dynamically based on connection status to prevent rate-limiting lockouts
   useEffect(() => {
     fetchStatus(true);
+    
+    const intervalTime = statusData.status === "CONNECTED" ? 45000 : 4000;
     const interval = setInterval(() => {
       fetchStatus(false);
-    }, 4000);
+    }, intervalTime);
+    
     return () => clearInterval(interval);
-  }, [fetchStatus]);
+  }, [fetchStatus, statusData.status]);
 
   const handleInit = async () => {
     setIniting(true);
