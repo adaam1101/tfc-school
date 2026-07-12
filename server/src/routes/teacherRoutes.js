@@ -8,6 +8,7 @@ import { Group } from "../models/Group.js";
 import { dateKey, daysAgo } from "../utils/dates.js";
 import { sendAbsenceNotification } from "../utils/email.js";
 import { attendanceSchema } from "../validators/schemas.js";
+import { sendWhatsAppMessage } from "../utils/whatsapp.js";
 
 export const teacherRouter = express.Router();
 
@@ -348,3 +349,70 @@ teacherRouter.get("/students/:studentId/attendance", async (req, res, next) => {
     next(error);
   }
 });
+
+// Broadcast a WhatsApp message to all students in a group
+teacherRouter.post("/groups/:id/broadcast", async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { message } = req.body;
+
+    if (!message || !message.trim()) {
+      return res.status(400).json({ message: "Message content is required." });
+    }
+
+    const group = await Group.findOne({ _id: id, teacher: req.user._id })
+      .populate("students", "name phone studentProfile age");
+
+    if (!group) {
+      return res.status(404).json({ message: "Group not found." });
+    }
+
+    if (process.env.WHATSAPP_ENABLED !== "true") {
+      return res.status(450).json({ message: "WhatsApp notifications are currently disabled on the server." });
+    }
+
+    const targets = [];
+    const logs = [];
+
+    for (const student of group.students) {
+      const parentPhone = student.studentProfile?.parentPhone;
+      const studentPhone = student.phone;
+      const age = student.studentProfile?.age || student.age;
+      // Standard age routing rule: 15+ is adult (receives directly), otherwise goes to parent
+      const isAdult = age >= 15 || !parentPhone;
+      const recipientPhone = isAdult ? studentPhone : parentPhone;
+
+      if (recipientPhone) {
+        targets.push({
+          studentName: student.name,
+          phone: recipientPhone
+        });
+      } else {
+        logs.push({ studentName: student.name, status: "Skipped", error: "No phone number available" });
+      }
+    }
+
+    let successCount = 0;
+    let failedCount = 0;
+
+    for (const target of targets) {
+      try {
+        await sendWhatsAppMessage(target.phone, message);
+        successCount++;
+        logs.push({ studentName: target.studentName, phone: target.phone, status: "Sent" });
+      } catch (err) {
+        failedCount++;
+        logs.push({ studentName: target.studentName, phone: target.phone, status: "Failed", error: err.message });
+      }
+    }
+
+    res.json({
+      message: `Broadcast finished. Sent: ${successCount}, Failed: ${failedCount}`,
+      summary: { successCount, failedCount },
+      logs
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+

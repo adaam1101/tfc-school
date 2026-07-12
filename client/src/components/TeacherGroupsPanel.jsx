@@ -15,7 +15,8 @@ import {
   CheckCircle2,
   ClipboardCopy,
   UserRoundPlus,
-  CalendarDays
+  CalendarDays,
+  Megaphone
 } from "lucide-react";
 import { api, getApiError } from "../api/http.js";
 import { useAuth } from "../context/AuthContext.jsx";
@@ -532,6 +533,7 @@ function GroupForm({ myStudents, initial, onSave, onCancel }) {
 function GroupCard({ group, myStudents, onEdit, onDelete, onTrackStudent }) {
   const [open, setOpen]             = useState(false);
   const [showAttendance, setShowAtt] = useState(false);
+  const [showBroadcast, setShowBroadcast] = useState(false);
 
   return (
     <div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 overflow-hidden shadow-sm">
@@ -552,6 +554,13 @@ function GroupCard({ group, myStudents, onEdit, onDelete, onTrackStudent }) {
             </div>
           </div>
           <div className="flex items-center gap-1.5 shrink-0">
+            <button
+              onClick={() => setShowBroadcast(true)}
+              className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-teal-500 to-indigo-600 px-3 py-1.5 text-xs font-bold text-white shadow-sm hover:from-teal-600 hover:to-indigo-700 transition-all"
+              title="Broadcast WhatsApp message to this group"
+            >
+              <Megaphone className="h-3.5 w-3.5" /> Broadcast
+            </button>
             <button
               onClick={() => setShowAtt(true)}
               className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-brand-600 to-emerald-600 px-3 py-1.5 text-xs font-bold text-white shadow-sm hover:from-brand-700 hover:to-emerald-700 transition-all"
@@ -600,6 +609,9 @@ function GroupCard({ group, myStudents, onEdit, onDelete, onTrackStudent }) {
 
       {showAttendance && (
         <GroupAttendancePanel group={group} onClose={() => setShowAtt(false)} />
+      )}
+      {showBroadcast && (
+        <GroupBroadcastModal group={group} onClose={() => setShowBroadcast(false)} />
       )}
     </div>
   );
@@ -1099,6 +1111,128 @@ export default function TeacherGroupsPanel() {
           onClose={() => setTrackingStudent(null)}
         />
       )}
+    </div>
+  );
+}
+
+// ── Group Broadcast Modal ───────────────────────────────────────────────────
+
+function GroupBroadcastModal({ group, onClose }) {
+  const [message, setMessage] = useState("");
+  const [sending, setSending] = useState(false);
+  const [success, setSuccess] = useState("");
+  const [error, setError] = useState("");
+  const [summary, setSummary] = useState(null);
+  const [logs, setLogs] = useState([]);
+
+  const handleSend = async (e) => {
+    e.preventDefault();
+    if (!message.trim()) return;
+
+    setSending(true);
+    setError("");
+    setSuccess("");
+    setSummary(null);
+    setLogs([]);
+
+    try {
+      const { data } = await api.post(`/teacher/groups/${group._id}/broadcast`, {
+        message: message.trim()
+      });
+      setSuccess(data.message || "Broadcast completed successfully!");
+      setSummary(data.summary);
+      setLogs(data.logs || []);
+      setMessage("");
+    } catch (err) {
+      setError(getApiError(err));
+    } finally {
+      setSending(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in">
+      <div className="w-full max-w-md rounded-3xl bg-white dark:bg-slate-800 shadow-2xl overflow-hidden border border-slate-100 dark:border-slate-700">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
+          <div className="flex items-center gap-2">
+            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-teal-500 to-indigo-500 text-white shadow-sm">
+              <Megaphone className="h-4.5 w-4.5" />
+            </span>
+            <div>
+              <h3 className="font-black text-slate-900 dark:text-slate-100 text-sm">Broadcast to {group.name}</h3>
+              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wide">Group WhatsApp Bulletin</p>
+            </div>
+          </div>
+          <button onClick={onClose} className="flex h-8 w-8 items-center justify-center rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 transition-colors">
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+
+        <div className="p-6">
+          <ErrorAlert message={error} />
+          {success && (
+            <div className="mb-4 rounded-2xl border border-emerald-150 bg-emerald-50/50 p-4 dark:border-emerald-900/50 dark:bg-emerald-950/20 text-xs">
+              <p className="font-black text-emerald-800 dark:text-emerald-400">{success}</p>
+              {summary && (
+                <div className="mt-2 flex gap-4 text-emerald-700 dark:text-emerald-500 font-bold">
+                  <span>Delivered: {summary.successCount}</span>
+                  {summary.failedCount > 0 && <span className="text-rose-600 dark:text-rose-450">Failed: {summary.failedCount}</span>}
+                </div>
+              )}
+            </div>
+          )}
+
+          {!success && (
+            <form onSubmit={handleSend} className="space-y-4">
+              <div className="rounded-2xl border border-slate-100 dark:border-slate-700/60 bg-slate-50/50 dark:bg-slate-900/30 p-3.5 text-xs text-slate-550 dark:text-slate-400 leading-relaxed font-semibold">
+                This message will be sent automatically to the WhatsApp numbers of all students in this group (parents for minors under 15, and directly to older students).
+              </div>
+
+              <label className="block">
+                <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1.5 block">Message text</span>
+                <textarea
+                  required
+                  className="w-full rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-3 text-sm text-slate-850 dark:text-slate-205 focus:outline-none focus:ring-2 focus:ring-brand-500/20 min-h-[120px] resize-none"
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  placeholder="Type your group announcement or homework reminder here..."
+                  disabled={sending}
+                />
+              </label>
+
+              <button
+                type="submit"
+                disabled={sending || !message.trim()}
+                className="w-full rounded-2xl bg-gradient-to-r from-teal-500 to-indigo-655 py-3 text-sm font-bold text-white shadow-md hover:from-teal-600 hover:to-indigo-755 transition-all flex items-center justify-center gap-2 active:scale-[0.98] disabled:opacity-50"
+              >
+                {sending ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" /> Broadcasting...
+                  </>
+                ) : (
+                  <>
+                    Send Bulletin
+                  </>
+                )}
+              </button>
+            </form>
+          )}
+
+          {success && logs.length > 0 && (
+            <div className="space-y-2 max-h-[160px] overflow-y-auto mt-4 pr-1 scrollbar-thin">
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-wide">Delivery logs</p>
+              {logs.map((log, idx) => (
+                <div key={idx} className="flex items-center justify-between text-xs py-1.5 border-b border-slate-50 dark:border-slate-750/30">
+                  <span className="font-semibold text-slate-750 dark:text-slate-305">{log.studentName}</span>
+                  <span className={`font-bold ${log.status === "Sent" ? "text-emerald-600" : log.status === "Skipped" ? "text-slate-455" : "text-rose-500"}`}>
+                    {log.status} {log.error && `(${log.error})`}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
