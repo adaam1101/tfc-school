@@ -1117,7 +1117,7 @@ export default function TeacherGroupsPanel() {
 
 // ── Group Broadcast Modal ───────────────────────────────────────────────────
 
-function GroupBroadcastModal({ group, onClose }) {
+export function GroupBroadcastModal({ group, onClose }) {
   const [message, setMessage] = useState("");
   const [sending, setSending] = useState(false);
   const [success, setSuccess] = useState("");

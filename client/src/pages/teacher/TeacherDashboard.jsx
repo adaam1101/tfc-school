@@ -11,10 +11,11 @@ import {
   IdCard,
   Clock,
   Smartphone,
-  LayoutList
+  LayoutList,
+  Megaphone
 } from "lucide-react";
 import { Link } from "react-router-dom";
-import TeacherGroupsPanel from "../../components/TeacherGroupsPanel.jsx";
+import TeacherGroupsPanel, { GroupBroadcastModal } from "../../components/TeacherGroupsPanel.jsx";
 import { useEffect, useMemo, useState } from "react";
 import { api, getApiError } from "../../api/http.js";
 import ErrorAlert from "../../components/ErrorAlert.jsx";
@@ -53,6 +54,7 @@ export default function TeacherDashboard() {
   const [selectedGroup, setSelectedGroup] = useState("all");
   const [selectedCourse, setSelectedCourse] = useState("all");
   const [expandedNotes, setExpandedNotes] = useState({});
+  const [showFilterGroupBroadcast, setShowFilterGroupBroadcast] = useState(false);
 
   const getAvatarGradient = (name = "") => {
     const gradients = [
@@ -388,15 +390,27 @@ export default function TeacherDashboard() {
                     </select>
                   </div>
 
-                  {(selectedGroup !== "all" || selectedCourse !== "all") && (
-                    <button
-                      type="button"
-                      onClick={() => { setSelectedGroup("all"); setSelectedCourse("all"); }}
-                      className="self-end rounded-xl border border-rose-250 bg-rose-50/50 hover:bg-rose-50 text-rose-700 dark:border-rose-900 dark:bg-rose-950/20 dark:text-rose-455 px-4 py-2 text-sm font-bold transition-all active:scale-95"
-                    >
-                      Reset Filters
-                    </button>
-                  )}
+                  <div className="flex gap-2 self-end">
+                    {selectedGroup !== "all" && (
+                      <button
+                        type="button"
+                        onClick={() => setShowFilterGroupBroadcast(true)}
+                        className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-teal-500 to-indigo-650 px-4 py-2 text-sm font-bold text-white shadow-sm hover:from-teal-600 hover:to-indigo-755 transition-all active:scale-95"
+                        title="Broadcast message to the selected group"
+                      >
+                        <Megaphone className="h-4 w-4" /> Group Broadcast
+                      </button>
+                    )}
+                    {(selectedGroup !== "all" || selectedCourse !== "all") && (
+                      <button
+                        type="button"
+                        onClick={() => { setSelectedGroup("all"); setSelectedCourse("all"); }}
+                        className="rounded-xl border border-rose-250 bg-rose-50/50 hover:bg-rose-50 text-rose-700 dark:border-rose-900 dark:bg-rose-950/20 dark:text-rose-455 px-4 py-2 text-sm font-bold transition-all active:scale-95"
+                      >
+                        Reset Filters
+                      </button>
+                    )}
+                  </div>
                 </div>
 
                 {filteredStudents.length === 0 ? (
@@ -568,6 +582,13 @@ export default function TeacherDashboard() {
               </>
             )}
           </section>
+        )}
+
+        {showFilterGroupBroadcast && selectedGroup !== "all" && (
+          <GroupBroadcastModal
+            group={groups.find((g) => g._id === selectedGroup)}
+            onClose={() => setShowFilterGroupBroadcast(false)}
+          />
         )}
 
         <AnnouncementsCard />
