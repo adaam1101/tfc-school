@@ -12,7 +12,9 @@ import {
   Clock,
   Smartphone,
   LayoutList,
-  Megaphone
+  Megaphone,
+  Trash2,
+  BookOpen
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import TeacherGroupsPanel, { GroupBroadcastModal } from "../../components/TeacherGroupsPanel.jsx";
@@ -122,6 +124,17 @@ export default function TeacherDashboard() {
       setError(getApiError(loadError));
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleResetAttendance = async () => {
+    if (!window.confirm("Are you sure you want to clear all previous attendance history to start counting fresh from Next Monday?")) return;
+    try {
+      const { data: res } = await api.post("/teacher/attendance/clear-past");
+      setMessage(res.message || "Attendance history cleared! Counting starts fresh from Next Monday.");
+      await loadDashboard();
+    } catch (err) {
+      setError(getApiError(err));
     }
   };
 
@@ -329,7 +342,11 @@ export default function TeacherDashboard() {
                       </div>
                     </div>
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex flex-wrap gap-2">
+                    <button type="button" className="inline-flex items-center gap-1.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 border border-rose-300/30 px-3.5 py-2 text-sm font-semibold text-white transition-all active:scale-95" onClick={handleResetAttendance} title="Clear past attendance records to start counting fresh from Next Monday">
+                      <Trash2 className="h-4 w-4 text-rose-200" />
+                      Reset Past
+                    </button>
                     <button type="button" className="inline-flex items-center gap-2 rounded-xl bg-white/15 px-4 py-2 text-sm font-semibold text-white transition-all hover:bg-white/25" onClick={() => setShowIdCard(true)}>
                       <IdCard className="h-4 w-4" />
                       {t.myId}
@@ -483,6 +500,9 @@ export default function TeacherDashboard() {
                                       Age {student.studentProfile.age}
                                     </span>
                                   )}
+                                  <span className="bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-350 border border-emerald-200/60 dark:border-emerald-800/60 px-2 py-0.5 rounded-lg text-[10px] font-bold">
+                                    📖 {student.sessionsAttended ?? 0} {student.sessionsAttended === 1 ? "Session" : "Sessions"}
+                                  </span>
                                 </div>
 
                                 {student.studentProfile?.parentPhone && (

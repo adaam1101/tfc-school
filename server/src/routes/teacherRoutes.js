@@ -29,7 +29,7 @@ teacherRouter.get("/dashboard", async (req, res, next) => {
     const students = await getAssignedStudents(req.user);
     const studentIds = students.map((student) => student._id);
 
-    const [todayRecords, weekStats] = await Promise.all([
+    const [todayRecords, weekStats, sessionCounts] = await Promise.all([
       Attendance.find({ date: today, student: { $in: studentIds } }),
       Attendance.aggregate([
         {
@@ -39,11 +39,23 @@ teacherRouter.get("/dashboard", async (req, res, next) => {
           }
         },
         { $group: { _id: "$status", count: { $sum: 1 } } }
+      ]),
+      Attendance.aggregate([
+        {
+          $match: {
+            student: { $in: studentIds },
+            status: "Present"
+          }
+        },
+        { $group: { _id: "$student", count: { $sum: 1 } } }
       ])
     ]);
 
     const attendanceByStudent = new Map(
       todayRecords.map((record) => [String(record.student), record])
+    );
+    const sessionsByStudent = new Map(
+      sessionCounts.map((item) => [String(item._id), item.count])
     );
 
     res.json({
@@ -52,8 +64,28 @@ teacherRouter.get("/dashboard", async (req, res, next) => {
       weekStats,
       students: students.map((student) => ({
         ...student.toJSON(),
-        todayAttendance: attendanceByStudent.get(String(student._id)) || null
+        todayAttendance: attendanceByStudent.get(String(student._id)) || null,
+        sessionsAttended: sessionsByStudent.get(String(student._id)) || 0
       }))
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Clear past attendance data to start fresh counting from Next Monday
+teacherRouter.post("/attendance/clear-past", async (req, res, next) => {
+  try {
+    const students = await getAssignedStudents(req.user);
+    const studentIds = students.map((s) => s._id);
+
+    const result = await Attendance.deleteMany({
+      student: { $in: studentIds }
+    });
+
+    res.json({
+      message: `Cleared ${result.deletedCount} past attendance records. You can now start counting fresh from Next Monday!`,
+      deletedCount: result.deletedCount
     });
   } catch (error) {
     next(error);
