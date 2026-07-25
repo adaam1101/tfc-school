@@ -25,6 +25,7 @@ const studentProfileSchema = new Schema(
     parentEmail: { type: String, trim: true, lowercase: true },
     parentPhone: { type: String, trim: true },
     mark: { type: String, trim: true },
+    sessionsAttended: { type: Number, default: 0, min: 0 },
     rfidCardHash: { type: String, index: true, select: false },
     rfidCardLast4: { type: String, trim: true },
     teacher: { type: Schema.Types.ObjectId, ref: "User" },

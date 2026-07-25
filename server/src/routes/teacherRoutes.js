@@ -62,11 +62,53 @@ teacherRouter.get("/dashboard", async (req, res, next) => {
       teacher: req.user,
       today,
       weekStats,
-      students: students.map((student) => ({
-        ...student.toJSON(),
-        todayAttendance: attendanceByStudent.get(String(student._id)) || null,
-        sessionsAttended: sessionsByStudent.get(String(student._id)) || 0
-      }))
+      students: students.map((student) => {
+        const baseSessions = student.studentProfile?.sessionsAttended || 0;
+        const presentCount = sessionsByStudent.get(String(student._id)) || 0;
+        return {
+          ...student.toJSON(),
+          todayAttendance: attendanceByStudent.get(String(student._id)) || null,
+          sessionsAttended: baseSessions + presentCount
+        };
+      })
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Update a student's total studied sessions count
+teacherRouter.put("/students/:studentId/sessions", async (req, res, next) => {
+  try {
+    const { studentId } = req.params;
+    const { count } = req.body;
+
+    const newCount = Math.max(0, parseInt(count, 10) || 0);
+
+    const student = await User.findOne({ _id: studentId, role: "student" });
+    if (!student) {
+      return res.status(404).json({ message: "Student not found." });
+    }
+
+    const assignedStudents = await getAssignedStudents(req.user);
+    const isAssigned = assignedStudents.some((assigned) => String(assigned._id) === studentId);
+    if (!isAssigned) {
+      return res.status(403).json({ message: "This student is not assigned to you." });
+    }
+
+    const presentCount = await Attendance.countDocuments({ student: studentId, status: "Present" });
+
+    if (!student.studentProfile) {
+      student.studentProfile = {};
+    }
+
+    student.studentProfile.sessionsAttended = Math.max(0, newCount - presentCount);
+    await student.save();
+
+    res.json({
+      studentId,
+      sessionsAttended: newCount,
+      message: `Sessions count for ${student.name} updated to ${newCount}.`
     });
   } catch (error) {
     next(error);

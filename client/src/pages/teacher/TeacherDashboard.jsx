@@ -14,7 +14,9 @@ import {
   LayoutList,
   Megaphone,
   Trash2,
-  BookOpen
+  BookOpen,
+  Pencil,
+  X
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import TeacherGroupsPanel, { GroupBroadcastModal } from "../../components/TeacherGroupsPanel.jsx";
@@ -57,6 +59,7 @@ export default function TeacherDashboard() {
   const [selectedCourse, setSelectedCourse] = useState("all");
   const [expandedNotes, setExpandedNotes] = useState({});
   const [showFilterGroupBroadcast, setShowFilterGroupBroadcast] = useState(false);
+  const [editingSessionsStudent, setEditingSessionsStudent] = useState(null);
 
   const getAvatarGradient = (name = "") => {
     const gradients = [
@@ -500,9 +503,15 @@ export default function TeacherDashboard() {
                                       Age {student.studentProfile.age}
                                     </span>
                                   )}
-                                  <span className="bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-350 border border-emerald-200/60 dark:border-emerald-800/60 px-2 py-0.5 rounded-lg text-[10px] font-bold">
-                                    📖 {student.sessionsAttended ?? 0} {student.sessionsAttended === 1 ? "Session" : "Sessions"}
-                                  </span>
+                                  <button
+                                    type="button"
+                                    onClick={() => setEditingSessionsStudent(student)}
+                                    className="inline-flex items-center gap-1 bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 text-emerald-700 dark:text-emerald-350 border border-emerald-200/60 dark:border-emerald-800/60 px-2 py-0.5 rounded-lg text-[10px] font-bold transition-all active:scale-95 cursor-pointer shadow-2xs group"
+                                    title="Click to edit total sessions studied"
+                                  >
+                                    <span>📖 {student.sessionsAttended ?? 0} {student.sessionsAttended === 1 ? "Session" : "Sessions"}</span>
+                                    <Pencil className="h-2.5 w-2.5 opacity-60 group-hover:opacity-100 ml-0.5" />
+                                  </button>
                                 </div>
 
                                 {student.studentProfile?.parentPhone && (
@@ -615,6 +624,96 @@ export default function TeacherDashboard() {
       </div>
 
       {showIdCard && data?.teacher && <IDCardModal user={data.teacher} onClose={() => setShowIdCard(false)} />}
+      {editingSessionsStudent && (
+        <EditSessionsModal
+          student={editingSessionsStudent}
+          onClose={() => setEditingSessionsStudent(null)}
+          onSaved={loadDashboard}
+        />
+      )}
     </AppLayout>
+  );
+}
+
+// ── Edit Sessions Modal ───────────────────────────────────────────────────
+
+export function EditSessionsModal({ student, onClose, onSaved }) {
+  const [count, setCount] = useState(student.sessionsAttended ?? 0);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleSave = async (e) => {
+    e.preventDefault();
+    setSaving(true);
+    setError("");
+    try {
+      await api.put(`/teacher/students/${student._id}/sessions`, { count });
+      if (onSaved) onSaved();
+      onClose();
+    } catch (err) {
+      setError(getApiError(err));
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in">
+      <div className="w-full max-w-sm rounded-3xl bg-white dark:bg-slate-800 shadow-2xl overflow-hidden border border-slate-100 dark:border-slate-700">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
+          <div className="flex items-center gap-2">
+            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-sm font-bold text-sm">
+              📖
+            </span>
+            <div>
+              <h3 className="font-black text-slate-900 dark:text-slate-100 text-sm">Sessions Studied</h3>
+              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wide">{student.name}</p>
+            </div>
+          </div>
+          <button onClick={onClose} className="flex h-8 w-8 items-center justify-center rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 transition-colors">
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+
+        <form onSubmit={handleSave} className="p-6 space-y-4">
+          <ErrorAlert message={error} />
+          <div>
+            <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1.5">
+              Total Sessions Attended
+            </label>
+            <input
+              type="number"
+              min="0"
+              max="999"
+              required
+              className="w-full rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/50 px-4 py-3 text-lg font-black text-slate-850 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 text-center"
+              value={count}
+              onChange={(e) => setCount(e.target.value)}
+              autoFocus
+            />
+            <p className="mt-2 text-[11px] text-slate-400 text-center">
+              Enter how many sessions {student.name} has completed.
+            </p>
+          </div>
+
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex-1 rounded-xl border border-slate-200 dark:border-slate-700 py-2.5 text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={saving}
+              className="flex-1 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 py-2.5 text-xs font-bold text-white shadow-md hover:from-emerald-600 hover:to-teal-700 transition-all disabled:opacity-50"
+            >
+              {saving ? "Saving..." : "Save Sessions"}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
   );
 }
