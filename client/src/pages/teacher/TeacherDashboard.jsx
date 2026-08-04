@@ -60,6 +60,7 @@ export default function TeacherDashboard() {
   const [expandedNotes, setExpandedNotes] = useState({});
   const [showFilterGroupBroadcast, setShowFilterGroupBroadcast] = useState(false);
   const [editingSessionsStudent, setEditingSessionsStudent] = useState(null);
+  const [editingCourseStudent, setEditingCourseStudent] = useState(null);
   const [selectedStatus, setSelectedStatus] = useState("all");
 
   const getAvatarGradient = (name = "") => {
@@ -552,9 +553,15 @@ export default function TeacherDashboard() {
                                 </div>
                                 
                                 <div className="mt-1.5 flex flex-wrap gap-1.5 items-center">
-                                  <span className="bg-slate-100 dark:bg-slate-800 text-slate-650 dark:text-slate-350 px-2 py-0.5 rounded-lg text-[10px] font-bold">
-                                    {student.studentProfile?.course || "Course"}
-                                  </span>
+                                  <button
+                                    type="button"
+                                    onClick={() => setEditingCourseStudent(student)}
+                                    className="inline-flex items-center gap-1 bg-brand-50 dark:bg-brand-950/40 hover:bg-brand-100 dark:hover:bg-brand-900/60 text-brand-700 dark:text-brand-300 border border-brand-200/60 dark:border-brand-800/60 px-2 py-0.5 rounded-lg text-[10px] font-bold transition-all active:scale-95 cursor-pointer shadow-2xs group"
+                                    title="Click to switch or promote level (e.g. A1 -> A2)"
+                                  >
+                                    <span>🎓 {student.studentProfile?.course || "Course"}</span>
+                                    <Pencil className="h-2.5 w-2.5 opacity-60 group-hover:opacity-100 ml-0.5" />
+                                  </button>
                                   {student.studentProfile?.age && (
                                     <span className="bg-slate-100 dark:bg-slate-800 text-slate-650 dark:text-slate-350 px-2 py-0.5 rounded-lg text-[10px] font-bold">
                                       Age {student.studentProfile.age}
@@ -701,6 +708,13 @@ export default function TeacherDashboard() {
           onSaved={loadDashboard}
         />
       )}
+      {editingCourseStudent && (
+        <SwitchLevelModal
+          student={editingCourseStudent}
+          onClose={() => setEditingCourseStudent(null)}
+          onSaved={loadDashboard}
+        />
+      )}
     </AppLayout>
   );
 }
@@ -780,6 +794,128 @@ export function EditSessionsModal({ student, onClose, onSaved }) {
               className="flex-1 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 py-2.5 text-xs font-bold text-white shadow-md hover:from-emerald-600 hover:to-teal-700 transition-all disabled:opacity-50"
             >
               {saving ? "Saving..." : "Save Sessions"}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+// ── Switch / Promote Level Modal ──────────────────────────────────────────────
+
+export function SwitchLevelModal({ student, onClose, onSaved }) {
+  const currentCourse = student.studentProfile?.course || "";
+  const [course, setCourse] = useState(currentCourse);
+  const [resetSessions, setResetSessions] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+
+  const LEVEL_PRESETS = ["A1", "A2", "B1", "B2", "C1", "C2"];
+
+  const handleSave = async (e) => {
+    e.preventDefault();
+    if (!course.trim()) return;
+    setSaving(true);
+    setError("");
+    try {
+      await api.put(`/teacher/students/${student._id}/course`, {
+        course: course.trim(),
+        resetSessions
+      });
+      if (onSaved) onSaved();
+      onClose();
+    } catch (err) {
+      setError(getApiError(err));
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in">
+      <div className="w-full max-w-sm rounded-3xl bg-white dark:bg-slate-800 shadow-2xl overflow-hidden border border-slate-100 dark:border-slate-700">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
+          <div className="flex items-center gap-2">
+            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-sm font-bold text-sm">
+              🎓
+            </span>
+            <div>
+              <h3 className="font-black text-slate-900 dark:text-slate-100 text-sm">Switch / Promote Level</h3>
+              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wide">{student.name}</p>
+            </div>
+          </div>
+          <button onClick={onClose} className="flex h-8 w-8 items-center justify-center rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 transition-colors">
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+
+        <form onSubmit={handleSave} className="p-6 space-y-4">
+          <ErrorAlert message={error} />
+
+          <div>
+            <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1.5">
+              Course / Level Name
+            </label>
+            <input
+              type="text"
+              required
+              placeholder="e.g. A2 or English A2"
+              className="w-full rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/50 px-4 py-2.5 text-sm font-bold text-slate-850 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
+              value={course}
+              onChange={(e) => setCourse(e.target.value)}
+              autoFocus
+            />
+          </div>
+
+          <div>
+            <span className="block text-[11px] font-bold text-slate-400 uppercase tracking-wide mb-1.5">
+              Quick Level Presets
+            </span>
+            <div className="flex flex-wrap gap-1.5">
+              {LEVEL_PRESETS.map((lvl) => (
+                <button
+                  key={lvl}
+                  type="button"
+                  onClick={() => setCourse(lvl)}
+                  className={`px-3 py-1 rounded-xl text-xs font-bold transition-all border ${
+                    course === lvl
+                      ? "bg-brand-600 text-white border-brand-600 shadow-sm"
+                      : "bg-slate-100 dark:bg-slate-700/60 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-600 hover:bg-brand-50 hover:text-brand-600"
+                  }`}
+                >
+                  {lvl}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <label className="flex items-center gap-2 pt-1 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              className="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
+              checked={resetSessions}
+              onChange={(e) => setResetSessions(e.target.checked)}
+            />
+            <span className="text-xs text-slate-600 dark:text-slate-400 font-semibold">
+              Reset sessions counter for new level
+            </span>
+          </label>
+
+          <div className="flex gap-2 pt-2">
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex-1 rounded-xl border border-slate-200 dark:border-slate-700 py-2.5 text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={saving || !course.trim()}
+              className="flex-1 rounded-xl bg-gradient-to-r from-brand-600 to-indigo-600 py-2.5 text-xs font-bold text-white shadow-md hover:from-brand-700 hover:to-indigo-700 transition-all disabled:opacity-50"
+            >
+              {saving ? "Saving..." : "Promote Level 🌟"}
             </button>
           </div>
         </form>

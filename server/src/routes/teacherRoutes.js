@@ -151,6 +151,51 @@ teacherRouter.put("/students/:studentId/status", async (req, res, next) => {
   }
 });
 
+// Switch or promote a student's course/level (e.g. A1 -> A2)
+teacherRouter.put("/students/:studentId/course", async (req, res, next) => {
+  try {
+    const { studentId } = req.params;
+    const { course, resetSessions } = req.body;
+
+    if (!course || !course.trim()) {
+      return res.status(400).json({ message: "Course / Level name is required." });
+    }
+
+    const student = await User.findOne({ _id: studentId, role: "student" });
+    if (!student) {
+      return res.status(404).json({ message: "Student not found." });
+    }
+
+    const assignedStudents = await getAssignedStudents(req.user);
+    const isAssigned = assignedStudents.some((assigned) => String(assigned._id) === studentId);
+    if (!isAssigned) {
+      return res.status(403).json({ message: "This student is not assigned to you." });
+    }
+
+    if (!student.studentProfile) {
+      student.studentProfile = {};
+    }
+
+    const oldCourse = student.studentProfile.course || "Unassigned";
+    const newCourse = course.trim();
+    student.studentProfile.course = newCourse;
+
+    if (resetSessions) {
+      const presentCount = await Attendance.countDocuments({ student: studentId, status: "Present" });
+      student.studentProfile.sessionsAttended = Math.max(0, 0 - presentCount);
+    }
+
+    await student.save();
+
+    res.json({
+      student,
+      message: `${student.name} updated from ${oldCourse} to ${newCourse}! 🌟`
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
 // Clear past attendance data to start fresh counting from Next Monday
 teacherRouter.post("/attendance/clear-past", async (req, res, next) => {
   try {
