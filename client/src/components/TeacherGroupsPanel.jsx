@@ -593,6 +593,9 @@ function GroupCard({ group, myStudents, onEdit, onDelete, onTrackStudent }) {
                       <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 truncate">{s.name}</p>
                       <p className="text-xs text-slate-400 truncate">
                         {s.studentProfile?.course} · Age {s.studentProfile?.age || "–"} · <span className="font-bold text-emerald-600 dark:text-emerald-400">📖 {s.sessionsAttended ?? 0} Sessions</span>
+                        {(s.studentProfile?.isStopped || s.status === "stopped") && (
+                          <span className="ml-1.5 font-bold text-rose-500">⛔ Stopped</span>
+                        )}
                       </p>
                     </div>
                   </div>
@@ -1022,6 +1025,9 @@ export default function TeacherGroupsPanel() {
                   <p className="font-bold text-slate-900 dark:text-slate-100 truncate">{s.name}</p>
                   <p className="text-xs text-slate-400 truncate">
                     {s.studentProfile?.course || "–"} · Age {s.studentProfile?.age || "–"} · <span className="font-bold text-emerald-600 dark:text-emerald-400">📖 {s.sessionsAttended ?? 0} Sessions</span>
+                    {(s.studentProfile?.isStopped || s.status === "stopped") && (
+                      <span className="ml-1.5 font-bold text-rose-500 font-black">⛔ Stopped</span>
+                    )}
                   </p>
                 </div>
                 <button

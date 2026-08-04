@@ -115,6 +115,42 @@ teacherRouter.put("/students/:studentId/sessions", async (req, res, next) => {
   }
 });
 
+// Update a student's active vs stopped status
+teacherRouter.put("/students/:studentId/status", async (req, res, next) => {
+  try {
+    const { studentId } = req.params;
+    const { isStopped } = req.body;
+
+    const student = await User.findOne({ _id: studentId, role: "student" });
+    if (!student) {
+      return res.status(404).json({ message: "Student not found." });
+    }
+
+    const assignedStudents = await getAssignedStudents(req.user);
+    const isAssigned = assignedStudents.some((assigned) => String(assigned._id) === studentId);
+    if (!isAssigned) {
+      return res.status(403).json({ message: "This student is not assigned to you." });
+    }
+
+    if (!student.studentProfile) {
+      student.studentProfile = {};
+    }
+
+    student.studentProfile.isStopped = Boolean(isStopped);
+    student.studentProfile.stoppedAt = isStopped ? new Date() : undefined;
+    student.status = isStopped ? "stopped" : "active";
+
+    await student.save();
+
+    res.json({
+      student,
+      message: `Student status for ${student.name} updated to ${isStopped ? "Stopped" : "Active"}.`
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
 // Clear past attendance data to start fresh counting from Next Monday
 teacherRouter.post("/attendance/clear-past", async (req, res, next) => {
   try {

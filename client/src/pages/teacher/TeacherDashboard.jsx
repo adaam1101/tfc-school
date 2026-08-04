@@ -60,6 +60,7 @@ export default function TeacherDashboard() {
   const [expandedNotes, setExpandedNotes] = useState({});
   const [showFilterGroupBroadcast, setShowFilterGroupBroadcast] = useState(false);
   const [editingSessionsStudent, setEditingSessionsStudent] = useState(null);
+  const [selectedStatus, setSelectedStatus] = useState("all");
 
   const getAvatarGradient = (name = "") => {
     const gradients = [
@@ -99,9 +100,14 @@ export default function TeacherDashboard() {
       if (selectedCourse !== "all") {
         if (s.studentProfile?.course !== selectedCourse) return false;
       }
+      if (selectedStatus !== "all") {
+        const isStopped = s.studentProfile?.isStopped || s.status === "stopped";
+        if (selectedStatus === "stopped" && !isStopped) return false;
+        if (selectedStatus === "active" && isStopped) return false;
+      }
       return true;
     });
-  }, [students, groups, selectedGroup, selectedCourse]);
+  }, [students, groups, selectedGroup, selectedCourse, selectedStatus]);
 
   const presentCount = countStatus(students, "Present");
   const absentCount = countStatus(students, "Absent");
@@ -135,6 +141,24 @@ export default function TeacherDashboard() {
     try {
       const { data: res } = await api.post("/teacher/attendance/clear-past");
       setMessage(res.message || "Attendance history cleared! Counting starts fresh from Next Monday.");
+      await loadDashboard();
+    } catch (err) {
+      setError(getApiError(err));
+    }
+  };
+
+  const handleToggleStatus = async (student) => {
+    const isCurrentlyStopped = student.studentProfile?.isStopped || student.status === "stopped";
+    const nextStopped = !isCurrentlyStopped;
+    const confirmMsg = nextStopped
+      ? `Mark ${student.name} as STOPPED? They will be flagged as no longer attending.`
+      : `Mark ${student.name} as ACTIVE again?`;
+
+    if (!window.confirm(confirmMsg)) return;
+
+    try {
+      await api.put(`/teacher/students/${student._id}/status`, { isStopped: nextStopped });
+      setMessage(`${student.name} marked as ${nextStopped ? "Stopped ⛔" : "Active 🟢"}.`);
       await loadDashboard();
     } catch (err) {
       setError(getApiError(err));
@@ -410,6 +434,21 @@ export default function TeacherDashboard() {
                     </select>
                   </div>
 
+                  <div className="flex-1 min-w-[170px]">
+                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">
+                      Status Marker
+                    </label>
+                    <select
+                      value={selectedStatus}
+                      onChange={(e) => setSelectedStatus(e.target.value)}
+                      className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/20 text-slate-700 dark:text-slate-250 font-bold"
+                    >
+                      <option value="all">⚡ All Statuses</option>
+                      <option value="active">🟢 Active Only</option>
+                      <option value="stopped">⛔ Stopped Only</option>
+                    </select>
+                  </div>
+
                   <div className="flex gap-2 self-end">
                     {selectedGroup !== "all" && (
                       <button
@@ -421,10 +460,10 @@ export default function TeacherDashboard() {
                         <Megaphone className="h-4 w-4" /> Group Broadcast
                       </button>
                     )}
-                    {(selectedGroup !== "all" || selectedCourse !== "all") && (
+                    {(selectedGroup !== "all" || selectedCourse !== "all" || selectedStatus !== "all") && (
                       <button
                         type="button"
-                        onClick={() => { setSelectedGroup("all"); setSelectedCourse("all"); }}
+                        onClick={() => { setSelectedGroup("all"); setSelectedCourse("all"); setSelectedStatus("all"); }}
                         className="rounded-xl border border-rose-250 bg-rose-50/50 hover:bg-rose-50 text-rose-700 dark:border-rose-900 dark:bg-rose-950/20 dark:text-rose-455 px-4 py-2 text-sm font-bold transition-all active:scale-95"
                       >
                         Reset Filters
@@ -443,11 +482,13 @@ export default function TeacherDashboard() {
                   <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
                     {filteredStudents.map((student, index) => {
                       const status = student.todayAttendance?.status;
+                      const isStopped = student.studentProfile?.isStopped || student.status === "stopped";
                       const initials = student.name?.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase() || "?";
                       const avatarGradient = getAvatarGradient(student.name);
 
-                      const statusBorder = 
-                        status === "Present" ? "border-emerald-500/30 shadow-emerald-500/10 dark:shadow-emerald-500/5 bg-gradient-to-b from-white to-emerald-50/20 dark:from-slate-900 dark:to-emerald-950/10"
+                      const statusBorder = isStopped
+                        ? "border-rose-250/70 dark:border-rose-900/60 bg-rose-50/20 dark:bg-rose-950/10 opacity-85"
+                        : status === "Present" ? "border-emerald-500/30 shadow-emerald-500/10 dark:shadow-emerald-500/5 bg-gradient-to-b from-white to-emerald-50/20 dark:from-slate-900 dark:to-emerald-950/10"
                         : status === "Absent" ? "border-rose-500/30 shadow-rose-500/10 dark:shadow-rose-500/5 bg-gradient-to-b from-white to-rose-50/20 dark:from-slate-900 dark:to-rose-950/10"
                         : "border-slate-200/70 dark:border-slate-800/70 hover:border-brand-500/40 hover:shadow-brand-500/5 dark:hover:border-brand-500/30";
 
@@ -465,10 +506,26 @@ export default function TeacherDashboard() {
                         >
                           {/* Accent status strip */}
                           <div className={`absolute left-0 top-0 bottom-0 w-1 transition-all duration-300 ${
-                            status === "Present" ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"
+                            isStopped ? "bg-rose-600 shadow-[0_0_8px_rgba(225,29,72,0.5)]"
+                            : status === "Present" ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"
                             : status === "Absent" ? "bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.5)]"
                             : "bg-slate-200 dark:bg-slate-800"
                           }`} />
+
+                          {isStopped && (
+                            <div className="bg-rose-500/15 border-b border-rose-200/50 dark:border-rose-900/50 px-4 py-1.5 text-[11px] font-black text-rose-700 dark:text-rose-300 flex items-center justify-between">
+                              <span className="flex items-center gap-1">
+                                ⛔ Student Has Stopped Studying
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => handleToggleStatus(student)}
+                                className="underline text-[10px] hover:text-rose-900 font-bold"
+                              >
+                                Reactivate
+                              </button>
+                            </div>
+                          )}
 
                           <div className="p-4 pl-5">
                             {/* Student info */}
@@ -511,6 +568,19 @@ export default function TeacherDashboard() {
                                   >
                                     <span>📖 {student.sessionsAttended ?? 0} {student.sessionsAttended === 1 ? "Session" : "Sessions"}</span>
                                     <Pencil className="h-2.5 w-2.5 opacity-60 group-hover:opacity-100 ml-0.5" />
+                                  </button>
+
+                                  <button
+                                    type="button"
+                                    onClick={() => handleToggleStatus(student)}
+                                    className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-black transition-all active:scale-95 cursor-pointer shadow-2xs ${
+                                      isStopped
+                                        ? "bg-rose-100 dark:bg-rose-950/60 hover:bg-rose-200 text-rose-700 dark:text-rose-300 border border-rose-300 dark:border-rose-800"
+                                        : "bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700"
+                                    }`}
+                                    title={isStopped ? "Click to set status to Active" : "Click to mark student as Stopped"}
+                                  >
+                                    {isStopped ? "⛔ Stopped" : "🟢 Active"}
                                   </button>
                                 </div>
 

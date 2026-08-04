@@ -26,6 +26,8 @@ const studentProfileSchema = new Schema(
     parentPhone: { type: String, trim: true },
     mark: { type: String, trim: true },
     sessionsAttended: { type: Number, default: 0, min: 0 },
+    isStopped: { type: Boolean, default: false },
+    stoppedAt: { type: Date },
     rfidCardHash: { type: String, index: true, select: false },
     rfidCardLast4: { type: String, trim: true },
     teacher: { type: Schema.Types.ObjectId, ref: "User" },
@@ -54,7 +56,7 @@ const userSchema = new Schema(
     phone: { type: String, trim: true },
     age: { type: Number, min: 3, max: 120 },
     photo: { type: String }, // base64 data URL for ID card photo
-    status: { type: String, enum: ["active", "inactive"], default: "active" },
+    status: { type: String, enum: ["active", "inactive", "stopped"], default: "active" },
     twoFactorEnabled: { type: Boolean, default: true },
     twoFactorCode: { type: String, select: false },
     twoFactorExpires: { type: Date, select: false },
