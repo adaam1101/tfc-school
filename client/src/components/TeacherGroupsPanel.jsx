@@ -530,7 +530,7 @@ function GroupForm({ myStudents, initial, onSave, onCancel }) {
 
 // ── Group card ────────────────────────────────────────────────────────────────
 
-function GroupCard({ group, myStudents, onEdit, onDelete, onTrackStudent }) {
+function GroupCard({ group, myStudents, onEdit, onDelete, onTrackStudent, onMoveStudent, onRemoveFromGroup }) {
   const [open, setOpen]             = useState(false);
   const [showAttendance, setShowAtt] = useState(false);
   const [showBroadcast, setShowBroadcast] = useState(false);
@@ -599,12 +599,28 @@ function GroupCard({ group, myStudents, onEdit, onDelete, onTrackStudent }) {
                       </p>
                     </div>
                   </div>
-                  <button
-                    onClick={() => onTrackStudent(s, group)}
-                    className="shrink-0 inline-flex items-center gap-1 rounded-lg border border-slate-200 hover:border-brand-300 bg-white hover:bg-brand-50 px-2 py-1 text-xs font-bold text-slate-600 hover:text-brand-700 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-350 dark:hover:bg-slate-700 transition-all active:scale-95"
-                  >
-                    <CalendarDays className="h-3.5 w-3.5" /> Track
-                  </button>
+                  <div className="flex shrink-0 items-center gap-1">
+                    <button
+                      onClick={() => onTrackStudent(s, group)}
+                      className="inline-flex items-center gap-1 rounded-lg border border-slate-200 hover:border-brand-300 bg-white hover:bg-brand-50 px-2 py-1 text-xs font-bold text-slate-600 hover:text-brand-700 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-350 dark:hover:bg-slate-700 transition-all active:scale-95"
+                    >
+                      <CalendarDays className="h-3.5 w-3.5" /> Track
+                    </button>
+                    <button
+                      onClick={() => onMoveStudent(s, group)}
+                      className="inline-flex items-center gap-1 rounded-lg border border-slate-200 hover:border-indigo-300 bg-white hover:bg-indigo-50 px-2 py-1 text-xs font-bold text-slate-600 hover:text-indigo-700 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-350 dark:hover:bg-slate-700 transition-all active:scale-95"
+                      title={`Move ${s.name} to another group`}
+                    >
+                      Move
+                    </button>
+                    <button
+                      onClick={() => onRemoveFromGroup(s, group)}
+                      className="flex h-7 w-7 items-center justify-center rounded-lg border border-rose-200 bg-white text-rose-500 hover:bg-rose-50 dark:border-rose-900 dark:bg-slate-800"
+                      title={`Remove ${s.name} from this group only`}
+                    >
+                      <UserMinus className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
                 </div>
               ))
             )}
@@ -623,6 +639,59 @@ function GroupCard({ group, myStudents, onEdit, onDelete, onTrackStudent }) {
 }
 
 // ── Add student modal ─────────────────────────────────────────────────────────
+
+function MoveStudentModal({ student, sourceGroup, groups, onMove, onClose }) {
+  const destinations = groups.filter((group) => group._id !== sourceGroup._id);
+  const [targetGroupId, setTargetGroupId] = useState(destinations[0]?._id || "");
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    if (!targetGroupId) {
+      setError("Create another group before moving this student.");
+      return;
+    }
+    setSaving(true);
+    setError("");
+    try {
+      await onMove(targetGroupId);
+    } catch (err) {
+      setError(getApiError(err));
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+      <form onSubmit={handleSubmit} className="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl dark:bg-slate-800">
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h3 className="font-black text-slate-900 dark:text-slate-100">Move student</h3>
+            <p className="mt-1 text-sm text-slate-500">Move <strong>{student.name}</strong> from {sourceGroup.name}. Their account and attendance history stay unchanged.</p>
+          </div>
+          <button type="button" onClick={onClose} className="rounded-xl p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-700" aria-label="Close">
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+        <ErrorAlert message={error} />
+        <label className="mt-5 block">
+          <span className="mb-1 block text-xs font-bold uppercase tracking-wide text-slate-500">Destination group</span>
+          <select value={targetGroupId} onChange={(event) => setTargetGroupId(event.target.value)} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-400 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200" disabled={destinations.length === 0 || saving}>
+            {destinations.map((group) => <option key={group._id} value={group._id}>{group.name}</option>)}
+          </select>
+        </label>
+        {destinations.length === 0 && <p className="mt-2 text-xs text-rose-600">Create a second group first.</p>}
+        <div className="mt-6 flex justify-end gap-2">
+          <button type="button" onClick={onClose} className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-bold text-slate-600 hover:bg-slate-50 dark:border-slate-600 dark:text-slate-300">Cancel</button>
+          <button type="submit" disabled={saving || destinations.length === 0} className="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-4 py-2 text-sm font-bold text-white hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-60">
+            {saving && <Loader2 className="h-4 w-4 animate-spin" />} Move student
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+}
 
 function AddStudentModal({ myStudents, onAdd, onClose }) {
   const [all, setAll]     = useState([]);
@@ -867,13 +936,13 @@ export default function TeacherGroupsPanel() {
   const [loading, setLoading]       = useState(true);
   const [subTab, setSubTab]         = useState("students"); // "students" | "groups"
   const [showAddStudent, setShowAddStudent]       = useState(false);
-  const [showRegisterStudent, setShowRegisterStudent] = useState(false);
   const [showGroupForm, setShowGroupForm]   = useState(false);
   const [editingGroup, setEditingGroup]     = useState(null);
   const [removingId, setRemovingId]         = useState("");
   const [toast, setToast]           = useState({ msg: "", type: "success" });
   const [error, setError]           = useState("");
   const [trackingStudent, setTrackingStudent] = useState(null);
+  const [movingStudent, setMovingStudent] = useState(null);
 
   const showToast = (msg, type = "success") => {
     setToast({ msg, type });
@@ -953,6 +1022,29 @@ export default function TeacherGroupsPanel() {
     }
   };
 
+  const handleRemoveFromGroup = async (student, group) => {
+    if (!window.confirm("Remove " + student.name + " from " + group.name + "? Their account, attendance, and class assignment will remain.")) return;
+    try {
+      await api.delete("/teacher/groups/" + group._id + "/students/" + student._id);
+      setGroups((prev) => prev.map((item) => (
+        item._id === group._id
+          ? { ...item, students: item.students.filter((member) => member._id !== student._id) }
+          : item
+      )));
+      showToast(student.name + " removed from " + group.name + ".");
+    } catch (err) {
+      showToast(getApiError(err), "error");
+    }
+  };
+
+  const handleMoveStudent = async (targetGroupId) => {
+    const { student, group } = movingStudent;
+    await api.post("/teacher/groups/" + group._id + "/students/" + student._id + "/move", { targetGroupId });
+    setMovingStudent(null);
+    await load();
+    showToast(student.name + " moved to the new group.");
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-16">
@@ -994,12 +1086,6 @@ export default function TeacherGroupsPanel() {
               {myStudents.length === 0 ? "No students yet." : `${myStudents.length} student${myStudents.length > 1 ? "s" : ""} in your class`}
             </p>
             <div className="flex gap-2">
-              <button
-                onClick={() => setShowRegisterStudent(true)}
-                className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-700 px-4 py-2 text-sm font-bold text-white shadow-sm hover:from-emerald-700 hover:to-teal-800 transition-all"
-              >
-                <UserRoundPlus className="h-4 w-4" /> Register new
-              </button>
               <button
                 onClick={() => setShowAddStudent(true)}
                 className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-brand-600 to-brand-700 px-4 py-2 text-sm font-bold text-white shadow-sm hover:from-brand-700 hover:to-brand-800 transition-all"
@@ -1090,6 +1176,8 @@ export default function TeacherGroupsPanel() {
                 onEdit={handleEditGroup}
                 onDelete={handleDeleteGroup}
                 onTrackStudent={(student, group) => setTrackingStudent({ student, group })}
+                onMoveStudent={(student, group) => setMovingStudent({ student, group })}
+                onRemoveFromGroup={handleRemoveFromGroup}
               />
             ))}
           </div>
@@ -1104,19 +1192,21 @@ export default function TeacherGroupsPanel() {
         />
       )}
 
-      {showRegisterStudent && (
-        <RegisterStudentModal
-          onDone={load}
-          teacherSubject={teacherSubject}
-          onClose={() => setShowRegisterStudent(false)}
-        />
-      )}
 
       {trackingStudent && (
         <StudentTrackingModal
           student={trackingStudent.student}
           group={trackingStudent.group}
           onClose={() => setTrackingStudent(null)}
+        />
+      )}
+      {movingStudent && (
+        <MoveStudentModal
+          student={movingStudent.student}
+          sourceGroup={movingStudent.group}
+          groups={groups}
+          onMove={handleMoveStudent}
+          onClose={() => setMovingStudent(null)}
         />
       )}
     </div>

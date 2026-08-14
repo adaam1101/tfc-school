@@ -15,7 +15,7 @@ studentRouter.get("/profile", async (req, res, next) => {
         .limit(90)
         .populate("teacher", "name teacherProfile.subject"),
       req.user.studentProfile?.teacher
-        ? User.findById(req.user.studentProfile.teacher).select("name email teacherProfile.subject")
+        ? User.findById(req.user.studentProfile.teacher).select("name email phone teacherProfile.subject teacherProfile.contactInfo")
         : null
     ]);
 

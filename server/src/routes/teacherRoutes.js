@@ -1,4 +1,3 @@
-import crypto from "node:crypto";
 import express from "express";
 import { protect, allowRoles } from "../middleware/auth.js";
 import { validate } from "../middleware/validate.js";
@@ -189,7 +188,7 @@ teacherRouter.put("/students/:studentId/course", async (req, res, next) => {
 
     res.json({
       student,
-      message: `${student.name} updated from ${oldCourse} to ${newCourse}! 🌟`
+      message: `${student.name} updated from ${oldCourse} to ${newCourse}! ðŸŒŸ`
     });
   } catch (error) {
     next(error);
@@ -289,72 +288,16 @@ teacherRouter.post("/attendance", validate(attendanceSchema), async (req, res, n
   }
 });
 
-// ── Register a new student (teacher self-service) ─────────────────────────────
+// â”€â”€ Register a new student (teacher self-service) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-teacherRouter.post("/students/register", async (req, res, next) => {
-  try {
-    const { name, age, course, phone, parentName, parentPhone, parentEmail, dateOfBirth } = req.body;
+// Student accounts are created by administrators only.
 
-    if (!name?.trim()) return res.status(400).json({ message: "Full name is required." });
-    if (!age)          return res.status(400).json({ message: "Age is required." });
-    if (!course?.trim()) return res.status(400).json({ message: "Course is required." });
-
-    // Auto-generate email + temporary password
-    const slug = name.trim().toLowerCase().replace(/\s+/g, ".").replace(/[^a-z0-9.]/g, "");
-    const rand = Math.floor(1000 + Math.random() * 9000);
-    let email = `${slug}@tfcschool.dz`;
-
-    // Ensure email uniqueness
-    const exists = await User.findOne({ email });
-    if (exists) email = `${slug}.${rand}@tfcschool.dz`;
-
-    const tempPassword = `Tfc@${crypto.randomBytes(8).toString("base64url").slice(0, 10)}`;
-
-    const student = await User.create({
-      role: "student",
-      name: name.trim(),
-      email,
-      password: tempPassword,
-      phone: phone || "",
-      status: "active",
-      studentProfile: {
-        age: Number(age),
-        dateOfBirth: dateOfBirth || "",
-        course: course.trim(),
-        parentName: parentName || "",
-        parentPhone: parentPhone || "",
-        parentEmail: parentEmail || "",
-        teacher: req.user._id
-      }
-    });
-
-    // Link student to this teacher
-    await User.updateOne(
-      { _id: req.user._id },
-      { $addToSet: { "teacherProfile.assignedStudents": student._id } }
-    );
-
-    res.status(201).json({
-      message: `${student.name} registered successfully.`,
-      student: {
-        _id:   student._id,
-        name:  student.name,
-        email: student.email,
-        studentProfile: student.studentProfile
-      },
-      credentials: { email, tempPassword }
-    });
-  } catch (err) {
-    next(err);
-  }
-});
-
-// ── Student management ────────────────────────────────────────────────────────
+// â”€â”€ Student management â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 // List all students available to assign (unassigned or already mine)
 teacherRouter.get("/available-students", async (req, res, next) => {
   try {
-    // Exclude email — teachers only need name/profile to assign students
+    // Exclude email â€” teachers only need name/profile to assign students
     const students = await User.find({ role: "student" })
       .select("name studentProfile photo")
       .sort({ name: 1 });
@@ -414,7 +357,7 @@ teacherRouter.delete("/students/:studentId", async (req, res, next) => {
   } catch (err) { next(err); }
 });
 
-// ── Group management ──────────────────────────────────────────────────────────
+// â”€â”€ Group management â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 // List this teacher's groups
 teacherRouter.get("/groups", async (req, res, next) => {
@@ -465,6 +408,52 @@ teacherRouter.put("/groups/:id", async (req, res, next) => {
     await group.save();
     const populated = await group.populate("students", "name email studentProfile photo");
     res.json({ group: populated });
+  } catch (err) { next(err); }
+});
+
+// Remove a student from one group without deleting their account, attendance, or class assignment.
+teacherRouter.delete("/groups/:id/students/:studentId", async (req, res, next) => {
+  try {
+    const group = await Group.findOne({ _id: req.params.id, teacher: req.user._id });
+    if (!group) return res.status(404).json({ message: "Group not found." });
+
+    const studentId = String(req.params.studentId);
+    if (!group.students.some((id) => String(id) === studentId)) {
+      return res.status(404).json({ message: "Student is not in this group." });
+    }
+
+    group.students.pull(req.params.studentId);
+    await group.save();
+
+    res.json({ message: "Student removed from this group." });
+  } catch (err) { next(err); }
+});
+
+// Move a student between this teacher's groups while preserving the student record and attendance.
+teacherRouter.post("/groups/:id/students/:studentId/move", async (req, res, next) => {
+  try {
+    const sourceGroup = await Group.findOne({ _id: req.params.id, teacher: req.user._id });
+    if (!sourceGroup) return res.status(404).json({ message: "Source group not found." });
+
+    const { targetGroupId } = req.body;
+    if (!targetGroupId) return res.status(400).json({ message: "A destination group is required." });
+    if (String(sourceGroup._id) === String(targetGroupId)) {
+      return res.status(400).json({ message: "Choose a different destination group." });
+    }
+
+    const targetGroup = await Group.findOne({ _id: targetGroupId, teacher: req.user._id });
+    if (!targetGroup) return res.status(404).json({ message: "Destination group not found." });
+
+    const studentId = String(req.params.studentId);
+    if (!sourceGroup.students.some((id) => String(id) === studentId)) {
+      return res.status(404).json({ message: "Student is not in the source group." });
+    }
+
+    sourceGroup.students.pull(req.params.studentId);
+    targetGroup.students.addToSet(req.params.studentId);
+    await Promise.all([sourceGroup.save(), targetGroup.save()]);
+
+    res.json({ message: "Student moved to the new group." });
   } catch (err) { next(err); }
 });
 

@@ -2,6 +2,7 @@ import express from "express";
 import { protect, allowRoles } from "../middleware/auth.js";
 import { validate } from "../middleware/validate.js";
 import { Attendance } from "../models/Attendance.js";
+import { Group } from "../models/Group.js";
 import { User } from "../models/User.js";
 import { dateKey, daysAgo } from "../utils/dates.js";
 import { applyRfidCardToProfile } from "../utils/rfid.js";
@@ -130,9 +131,18 @@ adminRouter.get("/users", async (req, res, next) => {
 
 adminRouter.post("/users", validate(createUserSchema), async (req, res, next) => {
   try {
-    // Moderators can only add students
+    // Student accounts are created by the administrator only.
+    if (req.body.role === "student" && req.user.role !== "admin") {
+      return res.status(403).json({ message: "Only the administrator can create student accounts." });
+    }
     if (req.user.role === "moderator" && req.body.role !== "student") {
       return res.status(403).json({ message: "Moderators can only add students." });
+    }
+
+    if (req.body.role === "student") {
+      if (!req.body.name?.trim()) return res.status(400).json({ message: "Student full name is required." });
+      if (!req.body.studentProfile?.course?.trim()) return res.status(400).json({ message: "Student course is required." });
+      if (!req.body.studentProfile?.teacher) return res.status(400).json({ message: "Assign a teacher before creating a student account." });
     }
 
     if (req.body.studentProfile) {
@@ -257,6 +267,7 @@ adminRouter.delete("/users/:id", onlyAdmin, validate(idParamSchema), async (req,
 
     if (user.role === "student") {
       await Attendance.deleteMany({ student: user._id });
+      await Group.updateMany({}, { $pull: { students: user._id } });
       await User.updateMany(
         { role: "teacher" },
         { $pull: { "teacherProfile.assignedStudents": user._id } }

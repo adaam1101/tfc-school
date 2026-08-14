@@ -45,6 +45,7 @@ export default function StudentDashboard() {
   const [profile, setProfile] = useState(null);
   const [payments, setPayments] = useState([]);
   const [schedules, setSchedules] = useState([]);
+  const [coursework, setCoursework] = useState([]);
   const [showIdCard, setShowIdCard] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
@@ -73,6 +74,7 @@ export default function StudentDashboard() {
     };
     loadProfile();
     api.get("/payments/mine").then(({ data }) => setPayments(data.payments || [])).catch(() => {});
+    api.get("/coursework/mine").then(({ data }) => setCoursework(data.items || [])).catch(() => {});
     loadSchedules();
   }, []);
 
@@ -323,6 +325,18 @@ export default function StudentDashboard() {
                     </div>
                   ))}
                 </dl>
+                {profile?.teacher && (
+                  <div className="mt-4 rounded-xl border border-brand-100 bg-brand-50 p-3 dark:border-brand-900 dark:bg-brand-950/30">
+                    <p className="text-xs font-black uppercase tracking-wide text-brand-700 dark:text-brand-300">Contact your teacher</p>
+                    <p className="mt-1 text-sm font-bold text-slate-900 dark:text-white">{profile.teacher.name}</p>
+                    <p className="text-xs text-slate-500">{profile.teacher.teacherProfile?.subject || "Teacher"}</p>
+                    {(profile.teacher.phone || profile.teacher.teacherProfile?.contactInfo || profile.teacher.email) && (
+                      <a className="mt-2 inline-flex items-center gap-1 text-sm font-bold text-brand-700 hover:underline dark:text-brand-300" href={profile.teacher.phone ? "tel:" + profile.teacher.phone : profile.teacher.email ? "mailto:" + profile.teacher.email : "#"}>
+                        <Phone className="h-3.5 w-3.5" /> {profile.teacher.phone || profile.teacher.teacherProfile?.contactInfo || profile.teacher.email}
+                      </a>
+                    )}
+                  </div>
+                )}
               </div>
 
               {/* Attendance history */}
@@ -380,6 +394,21 @@ export default function StudentDashboard() {
             </section>
 
             <section className="grid gap-6 lg:grid-cols-2">
+              <div className="card p-6">
+                <div className="mb-5 flex items-center gap-3">
+                  <div className="rounded-xl bg-gradient-to-br from-indigo-500 to-brand-600 p-2.5 shadow-sm"><BookOpen className="h-5 w-5 text-white" /></div>
+                  <div><h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">Lessons & assignments</h2><p className="text-sm text-slate-500 dark:text-slate-400">Published by your teacher</p></div>
+                </div>
+                <div className="space-y-3">
+                  {coursework.length ? coursework.map((item) => (
+                    <article key={item._id} className="rounded-xl border border-slate-100 bg-slate-50/60 p-4 dark:border-slate-700 dark:bg-slate-700/30">
+                      <p className="font-bold text-slate-900 dark:text-white">{item.type === "assignment" ? "Assignment: " : "Lesson: "}{item.title}</p>
+                      <p className="mt-1 whitespace-pre-wrap text-sm text-slate-600 dark:text-slate-300">{item.body}</p>
+                      {item.dueDate && <p className="mt-2 text-xs font-semibold text-rose-600">Due: {item.dueDate}</p>}
+                    </article>
+                  )) : <p className="py-8 text-center text-sm text-slate-400">Your teacher has not published any lessons or assignments yet.</p>}
+                </div>
+              </div>
               <AnnouncementsCard />
 
               {/* My fees quick summary */}

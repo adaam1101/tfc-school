@@ -23,6 +23,7 @@ import { paymentRouter } from "./routes/paymentRoutes.js";
 import { announcementRouter } from "./routes/announcementRoutes.js";
 import { auditRouter } from "./routes/auditRoutes.js";
 import { scheduleRouter } from "./routes/scheduleRoutes.js";
+import { courseworkRouter } from "./routes/courseworkRoutes.js";
 
 dotenv.config();
 
@@ -64,6 +65,7 @@ app.use("/api/payments", paymentRouter);
 app.use("/api/announcements", announcementRouter);
 app.use("/api/audit", auditRouter);
 app.use("/api/schedules", scheduleRouter);
+app.use("/api/coursework", courseworkRouter);
 
 const clientDistCandidates = [
   path.resolve(__dirname, "../../client/dist"),

@@ -31,11 +31,13 @@ import { T } from "../../translations/dashboards.js";
 import AnnouncementsCard from "../../components/AnnouncementsCard.jsx";
 import IDCardModal from "../../components/IDCardModal.jsx";
 import TimetableGrid from "../../components/TimetableGrid.jsx";
+import TeacherCourseworkPanel from "../../components/TeacherCourseworkPanel.jsx";
 
 const TAB_IDS = [
   { id: "attendance", key: "attendance", icon: ClipboardCheck },
   { id: "groups",     key: "studentsGroups", icon: LayoutList },
-  { id: "timetable",  key: "timetable",  icon: CalendarDays }
+  { id: "timetable",  key: "timetable",  icon: CalendarDays },
+  { id: "coursework", label: "Lessons & assignments", icon: BookOpen }
 ];
 
 const countStatus = (students, status) =>
@@ -279,7 +281,7 @@ export default function TeacherDashboard() {
           {TAB_IDS.map((tab_item) => {
             const Icon = tab_item.icon;
             const active = tab === tab_item.id;
-            const label = t[tab_item.key];
+            const label = tab_item.label || t[tab_item.key];
             return (
               <button
                 key={tab_item.id}
@@ -339,6 +341,7 @@ export default function TeacherDashboard() {
             </div>
           </section>
         )}
+        {tab === "coursework" && <TeacherCourseworkPanel />}
 
         {/* ── Attendance tab ── */}
         {tab === "attendance" && (
