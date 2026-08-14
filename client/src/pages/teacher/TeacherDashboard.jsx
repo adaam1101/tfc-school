@@ -63,6 +63,7 @@ export default function TeacherDashboard() {
   const [showFilterGroupBroadcast, setShowFilterGroupBroadcast] = useState(false);
   const [editingSessionsStudent, setEditingSessionsStudent] = useState(null);
   const [editingCourseStudent, setEditingCourseStudent] = useState(null);
+  const [observationsStudent, setObservationsStudent] = useState(null);
   const [selectedStatus, setSelectedStatus] = useState("all");
 
   const getAvatarGradient = (name = "") => {
@@ -592,6 +593,15 @@ export default function TeacherDashboard() {
                                   >
                                     {isStopped ? "⛔ Stopped" : "🟢 Active"}
                                   </button>
+
+                                  <button
+                                    type="button"
+                                    onClick={() => setObservationsStudent(student)}
+                                    className="inline-flex items-center gap-1 bg-purple-50 dark:bg-purple-950/40 hover:bg-purple-100 dark:hover:bg-purple-900/60 text-purple-700 dark:text-purple-300 border border-purple-200/60 dark:border-purple-800/60 px-2 py-0.5 rounded-lg text-[10px] font-bold transition-all active:scale-95 cursor-pointer shadow-2xs group"
+                                    title="Upload pictures, PDF files, homework or write teacher observations"
+                                  >
+                                    <span>📝 Files & Notes</span>
+                                  </button>
                                 </div>
 
                                 {student.studentProfile?.parentPhone && (
@@ -716,6 +726,12 @@ export default function TeacherDashboard() {
           student={editingCourseStudent}
           onClose={() => setEditingCourseStudent(null)}
           onSaved={loadDashboard}
+        />
+      )}
+      {observationsStudent && (
+        <StudentObservationsModal
+          student={observationsStudent}
+          onClose={() => setObservationsStudent(null)}
         />
       )}
     </AppLayout>

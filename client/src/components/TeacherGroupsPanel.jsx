@@ -16,11 +16,13 @@ import {
   ClipboardCopy,
   UserRoundPlus,
   CalendarDays,
-  Megaphone
+  Megaphone,
+  FileText
 } from "lucide-react";
 import { api, getApiError } from "../api/http.js";
 import { useAuth } from "../context/AuthContext.jsx";
 import ErrorAlert from "./ErrorAlert.jsx";
+import StudentObservationsModal from "./StudentObservationsModal.jsx";
 
 // ── Register new student modal ────────────────────────────────────────────────
 
@@ -530,7 +532,11 @@ function GroupForm({ myStudents, initial, onSave, onCancel }) {
 
 // ── Group card ────────────────────────────────────────────────────────────────
 
+<<<<<<< HEAD
 function GroupCard({ group, myStudents, onEdit, onDelete, onTrackStudent, onMoveStudent, onRemoveFromGroup }) {
+=======
+function GroupCard({ group, myStudents, onEdit, onDelete, onTrackStudent, onOpenNotes }) {
+>>>>>>> 84467a1 (feat: add teacher observations, notes, and picture/PDF file uploads for students)
   const [open, setOpen]             = useState(false);
   const [showAttendance, setShowAtt] = useState(false);
   const [showBroadcast, setShowBroadcast] = useState(false);
@@ -601,25 +607,33 @@ function GroupCard({ group, myStudents, onEdit, onDelete, onTrackStudent, onMove
                   </div>
                   <div className="flex shrink-0 items-center gap-1">
                     <button
+                      onClick={() => onOpenNotes && onOpenNotes(s)}
+                      className="inline-flex items-center gap-1 rounded-lg border border-purple-200 hover:border-purple-300 bg-purple-50 hover:bg-purple-100 px-2 py-1 text-xs font-bold text-purple-700 dark:border-purple-800 dark:bg-purple-950/40 dark:text-purple-300 transition-all active:scale-95"
+                      title="Upload pictures, PDF files or write observations"
+                    >
+                      <FileText className="h-3.5 w-3.5" /> Notes & Files
+                    </button>
+                    <button
                       onClick={() => onTrackStudent(s, group)}
                       className="inline-flex items-center gap-1 rounded-lg border border-slate-200 hover:border-brand-300 bg-white hover:bg-brand-50 px-2 py-1 text-xs font-bold text-slate-600 hover:text-brand-700 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-350 dark:hover:bg-slate-700 transition-all active:scale-95"
                     >
                       <CalendarDays className="h-3.5 w-3.5" /> Track
                     </button>
                     <button
-                      onClick={() => onMoveStudent(s, group)}
+                      onClick={() => onMoveStudent && onMoveStudent(s, group)}
                       className="inline-flex items-center gap-1 rounded-lg border border-slate-200 hover:border-indigo-300 bg-white hover:bg-indigo-50 px-2 py-1 text-xs font-bold text-slate-600 hover:text-indigo-700 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-350 dark:hover:bg-slate-700 transition-all active:scale-95"
                       title={`Move ${s.name} to another group`}
                     >
                       Move
                     </button>
                     <button
-                      onClick={() => onRemoveFromGroup(s, group)}
+                      onClick={() => onRemoveFromGroup && onRemoveFromGroup(s, group)}
                       className="flex h-7 w-7 items-center justify-center rounded-lg border border-rose-200 bg-white text-rose-500 hover:bg-rose-50 dark:border-rose-900 dark:bg-slate-800"
                       title={`Remove ${s.name} from this group only`}
                     >
                       <UserMinus className="h-3.5 w-3.5" />
                     </button>
+                  </div>
                   </div>
                 </div>
               ))
@@ -942,7 +956,11 @@ export default function TeacherGroupsPanel() {
   const [toast, setToast]           = useState({ msg: "", type: "success" });
   const [error, setError]           = useState("");
   const [trackingStudent, setTrackingStudent] = useState(null);
+<<<<<<< HEAD
   const [movingStudent, setMovingStudent] = useState(null);
+=======
+  const [observationsStudent, setObservationsStudent] = useState(null);
+>>>>>>> 84467a1 (feat: add teacher observations, notes, and picture/PDF file uploads for students)
 
   const showToast = (msg, type = "success") => {
     setToast({ msg, type });
@@ -1176,8 +1194,12 @@ export default function TeacherGroupsPanel() {
                 onEdit={handleEditGroup}
                 onDelete={handleDeleteGroup}
                 onTrackStudent={(student, group) => setTrackingStudent({ student, group })}
+<<<<<<< HEAD
                 onMoveStudent={(student, group) => setMovingStudent({ student, group })}
                 onRemoveFromGroup={handleRemoveFromGroup}
+=======
+                onOpenNotes={(student) => setObservationsStudent(student)}
+>>>>>>> 84467a1 (feat: add teacher observations, notes, and picture/PDF file uploads for students)
               />
             ))}
           </div>
@@ -1200,6 +1222,7 @@ export default function TeacherGroupsPanel() {
           onClose={() => setTrackingStudent(null)}
         />
       )}
+<<<<<<< HEAD
       {movingStudent && (
         <MoveStudentModal
           student={movingStudent.student}
@@ -1207,6 +1230,13 @@ export default function TeacherGroupsPanel() {
           groups={groups}
           onMove={handleMoveStudent}
           onClose={() => setMovingStudent(null)}
+=======
+
+      {observationsStudent && (
+        <StudentObservationsModal
+          student={observationsStudent}
+          onClose={() => setObservationsStudent(null)}
+>>>>>>> 84467a1 (feat: add teacher observations, notes, and picture/PDF file uploads for students)
         />
       )}
     </div>

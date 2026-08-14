@@ -4,6 +4,7 @@ import { validate } from "../middleware/validate.js";
 import { Attendance } from "../models/Attendance.js";
 import { User } from "../models/User.js";
 import { Group } from "../models/Group.js";
+import { StudentNote } from "../models/StudentNote.js";
 import { dateKey, daysAgo } from "../utils/dates.js";
 import { sendAbsenceNotification } from "../utils/email.js";
 import { attendanceSchema } from "../validators/schemas.js";
@@ -555,6 +556,73 @@ teacherRouter.post("/groups/:id/broadcast", async (req, res, next) => {
       summary: { successCount, failedCount },
       logs
     });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Get all observations, notes, and file attachments for a student
+teacherRouter.get("/students/:studentId/notes", async (req, res, next) => {
+  try {
+    const { studentId } = req.params;
+    const notes = await StudentNote.find({ student: studentId })
+      .sort({ createdAt: -1 })
+      .populate("teacher", "name email");
+
+    res.json({ notes });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Create a new observation, note, or upload files (pictures / PDFs) for a student
+teacherRouter.post("/students/:studentId/notes", async (req, res, next) => {
+  try {
+    const { studentId } = req.params;
+    const { title, content, category, attachments } = req.body;
+
+    const student = await User.findOne({ _id: studentId, role: "student" });
+    if (!student) {
+      return res.status(404).json({ message: "Student not found." });
+    }
+
+    const assignedStudents = await getAssignedStudents(req.user);
+    const isAssigned = assignedStudents.some((assigned) => String(assigned._id) === studentId);
+    if (!isAssigned) {
+      return res.status(403).json({ message: "This student is not assigned to you." });
+    }
+
+    const newNote = new StudentNote({
+      student: studentId,
+      teacher: req.user._id,
+      category: category || "observation",
+      title: title?.trim(),
+      content: content?.trim(),
+      attachments: attachments || []
+    });
+
+    await newNote.save();
+    const populated = await StudentNote.findById(newNote._id).populate("teacher", "name email");
+
+    res.json({
+      note: populated,
+      message: `Observation / Files uploaded for ${student.name} successfully!`
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Delete a note / observation
+teacherRouter.delete("/notes/:noteId", async (req, res, next) => {
+  try {
+    const { noteId } = req.params;
+    const note = await StudentNote.findOneAndDelete({ _id: noteId, teacher: req.user._id });
+    if (!note) {
+      return res.status(404).json({ message: "Note not found or permission denied." });
+    }
+
+    res.json({ message: "Observation deleted." });
   } catch (error) {
     next(error);
   }
