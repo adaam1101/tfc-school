@@ -41,7 +41,13 @@ const issueSession = async (res, user) => {
 
 authRouter.post("/login", sensitiveLimiter, validate(loginSchema), async (req, res, next) => {
   try {
-    const loginId = (email || req.body.username || "").trim().toLowerCase();
+    const { email, username, password, role } = req.body;
+    const loginId = (email || username || "").trim().toLowerCase();
+
+    if (!loginId || !password) {
+      return res.status(400).json({ message: "Username/email and password are required." });
+    }
+
     const user = await User.findOne({
       $or: [
         { email: loginId },
