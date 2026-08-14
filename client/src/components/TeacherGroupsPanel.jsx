@@ -532,11 +532,7 @@ function GroupForm({ myStudents, initial, onSave, onCancel }) {
 
 // ── Group card ────────────────────────────────────────────────────────────────
 
-<<<<<<< HEAD
-function GroupCard({ group, myStudents, onEdit, onDelete, onTrackStudent, onMoveStudent, onRemoveFromGroup }) {
-=======
-function GroupCard({ group, myStudents, onEdit, onDelete, onTrackStudent, onOpenNotes }) {
->>>>>>> 84467a1 (feat: add teacher observations, notes, and picture/PDF file uploads for students)
+function GroupCard({ group, myStudents, onEdit, onDelete, onTrackStudent, onMoveStudent, onRemoveFromGroup, onOpenNotes }) {
   const [open, setOpen]             = useState(false);
   const [showAttendance, setShowAtt] = useState(false);
   const [showBroadcast, setShowBroadcast] = useState(false);
@@ -633,7 +629,6 @@ function GroupCard({ group, myStudents, onEdit, onDelete, onTrackStudent, onOpen
                     >
                       <UserMinus className="h-3.5 w-3.5" />
                     </button>
-                  </div>
                   </div>
                 </div>
               ))
@@ -956,11 +951,8 @@ export default function TeacherGroupsPanel() {
   const [toast, setToast]           = useState({ msg: "", type: "success" });
   const [error, setError]           = useState("");
   const [trackingStudent, setTrackingStudent] = useState(null);
-<<<<<<< HEAD
   const [movingStudent, setMovingStudent] = useState(null);
-=======
   const [observationsStudent, setObservationsStudent] = useState(null);
->>>>>>> 84467a1 (feat: add teacher observations, notes, and picture/PDF file uploads for students)
 
   const showToast = (msg, type = "success") => {
     setToast({ msg, type });
@@ -1194,12 +1186,9 @@ export default function TeacherGroupsPanel() {
                 onEdit={handleEditGroup}
                 onDelete={handleDeleteGroup}
                 onTrackStudent={(student, group) => setTrackingStudent({ student, group })}
-<<<<<<< HEAD
                 onMoveStudent={(student, group) => setMovingStudent({ student, group })}
                 onRemoveFromGroup={handleRemoveFromGroup}
-=======
                 onOpenNotes={(student) => setObservationsStudent(student)}
->>>>>>> 84467a1 (feat: add teacher observations, notes, and picture/PDF file uploads for students)
               />
             ))}
           </div>
@@ -1222,7 +1211,6 @@ export default function TeacherGroupsPanel() {
           onClose={() => setTrackingStudent(null)}
         />
       )}
-<<<<<<< HEAD
       {movingStudent && (
         <MoveStudentModal
           student={movingStudent.student}
@@ -1230,13 +1218,13 @@ export default function TeacherGroupsPanel() {
           groups={groups}
           onMove={handleMoveStudent}
           onClose={() => setMovingStudent(null)}
-=======
+        />
+      )}
 
       {observationsStudent && (
         <StudentObservationsModal
           student={observationsStudent}
           onClose={() => setObservationsStudent(null)}
->>>>>>> 84467a1 (feat: add teacher observations, notes, and picture/PDF file uploads for students)
         />
       )}
     </div>
