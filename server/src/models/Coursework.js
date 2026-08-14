@@ -1,5 +1,15 @@
 import mongoose from "mongoose";
 
+const attachmentSchema = new mongoose.Schema(
+  {
+    fileName: { type: String, required: true },
+    fileType: { type: String, enum: ["image", "pdf", "file"], default: "file" },
+    fileData: { type: String, required: true },
+    fileSize: { type: Number }
+  },
+  { _id: true }
+);
+
 const courseworkSchema = new mongoose.Schema(
   {
     teacher: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true, index: true },
@@ -7,7 +17,8 @@ const courseworkSchema = new mongoose.Schema(
     title: { type: String, required: true, trim: true, maxlength: 160 },
     body: { type: String, required: true, trim: true, maxlength: 5000 },
     dueDate: { type: String, trim: true, maxlength: 20 },
-    course: { type: String, trim: true, maxlength: 120 }
+    course: { type: String, trim: true, maxlength: 120 },
+    attachments: [attachmentSchema]
   },
   { timestamps: true }
 );

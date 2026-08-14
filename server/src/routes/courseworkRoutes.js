@@ -30,7 +30,7 @@ courseworkRouter.get("/", allowRoles("teacher"), async (req, res, next) => {
 
 courseworkRouter.post("/", allowRoles("teacher"), async (req, res, next) => {
   try {
-    const { type, title, body, dueDate, course } = req.body;
+    const { type, title, body, dueDate, course, attachments } = req.body;
     if (!["lesson", "assignment"].includes(type)) return res.status(400).json({ message: "Choose a lesson or assignment." });
     if (!title?.trim() || !body?.trim()) return res.status(400).json({ message: "A title and details are required." });
 
@@ -40,7 +40,8 @@ courseworkRouter.post("/", allowRoles("teacher"), async (req, res, next) => {
       title: title.trim(),
       body: body.trim(),
       dueDate: dueDate?.trim(),
-      course: course?.trim()
+      course: course?.trim(),
+      attachments: attachments || []
     });
     res.status(201).json({ item });
   } catch (error) { next(error); }

@@ -12,7 +12,9 @@ import {
   Wallet,
   RefreshCcw,
   TrendingUp,
-  Award
+  Award,
+  Download,
+  ClipboardCheck
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { api, getApiError } from "../../api/http.js";
@@ -419,7 +421,38 @@ export default function StudentDashboard() {
                       {lessons.length ? lessons.map((item, index) => (
                         <article key={item._id} className="group relative overflow-hidden rounded-2xl border border-indigo-100 bg-gradient-to-br from-indigo-50/80 to-white p-4 transition hover:-translate-y-0.5 hover:shadow-md dark:border-indigo-900/60 dark:from-indigo-950/30 dark:to-slate-800">
                           <div className="absolute left-0 top-0 h-full w-1 bg-indigo-500" />
-                          <div className="flex gap-3"><span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-indigo-600 text-sm font-black text-white">{String(index + 1).padStart(2, "0")}</span><div className="min-w-0"><p className="font-bold text-slate-900 dark:text-white">{item.title}</p><p className="mt-1 whitespace-pre-wrap text-sm leading-relaxed text-slate-600 dark:text-slate-300">{item.body}</p>{item.course && <p className="mt-3 text-xs font-bold text-indigo-600 dark:text-indigo-300">For {item.course}</p>}</div></div>
+                          <div className="flex gap-3">
+                            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-indigo-600 text-sm font-black text-white">{String(index + 1).padStart(2, "0")}</span>
+                            <div className="min-w-0 flex-1">
+                              <p className="font-bold text-slate-900 dark:text-white">{item.title}</p>
+                              <p className="mt-1 whitespace-pre-wrap text-sm leading-relaxed text-slate-600 dark:text-slate-300">{item.body}</p>
+                              {item.course && <p className="mt-2 text-xs font-bold text-indigo-600 dark:text-indigo-300">For {item.course}</p>}
+
+                              {item.attachments && item.attachments.length > 0 && (
+                                <div className="mt-3 pt-2.5 border-t border-indigo-100 dark:border-indigo-900/60 grid gap-2 sm:grid-cols-2">
+                                  {item.attachments.map((att, idx) => (
+                                    <div key={idx} className="flex items-center gap-2 rounded-xl bg-white dark:bg-slate-900/60 p-2 border border-indigo-100 dark:border-indigo-900/50 shadow-2xs">
+                                      {att.fileType === "image" ? (
+                                        <a href={att.fileData} target="_blank" rel="noreferrer">
+                                          <img src={att.fileData} alt={att.fileName} className="h-9 w-9 rounded-lg object-cover border shrink-0" />
+                                        </a>
+                                      ) : (
+                                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-rose-500 text-white font-black text-[10px]">
+                                          PDF
+                                        </div>
+                                      )}
+                                      <div className="min-w-0 flex-1">
+                                        <p className="text-xs font-bold text-slate-800 dark:text-slate-200 truncate">{att.fileName}</p>
+                                        <a href={att.fileData} download={att.fileName} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-[10px] font-bold text-indigo-600 dark:text-indigo-400">
+                                          <Download className="h-3 w-3" /> View / Download
+                                        </a>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          </div>
                         </article>
                       )) : <div className="rounded-2xl border-2 border-dashed border-indigo-100 p-7 text-center dark:border-indigo-900"><BookOpen className="mx-auto h-9 w-9 text-indigo-200 dark:text-indigo-800" /><p className="mt-3 text-sm font-semibold text-slate-500">New lessons will appear here.</p></div>}
                     </div>
@@ -429,7 +462,42 @@ export default function StudentDashboard() {
                     <div className="space-y-3">
                       {assignments.length ? assignments.map((item) => (
                         <article key={item._id} className="rounded-2xl border border-rose-100 bg-gradient-to-br from-rose-50/70 to-white p-4 transition hover:-translate-y-0.5 hover:shadow-md dark:border-rose-900/60 dark:from-rose-950/25 dark:to-slate-800">
-                          <div className="flex items-start gap-3"><div className="rounded-xl bg-rose-500 p-2 text-white shadow-sm"><ClipboardCheck className="h-5 w-5" /></div><div className="min-w-0 flex-1"><div className="flex flex-wrap items-center justify-between gap-2"><p className="font-bold text-slate-900 dark:text-white">{item.title}</p>{item.dueDate && <span className="rounded-full bg-rose-100 px-2.5 py-1 text-xs font-black text-rose-700 dark:bg-rose-900/50 dark:text-rose-200">Due {item.dueDate}</span>}</div><p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-slate-600 dark:text-slate-300">{item.body}</p><p className="mt-3 text-xs font-bold text-rose-600 dark:text-rose-300">Complete this before the due date.</p></div></div>
+                          <div className="flex items-start gap-3">
+                            <div className="rounded-xl bg-rose-500 p-2 text-white shadow-sm"><ClipboardCheck className="h-5 w-5" /></div>
+                            <div className="min-w-0 flex-1">
+                              <div className="flex flex-wrap items-center justify-between gap-2">
+                                <p className="font-bold text-slate-900 dark:text-white">{item.title}</p>
+                                {item.dueDate && <span className="rounded-full bg-rose-100 px-2.5 py-1 text-xs font-black text-rose-700 dark:bg-rose-900/50 dark:text-rose-200">Due {item.dueDate}</span>}
+                              </div>
+                              <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-slate-600 dark:text-slate-300">{item.body}</p>
+
+                              {item.attachments && item.attachments.length > 0 && (
+                                <div className="mt-3 pt-2.5 border-t border-rose-100 dark:border-rose-900/60 grid gap-2 sm:grid-cols-2">
+                                  {item.attachments.map((att, idx) => (
+                                    <div key={idx} className="flex items-center gap-2 rounded-xl bg-white dark:bg-slate-900/60 p-2 border border-rose-100 dark:border-rose-900/50 shadow-2xs">
+                                      {att.fileType === "image" ? (
+                                        <a href={att.fileData} target="_blank" rel="noreferrer">
+                                          <img src={att.fileData} alt={att.fileName} className="h-9 w-9 rounded-lg object-cover border shrink-0" />
+                                        </a>
+                                      ) : (
+                                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-rose-500 text-white font-black text-[10px]">
+                                          PDF
+                                        </div>
+                                      )}
+                                      <div className="min-w-0 flex-1">
+                                        <p className="text-xs font-bold text-slate-800 dark:text-slate-200 truncate">{att.fileName}</p>
+                                        <a href={att.fileData} download={att.fileName} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-[10px] font-bold text-rose-600 dark:text-rose-400">
+                                          <Download className="h-3 w-3" /> View / Download
+                                        </a>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+
+                              <p className="mt-3 text-xs font-bold text-rose-600 dark:text-rose-300">Complete this before the due date.</p>
+                            </div>
+                          </div>
                         </article>
                       )) : <div className="rounded-2xl border-2 border-dashed border-rose-100 p-7 text-center dark:border-rose-900"><CheckCircle2 className="mx-auto h-9 w-9 text-rose-200 dark:text-rose-800" /><p className="mt-3 text-sm font-semibold text-slate-500">No assignments right now. You are all caught up!</p></div>}
                     </div>
