@@ -798,6 +798,7 @@ function StudentTrackingModal({ student, group, onClose }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [savingDate, setSavingDate] = useState("");
+  const [startDate, setStartDate] = useState("2026-08-12");
 
   const loadHistory = useCallback(async () => {
     setLoading(true); setError("");
@@ -817,30 +818,33 @@ function StudentTrackingModal({ student, group, onClose }) {
 
   const groupDays = group.days || [];
 
-  // Generate course days for the last 60 days
+  // Generate course days starting from 12 August 2026
   const scheduledDates = useMemo(() => {
     if (groupDays.length === 0) return [];
     const dates = [];
     const today = new Date();
-    // Go back 60 days
+    const minDate = startDate ? new Date(`${startDate}T00:00:00`) : new Date("2026-08-12T00:00:00");
+
     for (let i = 0; i <= 60; i++) {
       const d = new Date();
       d.setDate(today.getDate() - i);
-      
+      d.setHours(0, 0, 0, 0);
+
+      if (d < minDate) continue;
+
       const weekday = d.toLocaleDateString("en-US", { weekday: "long" });
       if (groupDays.includes(weekday)) {
-        // Format as YYYY-MM-DD local time
         const yyyy = d.getFullYear();
         const mm = String(d.getMonth() + 1).padStart(2, '0');
         const dd = String(d.getDate()).padStart(2, '0');
         const formattedDate = `${yyyy}-${mm}-${dd}`;
-        
+
         const label = d.toLocaleDateString("en-US", { weekday: "long", day: "numeric", month: "short" });
         dates.push({ date: formattedDate, label, weekday });
       }
     }
     return dates;
-  }, [groupDays]);
+  }, [groupDays, startDate]);
 
   const markDateAttendance = async (dateStr, status) => {
     setSavingDate(dateStr); setError("");
@@ -889,8 +893,22 @@ function StudentTrackingModal({ student, group, onClose }) {
           ) : loading ? (
             <p className="text-center text-sm text-slate-400 py-6">Loading history…</p>
           ) : (
-            <div className="space-y-2">
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-wide mb-2">Scheduled days: {groupDays.join(", ")}</p>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between bg-slate-50 dark:bg-slate-700/50 p-2.5 px-3 rounded-2xl border border-slate-200 dark:border-slate-700">
+                <span className="text-xs font-bold text-slate-600 dark:text-slate-300 flex items-center gap-1">
+                  📅 Start tracking from:
+                </span>
+                <input
+                  type="date"
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                  className="rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 px-3 py-1 text-xs font-bold text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
+                />
+              </div>
+
+              <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wide">
+                Scheduled days: {groupDays.join(", ")}
+              </p>
               <div className="space-y-2">
                 {scheduledDates.map((item) => {
                   const status = getStatusForDate(item.date);
