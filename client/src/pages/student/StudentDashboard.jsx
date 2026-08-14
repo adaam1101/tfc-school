@@ -98,6 +98,8 @@ export default function StudentDashboard() {
   const student = profile?.student;
   const details = student?.studentProfile || {};
   const initials = student?.name?.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase() || "?";
+  const assignments = coursework.filter((item) => item.type === "assignment");
+  const lessons = coursework.filter((item) => item.type === "lesson");
 
   return (
     <AppLayout title="" subtitle="">
@@ -394,21 +396,46 @@ export default function StudentDashboard() {
             </section>
 
             <section className="grid gap-6 lg:grid-cols-2">
-              <div className="card p-6">
-                <div className="mb-5 flex items-center gap-3">
-                  <div className="rounded-xl bg-gradient-to-br from-indigo-500 to-brand-600 p-2.5 shadow-sm"><BookOpen className="h-5 w-5 text-white" /></div>
-                  <div><h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">Lessons & assignments</h2><p className="text-sm text-slate-500 dark:text-slate-400">Published by your teacher</p></div>
+              <section className="card overflow-hidden lg:col-span-2">
+                <div className="relative overflow-hidden bg-gradient-to-br from-indigo-600 via-brand-700 to-emerald-700 px-6 py-6">
+                  <div className="absolute -right-8 -top-8 h-36 w-36 rounded-full bg-white/10" />
+                  <div className="absolute bottom-0 left-1/2 h-16 w-16 rounded-full bg-white/5" />
+                  <div className="relative flex flex-wrap items-center justify-between gap-4">
+                    <div className="flex items-center gap-4">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/15 shadow-inner ring-1 ring-white/20"><BookOpen className="h-6 w-6 text-white" /></div>
+                      <div><h2 className="text-xl font-black text-white">Your learning space</h2><p className="text-sm text-indigo-100">Lessons and assignments from {profile?.teacher?.name || "your teacher"}</p></div>
+                    </div>
+                    <div className="flex gap-2">
+                      <span className="rounded-xl bg-white/15 px-3 py-2 text-center text-xs font-bold text-white"><strong className="block text-lg">{lessons.length}</strong>Lessons</span>
+                      <span className="rounded-xl bg-white/15 px-3 py-2 text-center text-xs font-bold text-white"><strong className="block text-lg">{assignments.length}</strong>Tasks</span>
+                    </div>
+                  </div>
                 </div>
-                <div className="space-y-3">
-                  {coursework.length ? coursework.map((item) => (
-                    <article key={item._id} className="rounded-xl border border-slate-100 bg-slate-50/60 p-4 dark:border-slate-700 dark:bg-slate-700/30">
-                      <p className="font-bold text-slate-900 dark:text-white">{item.type === "assignment" ? "Assignment: " : "Lesson: "}{item.title}</p>
-                      <p className="mt-1 whitespace-pre-wrap text-sm text-slate-600 dark:text-slate-300">{item.body}</p>
-                      {item.dueDate && <p className="mt-2 text-xs font-semibold text-rose-600">Due: {item.dueDate}</p>}
-                    </article>
-                  )) : <p className="py-8 text-center text-sm text-slate-400">Your teacher has not published any lessons or assignments yet.</p>}
+
+                <div className="grid gap-6 p-6 lg:grid-cols-2">
+                  <div>
+                    <div className="mb-3 flex items-center justify-between"><h3 className="text-sm font-black uppercase tracking-widest text-indigo-700 dark:text-indigo-300">Latest lessons</h3><span className="rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-bold text-indigo-600 dark:bg-indigo-950/50 dark:text-indigo-300">{lessons.length}</span></div>
+                    <div className="space-y-3">
+                      {lessons.length ? lessons.map((item, index) => (
+                        <article key={item._id} className="group relative overflow-hidden rounded-2xl border border-indigo-100 bg-gradient-to-br from-indigo-50/80 to-white p-4 transition hover:-translate-y-0.5 hover:shadow-md dark:border-indigo-900/60 dark:from-indigo-950/30 dark:to-slate-800">
+                          <div className="absolute left-0 top-0 h-full w-1 bg-indigo-500" />
+                          <div className="flex gap-3"><span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-indigo-600 text-sm font-black text-white">{String(index + 1).padStart(2, "0")}</span><div className="min-w-0"><p className="font-bold text-slate-900 dark:text-white">{item.title}</p><p className="mt-1 whitespace-pre-wrap text-sm leading-relaxed text-slate-600 dark:text-slate-300">{item.body}</p>{item.course && <p className="mt-3 text-xs font-bold text-indigo-600 dark:text-indigo-300">For {item.course}</p>}</div></div>
+                        </article>
+                      )) : <div className="rounded-2xl border-2 border-dashed border-indigo-100 p-7 text-center dark:border-indigo-900"><BookOpen className="mx-auto h-9 w-9 text-indigo-200 dark:text-indigo-800" /><p className="mt-3 text-sm font-semibold text-slate-500">New lessons will appear here.</p></div>}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="mb-3 flex items-center justify-between"><h3 className="text-sm font-black uppercase tracking-widest text-rose-700 dark:text-rose-300">Assignments</h3><span className="rounded-full bg-rose-50 px-2.5 py-1 text-xs font-bold text-rose-600 dark:bg-rose-950/50 dark:text-rose-300">{assignments.length}</span></div>
+                    <div className="space-y-3">
+                      {assignments.length ? assignments.map((item) => (
+                        <article key={item._id} className="rounded-2xl border border-rose-100 bg-gradient-to-br from-rose-50/70 to-white p-4 transition hover:-translate-y-0.5 hover:shadow-md dark:border-rose-900/60 dark:from-rose-950/25 dark:to-slate-800">
+                          <div className="flex items-start gap-3"><div className="rounded-xl bg-rose-500 p-2 text-white shadow-sm"><ClipboardCheck className="h-5 w-5" /></div><div className="min-w-0 flex-1"><div className="flex flex-wrap items-center justify-between gap-2"><p className="font-bold text-slate-900 dark:text-white">{item.title}</p>{item.dueDate && <span className="rounded-full bg-rose-100 px-2.5 py-1 text-xs font-black text-rose-700 dark:bg-rose-900/50 dark:text-rose-200">Due {item.dueDate}</span>}</div><p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-slate-600 dark:text-slate-300">{item.body}</p><p className="mt-3 text-xs font-bold text-rose-600 dark:text-rose-300">Complete this before the due date.</p></div></div>
+                        </article>
+                      )) : <div className="rounded-2xl border-2 border-dashed border-rose-100 p-7 text-center dark:border-rose-900"><CheckCircle2 className="mx-auto h-9 w-9 text-rose-200 dark:text-rose-800" /><p className="mt-3 text-sm font-semibold text-slate-500">No assignments right now. You are all caught up!</p></div>}
+                    </div>
+                  </div>
                 </div>
-              </div>
+              </section>
               <AnnouncementsCard />
 
               {/* My fees quick summary */}
