@@ -133,6 +133,7 @@ export default function AdminDashboard() {
   const [userSearch, setUserSearch] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [selectedUserIds, setSelectedUserIds] = useState([]);
 
   const teachers = useMemo(() => users.filter((u) => u.role === "teacher"), [users]);
   const students = useMemo(() => users.filter((u) => u.role === "student"), [users]);
@@ -150,6 +151,38 @@ export default function AdminDashboard() {
         u.teacherProfile?.subject?.toLowerCase().includes(q)
     );
   }, [userSubTab, students, teachers, staff, userSearch]);
+
+  const toggleSelectUser = (id) => {
+    setSelectedUserIds((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+    );
+  };
+
+  const toggleSelectAll = () => {
+    const selectableIds = filteredUsers.filter((u) => u.role !== "admin").map((u) => u._id);
+    if (selectedUserIds.length >= selectableIds.length && selectableIds.length > 0) {
+      setSelectedUserIds([]);
+    } else {
+      setSelectedUserIds(selectableIds);
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedUserIds.length === 0) return;
+    if (!window.confirm(`Are you sure you want to delete ${selectedUserIds.length} selected user(s)/student(s)? This will remove all their records.`)) return;
+
+    setSaving(true);
+    setError("");
+    try {
+      await api.post("/admin/users/bulk-delete", { userIds: selectedUserIds });
+      setUsers((current) => current.filter((u) => !selectedUserIds.includes(u._id)));
+      setSelectedUserIds([]);
+    } catch (err) {
+      setError(getApiError(err));
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const loadData = async () => {
     setError("");
@@ -854,12 +887,56 @@ export default function AdminDashboard() {
                   </div>
                 )}
 
+                {/* Bulk Action Bar */}
+                {selectedUserIds.length > 0 && (
+                  <div className="flex items-center justify-between bg-gradient-to-r from-rose-50 to-red-50 dark:from-rose-950/60 dark:to-red-950/60 border border-rose-200 dark:border-rose-800 rounded-2xl p-3.5 px-5 shadow-md">
+                    <div className="flex items-center gap-3">
+                      <span className="flex h-7 w-7 items-center justify-center rounded-xl bg-rose-600 text-white text-xs font-black shadow-sm">
+                        {selectedUserIds.length}
+                      </span>
+                      <span className="text-xs font-bold text-rose-900 dark:text-rose-200">
+                        {selectedUserIds.length} student(s) selected for removal
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setSelectedUserIds([])}
+                        className="px-3.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50 transition-all"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="button"
+                        disabled={saving}
+                        onClick={handleBulkDelete}
+                        className="px-4 py-1.5 rounded-xl bg-gradient-to-r from-rose-600 to-red-600 text-xs font-black text-white shadow-md hover:from-rose-700 hover:to-red-700 transition-all flex items-center gap-1.5 active:scale-95 disabled:opacity-50"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                        Delete Selected ({selectedUserIds.length})
+                      </button>
+                    </div>
+                  </div>
+                )}
+
                 {/* Users table */}
                 <div className="card overflow-hidden">
                   <div className="overflow-x-auto">
                     <table className="min-w-full text-sm">
                       <thead>
                         <tr className="border-b border-slate-100 bg-gradient-to-r from-slate-50 to-slate-100/50 dark:border-slate-700 dark:from-slate-800 dark:to-slate-800/50">
+                          <th className="px-3 py-3 w-10 text-center">
+                            <input
+                              type="checkbox"
+                              className="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500 cursor-pointer"
+                              checked={
+                                filteredUsers.filter((u) => u.role !== "admin").length > 0 &&
+                                selectedUserIds.length >= filteredUsers.filter((u) => u.role !== "admin").length
+                              }
+                              onChange={toggleSelectAll}
+                              title="Select All Students"
+                            />
+                          </th>
                           {[t.name, t.role, t.courseOrSubject, t.contact, t.actions].map((h) => (
                             <th key={h} className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider text-slate-400">{h}</th>
                           ))}
@@ -867,7 +944,17 @@ export default function AdminDashboard() {
                       </thead>
                       <tbody className="divide-y divide-slate-50 dark:divide-slate-700/50">
                         {filteredUsers.map((u) => (
-                          <tr key={u._id} className="border-l-2 border-l-transparent hover:border-l-brand-500 hover:bg-brand-50/30 transition-colors dark:hover:bg-slate-700/30">
+                          <tr key={u._id} className={`border-l-2 hover:bg-brand-50/30 transition-colors dark:hover:bg-slate-700/30 ${selectedUserIds.includes(u._id) ? "border-l-rose-500 bg-rose-50/30 dark:bg-rose-950/20" : "border-l-transparent hover:border-l-brand-500"}`}>
+                            <td className="px-3 py-3 text-center">
+                              {u.role !== "admin" && (
+                                <input
+                                  type="checkbox"
+                                  className="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500 cursor-pointer"
+                                  checked={selectedUserIds.includes(u._id)}
+                                  onChange={() => toggleSelectUser(u._id)}
+                                />
+                              )}
+                            </td>
                             <td className="px-4 py-3">
                               <div className="flex items-center gap-3">
                                 <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br text-xs font-bold text-white ${

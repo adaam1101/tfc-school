@@ -289,6 +289,57 @@ teacherRouter.post("/attendance", validate(attendanceSchema), async (req, res, n
   }
 });
 
+teacherRouter.post("/attendance/bulk", async (req, res, next) => {
+  try {
+    const { studentIds, status, date = dateKey() } = req.body;
+    if (!Array.isArray(studentIds) || !["Present", "Absent"].includes(status)) {
+      return res.status(400).json({ message: "studentIds array and valid status are required." });
+    }
+
+    const assignedStudents = await getAssignedStudents(req.user);
+    const assignedIds = new Set(assignedStudents.map((s) => String(s._id)));
+    const validStudentIds = studentIds.filter((id) => assignedIds.has(String(id)));
+
+    for (const studentId of validStudentIds) {
+      let existing = await Attendance.findOne({ student: studentId, date });
+      if (!existing) {
+        existing = new Attendance({ student: studentId, teacher: req.user._id, date });
+      }
+      existing.status = status;
+      existing.teacher = req.user._id;
+      existing.source = "manual";
+      await existing.save();
+
+      if (status === "Absent" && !existing.parentNotification?.sent) {
+        const student = assignedStudents.find((s) => String(s._id) === String(studentId));
+        if (student) {
+          try {
+            const notification = await sendAbsenceNotification({
+              student,
+              teacher: req.user,
+              attendance: existing
+            });
+            existing.parentNotification = {
+              sent: notification.sent,
+              channel: notification.channel,
+              emailSent: notification.emailSent || false,
+              smsSent: notification.smsSent || false,
+              whatsappSent: notification.waSent || false,
+              sentAt: notification.sent ? new Date() : undefined,
+              error: notification.error
+            };
+            await existing.save();
+          } catch (_) {}
+        }
+      }
+    }
+
+    res.json({ message: `Marked ${validStudentIds.length} student(s) as ${status}.` });
+  } catch (error) {
+    next(error);
+  }
+});
+
 // â”€â”€ Register a new student (teacher self-service) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 // Student accounts are created by administrators only.

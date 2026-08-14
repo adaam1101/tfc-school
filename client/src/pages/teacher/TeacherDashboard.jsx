@@ -65,6 +65,23 @@ export default function TeacherDashboard() {
   const [editingCourseStudent, setEditingCourseStudent] = useState(null);
   const [observationsStudent, setObservationsStudent] = useState(null);
   const [selectedStatus, setSelectedStatus] = useState("all");
+  const [bulkSaving, setBulkSaving] = useState(false);
+
+  const handleBulkAttendance = async (status) => {
+    if (filteredStudents.length === 0) return;
+    if (!window.confirm(`Mark all ${filteredStudents.length} displayed student(s) as ${status}?`)) return;
+
+    setBulkSaving(true);
+    try {
+      const studentIds = filteredStudents.map((s) => s._id);
+      await api.post("/teacher/attendance/bulk", { studentIds, status });
+      await loadDashboard();
+    } catch (err) {
+      setError(getApiError(err));
+    } finally {
+      setBulkSaving(false);
+    }
+  };
 
   const getAvatarGradient = (name = "") => {
     const gradients = [
@@ -454,12 +471,30 @@ export default function TeacherDashboard() {
                     </select>
                   </div>
 
-                  <div className="flex gap-2 self-end">
+                  <div className="flex flex-wrap gap-2 self-end">
+                    <button
+                      type="button"
+                      disabled={bulkSaving || filteredStudents.length === 0}
+                      onClick={() => handleBulkAttendance("Present")}
+                      className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 px-3.5 py-2 text-xs font-bold text-white shadow-sm hover:from-emerald-600 hover:to-teal-700 transition-all active:scale-95 disabled:opacity-50"
+                      title="Mark all displayed students as Present"
+                    >
+                      <CheckCircle2 className="h-4 w-4" /> Mark All Present ({filteredStudents.length})
+                    </button>
+                    <button
+                      type="button"
+                      disabled={bulkSaving || filteredStudents.length === 0}
+                      onClick={() => handleBulkAttendance("Absent")}
+                      className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-rose-500 to-red-600 px-3.5 py-2 text-xs font-bold text-white shadow-sm hover:from-rose-600 hover:to-red-700 transition-all active:scale-95 disabled:opacity-50"
+                      title="Mark all displayed students as Absent"
+                    >
+                      <XCircle className="h-4 w-4" /> Mark All Absent ({filteredStudents.length})
+                    </button>
                     {selectedGroup !== "all" && (
                       <button
                         type="button"
                         onClick={() => setShowFilterGroupBroadcast(true)}
-                        className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-teal-500 to-indigo-650 px-4 py-2 text-sm font-bold text-white shadow-sm hover:from-teal-600 hover:to-indigo-755 transition-all active:scale-95"
+                        className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-teal-500 to-indigo-650 px-4 py-2 text-xs font-bold text-white shadow-sm hover:from-teal-600 hover:to-indigo-755 transition-all active:scale-95"
                         title="Broadcast message to the selected group"
                       >
                         <Megaphone className="h-4 w-4" /> Group Broadcast
@@ -469,7 +504,7 @@ export default function TeacherDashboard() {
                       <button
                         type="button"
                         onClick={() => { setSelectedGroup("all"); setSelectedCourse("all"); setSelectedStatus("all"); }}
-                        className="rounded-xl border border-rose-250 bg-rose-50/50 hover:bg-rose-50 text-rose-700 dark:border-rose-900 dark:bg-rose-950/20 dark:text-rose-455 px-4 py-2 text-sm font-bold transition-all active:scale-95"
+                        className="rounded-xl border border-rose-250 bg-rose-50/50 hover:bg-rose-50 text-rose-700 dark:border-rose-900 dark:bg-rose-950/20 dark:text-rose-455 px-3.5 py-2 text-xs font-bold transition-all active:scale-95"
                       >
                         Reset Filters
                       </button>

@@ -254,6 +254,37 @@ adminRouter.post("/users/:id/reset-password", async (req, res, next) => {
   }
 });
 
+adminRouter.post("/users/bulk-delete", onlyAdmin, async (req, res, next) => {
+  try {
+    const { userIds } = req.body;
+    if (!Array.isArray(userIds) || userIds.length === 0) {
+      return res.status(400).json({ message: "userIds array is required." });
+    }
+
+    const idsToDelete = userIds.filter((id) => String(id) !== String(req.user._id));
+
+    await Attendance.deleteMany({ student: { $in: idsToDelete } });
+    await Group.updateMany({}, { $pull: { students: { $in: idsToDelete } } });
+    await User.updateMany(
+      { role: "teacher" },
+      { $pull: { "teacherProfile.assignedStudents": { $in: idsToDelete } } }
+    );
+
+    const result = await User.deleteMany({ _id: { $in: idsToDelete }, role: { $ne: "admin" } });
+
+    await recordAudit({
+      req,
+      action: "delete-bulk",
+      entity: "user",
+      entityLabel: `Deleted ${result.deletedCount} users`
+    });
+
+    res.json({ message: `Successfully deleted ${result.deletedCount} user(s).`, deletedCount: result.deletedCount });
+  } catch (error) {
+    next(error);
+  }
+});
+
 adminRouter.delete("/users/:id", onlyAdmin, validate(idParamSchema), async (req, res, next) => {
   try {
     if (String(req.user._id) === req.params.id) {
