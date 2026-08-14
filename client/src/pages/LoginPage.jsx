@@ -43,7 +43,7 @@ const roleConfig = {
     title: "Student Portal",
     subtitle: "Ready to learn today?",
     icon: UserRound,
-    placeholder: `student@${(import.meta.env.VITE_SCHOOL_SHORT || "tfc").toLowerCase()}school.dz`
+    placeholder: "Enter your username (e.g. adam123)"
   }
 };
 
@@ -98,65 +98,48 @@ export default function LoginPage({ role }) {
     <div className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-brand-100 via-brand-50 to-brand-200 px-4 py-12">
       {/* Background glow */}
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div className="absolute -top-40 -left-40 h-[500px] w-[500px] rounded-full bg-brand-300/30 blur-3xl" />
-        <div className="absolute -bottom-40 -right-40 h-[400px] w-[400px] rounded-full bg-brand-400/30 blur-3xl" />
+        <div className="absolute -top-40 -left-40 h-96 w-96 rounded-full bg-brand-300/30 blur-3xl" />
+        <div className="absolute -bottom-40 -right-40 h-96 w-96 rounded-full bg-emerald-300/30 blur-3xl" />
       </div>
 
-      <div className="relative w-full max-w-md animate-fade-slide-up">
-        {/* Back to home */}
+      <div className="relative w-full max-w-md">
+        {/* Return home link */}
         <Link
           to="/"
-          className="mb-6 inline-flex items-center gap-2 text-sm font-medium text-brand-700 transition hover:text-brand-900"
+          className="inline-flex items-center gap-1.5 text-xs font-bold text-brand-700 hover:text-brand-900 mb-6 transition"
         >
-          <ArrowLeft className="h-4 w-4" />
-          Back to home
+          <ArrowLeft className="h-4 w-4" /> Home
         </Link>
 
         {/* Card */}
-        <div className="overflow-hidden rounded-3xl bg-white ring-1 ring-brand-100 shadow-2xl shadow-brand-200/50">
-          {/* Top bar */}
-          <div className="bg-gradient-to-r from-brand-500 to-brand-700 p-6 text-white">
-            <div className="flex items-center gap-4">
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/20 ring-2 ring-white/30">
-                <Icon className="h-7 w-7" />
-              </div>
-              <div>
-                <p className="text-xl font-black">{cfg.title}</p>
-                <p className="text-sm opacity-90">{cfg.subtitle}</p>
-              </div>
+        <div className="rounded-3xl border border-white/80 bg-white/90 p-8 shadow-2xl backdrop-blur-xl dark:border-slate-800 dark:bg-slate-900/90">
+          <div className="mb-6 text-center">
+            <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-brand-500 to-brand-700 shadow-md">
+              <Icon className="h-7 w-7 text-white" />
             </div>
+            <h1 className="text-2xl font-black text-slate-900 dark:text-white">{cfg.title}</h1>
+            <p className="mt-1 text-xs text-slate-500">{cfg.subtitle}</p>
           </div>
 
-          {/* Form body */}
-          <div className="p-8">
-            {/* School identity */}
-            <div className="mb-8 flex items-center gap-3">
-              <img src={schoolLogo} alt={schoolInfo.short} className="h-10 w-10 rounded-xl object-contain ring-1 ring-brand-100" />
-              <div>
-                <p className="text-sm font-bold text-slate-900">{schoolInfo.name}</p>
-                <p className="text-xs text-slate-500">{schoolInfo.city}</p>
-              </div>
-            </div>
+          <ErrorAlert message={error} />
 
-            <ErrorAlert message={error} />
-
-            {step === "credentials" && (
+          {step === "credentials" && (
             <form className="grid gap-5" onSubmit={handleSubmit}>
-              {/* Email */}
+              {/* Username / Email */}
               <div>
                 <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-brand-700">
-                  Email address
+                  {role === "student" ? "Username" : "Username or Email"}
                 </label>
                 <div className="relative">
-                  <Mail className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-brand-400" />
+                  <UserRound className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-brand-400" />
                   <input
-                    type="email"
+                    type="text"
                     value={form.email}
                     onChange={(e) => setForm((c) => ({ ...c, email: e.target.value }))}
                     placeholder={cfg.placeholder}
                     className={inputClass}
                     required
-                    autoComplete="email"
+                    autoComplete="username"
                   />
                 </div>
               </div>
@@ -250,6 +233,5 @@ export default function LoginPage({ role }) {
           </div>
         </div>
       </div>
-    </div>
-  );
-}
+    );
+  }

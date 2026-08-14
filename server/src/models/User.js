@@ -52,6 +52,13 @@ const userSchema = new Schema(
       lowercase: true,
       trim: true
     },
+    username: {
+      type: String,
+      unique: true,
+      sparse: true,
+      lowercase: true,
+      trim: true
+    },
     password: { type: String, required: true, minlength: 8, select: false },
     phone: { type: String, trim: true },
     age: { type: Number, min: 3, max: 120 },
@@ -69,6 +76,24 @@ const userSchema = new Schema(
   },
   { timestamps: true }
 );
+
+userSchema.pre("validate", function (next) {
+  if (this.username) {
+    this.username = this.username.trim().toLowerCase();
+  }
+
+  if (this.email && !this.email.includes("@")) {
+    this.username = this.email.trim().toLowerCase();
+    this.email = `${this.username}@tfc.local`;
+  } else if (!this.email && this.username) {
+    this.email = `${this.username}@tfc.local`;
+  } else if (this.email && !this.username) {
+    const rawUser = this.email.split("@")[0].toLowerCase();
+    this.username = rawUser;
+  }
+
+  next();
+});
 
 userSchema.pre("save", async function hashPassword(next) {
   if (!this.isModified("password")) {

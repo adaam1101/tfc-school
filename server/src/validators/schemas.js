@@ -53,7 +53,8 @@ const studentProfile = z
 
 export const loginSchema = z.object({
   body: z.object({
-    email: z.string().trim().email().transform((value) => value.toLowerCase()),
+    email: z.string().trim().min(2).transform((value) => value.toLowerCase()),
+    username: z.string().trim().min(2).transform((value) => value.toLowerCase()).optional(),
     password: z.string().min(8),
     role: role.optional()
   })
@@ -63,11 +64,12 @@ export const createUserSchema = z.object({
   body: z.object({
     role,
     name: z.string().trim().min(2).max(120),
-    email: z.string().trim().email().transform((value) => value.toLowerCase()),
+    email: z.string().trim().min(2).transform((value) => value.toLowerCase()),
+    username: optionalText(80),
     password: z.string().min(8).max(128),
     phone: optionalText(40),
     photo: optionalPhoto,
-    status: z.enum(["active", "inactive"]).optional(),
+    status: z.enum(["active", "inactive", "stopped"]).optional(),
     teacherProfile,
     studentProfile
   })
@@ -78,7 +80,8 @@ export const updateUserSchema = z.object({
   body: z.object({
     role: role.optional(),
     name: z.string().trim().min(2).max(120).optional(),
-    email: z.string().trim().email().transform((value) => value.toLowerCase()).optional(),
+    email: z.string().trim().min(2).transform((value) => value.toLowerCase()).optional(),
+    username: optionalText(80),
     password: z.preprocess(
       (value) => (value === "" || value === null ? undefined : value),
       z.string().min(8).max(128).optional()

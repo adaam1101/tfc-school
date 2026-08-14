@@ -41,8 +41,14 @@ const issueSession = async (res, user) => {
 
 authRouter.post("/login", sensitiveLimiter, validate(loginSchema), async (req, res, next) => {
   try {
-    const { email, password, role } = req.body;
-    const user = await User.findOne({ email }).select("+password +loginAttempts +lockUntil");
+    const loginId = (email || req.body.username || "").trim().toLowerCase();
+    const user = await User.findOne({
+      $or: [
+        { email: loginId },
+        { username: loginId },
+        { email: `${loginId}@tfc.local` }
+      ]
+    }).select("+password +loginAttempts +lockUntil");
 
     // Account lockout check
     if (user?.isLocked()) {
@@ -55,7 +61,7 @@ authRouter.post("/login", sensitiveLimiter, validate(loginSchema), async (req, r
 
     if (!user || !passwordMatch) {
       if (user) await user.incrementLoginAttempts();
-      return res.status(401).json({ message: "Invalid email or password." });
+      return res.status(401).json({ message: "Invalid username/email or password." });
     }
 
     // Use timing-safe comparison to avoid leaking whether the email exists under a different role.

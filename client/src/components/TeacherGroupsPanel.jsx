@@ -89,8 +89,10 @@ function RegisterStudentModal({ onDone, onClose, teacherSubject }) {
 
             <div className="rounded-2xl bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 p-4 space-y-2">
               <div className="flex justify-between items-center text-sm">
-                <span className="text-slate-500 font-medium">Email</span>
-                <span className="font-bold text-slate-800 dark:text-slate-200 font-mono">{result.credentials.email}</span>
+                <span className="text-slate-500 font-medium">Username</span>
+                <span className="font-bold text-slate-800 dark:text-slate-200 font-mono">
+                  {result.student.username || result.credentials.email?.split("@")[0]}
+                </span>
               </div>
               <div className="flex justify-between items-center text-sm">
                 <span className="text-slate-500 font-medium">Password</span>

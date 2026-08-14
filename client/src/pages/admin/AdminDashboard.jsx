@@ -709,8 +709,15 @@ export default function AdminDashboard() {
                             <input className="input" value={form.name} onChange={(e) => updateForm("name", e.target.value)} required />
                           </label>
                           <label className="field">
-                            {t.email}
-                            <input className="input" type="email" value={form.email} onChange={(e) => updateForm("email", e.target.value)} required />
+                            {form.role === "student" ? "Username (Login ID)" : t.email}
+                            <input
+                              className="input"
+                              type={form.role === "student" ? "text" : "email"}
+                              value={form.email}
+                              onChange={(e) => updateForm("email", e.target.value)}
+                              placeholder={form.role === "student" ? "e.g. adam123" : "you@example.com"}
+                              required
+                            />
                           </label>
                         </div>
 
