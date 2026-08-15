@@ -16,7 +16,9 @@ import {
   Trash2,
   BookOpen,
   Pencil,
-  X
+  X,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import TeacherGroupsPanel, { GroupBroadcastModal } from "../../components/TeacherGroupsPanel.jsx";
@@ -43,6 +45,35 @@ const TAB_IDS = [
 const countStatus = (students, status) =>
   students.filter((s) => s.todayAttendance?.status === status).length;
 
+const getTodayDateKey = () => {
+  const d = new Date();
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}`;
+};
+
+const shiftDateKey = (currentDateStr, days) => {
+  const d = new Date((currentDateStr || getTodayDateKey()) + "T00:00:00");
+  d.setDate(d.getDate() + days);
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}`;
+};
+
+const formatDisplayDate = (dateStr, lang = "en") => {
+  if (!dateStr) return "";
+  const d = new Date(dateStr + "T00:00:00");
+  const locale = lang === "ar" ? "ar-DZ" : lang === "fr" ? "fr-FR" : "en-GB";
+  return d.toLocaleDateString(locale, {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric"
+  });
+};
+
 export default function TeacherDashboard() {
   const { lang } = useLang(); const t = T[lang];
   const [data, setData] = useState(null);
@@ -55,6 +86,7 @@ export default function TeacherDashboard() {
   const [loading, setLoading] = useState(true);
   const [showIdCard, setShowIdCard] = useState(false);
   const [tab, setTab] = useState("attendance");
+  const [selectedDate, setSelectedDate] = useState(() => getTodayDateKey());
 
   // Filtering states
   const [selectedGroup, setSelectedGroup] = useState("all");
@@ -69,13 +101,13 @@ export default function TeacherDashboard() {
 
   const handleBulkAttendance = async (status) => {
     if (filteredStudents.length === 0) return;
-    if (!window.confirm(`Mark all ${filteredStudents.length} displayed student(s) as ${status}?`)) return;
+    if (!window.confirm(`Mark all ${filteredStudents.length} displayed student(s) as ${status} for ${selectedDate}?`)) return;
 
     setBulkSaving(true);
     try {
       const studentIds = filteredStudents.map((s) => s._id);
-      await api.post("/teacher/attendance/bulk", { studentIds, status });
-      await loadDashboard();
+      await api.post("/teacher/attendance/bulk", { studentIds, status, date: selectedDate });
+      await loadDashboard(selectedDate);
     } catch (err) {
       setError(getApiError(err));
     } finally {
@@ -134,12 +166,13 @@ export default function TeacherDashboard() {
   const absentCount = countStatus(students, "Absent");
   const unmarkedCount = students.length - presentCount - absentCount;
 
-  const loadDashboard = async () => {
+  const loadDashboard = async (targetDate) => {
+    const activeDate = targetDate || selectedDate;
     setError("");
     setLoading(true);
     try {
       const [dashRes, groupsRes] = await Promise.all([
-        api.get("/teacher/dashboard"),
+        api.get(`/teacher/dashboard?date=${activeDate}`),
         api.get("/teacher/groups")
       ]);
       setData(dashRes.data);
@@ -157,12 +190,18 @@ export default function TeacherDashboard() {
     }
   };
 
+  const handleDateChange = (newDate) => {
+    if (!newDate) return;
+    setSelectedDate(newDate);
+    loadDashboard(newDate);
+  };
+
   const handleResetAttendance = async () => {
     if (!window.confirm("Are you sure you want to clear all previous attendance history to start counting fresh from Next Monday?")) return;
     try {
       const { data: res } = await api.post("/teacher/attendance/clear-past");
       setMessage(res.message || "Attendance history cleared! Counting starts fresh from Next Monday.");
-      await loadDashboard();
+      await loadDashboard(selectedDate);
     } catch (err) {
       setError(getApiError(err));
     }
@@ -180,7 +219,7 @@ export default function TeacherDashboard() {
     try {
       await api.put(`/teacher/students/${student._id}/status`, { isStopped: nextStopped });
       setMessage(`${student.name} marked as ${nextStopped ? "Stopped ⛔" : "Active 🟢"}.`);
-      await loadDashboard();
+      await loadDashboard(selectedDate);
     } catch (err) {
       setError(getApiError(err));
     }
@@ -196,7 +235,7 @@ export default function TeacherDashboard() {
   };
 
   useEffect(() => {
-    loadDashboard();
+    loadDashboard(selectedDate);
     loadSchedules();
   }, []);
 
@@ -208,7 +247,8 @@ export default function TeacherDashboard() {
       const { data: response } = await api.post("/teacher/attendance", {
         studentId: student._id,
         status,
-        note: notes[student._id] || ""
+        note: notes[student._id] || "",
+        date: selectedDate
       });
 
       setData((current) => ({
@@ -222,11 +262,11 @@ export default function TeacherDashboard() {
         const n = response.attendance.parentNotification;
         setMessage(
           n?.sent
-            ? `Parent email sent for ${student.name}.`
+            ? `Parent alert sent for ${student.name}.`
             : `Absent saved for ${student.name}. ${n?.error || "Notification not sent."}`
         );
       } else {
-        setMessage(`${student.name} marked present.`);
+        setMessage(`${student.name} marked present for ${formatDisplayDate(selectedDate, lang)}.`);
       }
     } catch (markError) {
       setError(getApiError(markError));
@@ -277,8 +317,8 @@ export default function TeacherDashboard() {
         <section className="grid gap-4 sm:grid-cols-3">
           {[
             { icon: Users,        label: t.assigned,      value: students.length, gradient: "from-brand-500 to-brand-700",     border: "border-brand-100 dark:border-brand-900",   num: "text-brand-900 dark:text-brand-200"   },
-            { icon: CheckCircle2, label: t.presentToday2,  value: presentCount,    gradient: "from-emerald-500 to-teal-600",    border: "border-emerald-100 dark:border-emerald-900", num: "text-emerald-900 dark:text-emerald-200" },
-            { icon: XCircle,      label: t.absentToday2,   value: absentCount,     gradient: "from-rose-500 to-red-600",        border: "border-rose-100 dark:border-rose-900",      num: "text-rose-900 dark:text-rose-200"     }
+            { icon: CheckCircle2, label: selectedDate === getTodayDateKey() ? t.presentToday2 : `Present (${selectedDate})`,  value: presentCount,    gradient: "from-emerald-500 to-teal-600",    border: "border-emerald-100 dark:border-emerald-900", num: "text-emerald-900 dark:text-emerald-200" },
+            { icon: XCircle,      label: selectedDate === getTodayDateKey() ? t.absentToday2 : `Absent (${selectedDate})`,   value: absentCount,     gradient: "from-rose-500 to-red-600",        border: "border-rose-100 dark:border-rose-900",      num: "text-rose-900 dark:text-rose-200"     }
           ].map(({ icon: Icon, label, value, gradient, border, num }) => (
             <div key={label} className={`card-hover border p-5 ${border}`}>
               <div className="flex items-start justify-between gap-3">
@@ -364,44 +404,98 @@ export default function TeacherDashboard() {
         {/* ── Attendance tab ── */}
         {tab === "attendance" && (
           <section>
-            {/* Section header */}
+            {/* Day & Date Attendance Header Card */}
             <div className="card overflow-hidden mb-4">
-              <div className="bg-gradient-to-r from-brand-600 to-emerald-700 px-6 py-5">
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/20 backdrop-blur-sm shadow-inner">
-                      <ClipboardCheck className="h-6 w-6 text-white" />
+              <div className="bg-gradient-to-r from-brand-600 via-indigo-700 to-emerald-700 px-6 py-5">
+                <div className="flex flex-wrap items-center justify-between gap-4">
+                  {/* Left: Day Name, Formatted Date & Completion */}
+                  <div className="flex items-center gap-3.5">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/20 backdrop-blur-sm shadow-inner text-white shrink-0">
+                      <CalendarDays className="h-6 w-6" />
                     </div>
                     <div>
-                      <h2 className="text-xl font-black text-white tracking-tight">{t.attendanceDate(data?.today)}</h2>
-                      <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-emerald-100 font-semibold">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight capitalize">
+                          {formatDisplayDate(selectedDate, lang)}
+                        </h2>
+                        <span className={`px-2.5 py-0.5 rounded-full text-xs font-black shadow-sm ${
+                          selectedDate === getTodayDateKey()
+                            ? "bg-emerald-400 text-emerald-950"
+                            : "bg-white/20 text-white"
+                        }`}>
+                          {selectedDate === getTodayDateKey() ? "🟢 Today" : `📆 ${selectedDate}`}
+                        </span>
+                      </div>
+
+                      <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs sm:text-sm text-emerald-100 font-semibold">
                         <span>{data?.teacher?.teacherProfile?.subject || t.assignedClass}</span>
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-300 opacity-60" />
                         <span>{(presentCount + absentCount)} / {students.length} marked</span>
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-300 opacity-60" />
                         <span>{students.length > 0 ? Math.round(((presentCount + absentCount) / students.length) * 100) : 0}% Complete</span>
                       </div>
-                      
+
                       {/* Animated completion bar */}
-                      <div className="mt-3.5 w-64 max-w-full bg-white/15 backdrop-blur-sm h-2 rounded-full overflow-hidden shadow-inner relative">
+                      <div className="mt-2.5 w-64 max-w-full bg-white/15 backdrop-blur-sm h-2 rounded-full overflow-hidden shadow-inner relative">
                         <div 
-                          className="bg-gradient-to-r from-emerald-450 to-teal-400 h-full rounded-full transition-all duration-700 ease-out shadow-sm"
+                          className="bg-gradient-to-r from-emerald-400 to-teal-300 h-full rounded-full transition-all duration-700 ease-out shadow-sm"
                           style={{ width: `${students.length > 0 ? Math.round(((presentCount + absentCount) / students.length) * 100) : 0}%` }}
                         />
                       </div>
                     </div>
                   </div>
-                  <div className="flex flex-wrap gap-2">
-                    <button type="button" className="inline-flex items-center gap-1.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 border border-rose-300/30 px-3.5 py-2 text-sm font-semibold text-white transition-all active:scale-95" onClick={handleResetAttendance} title="Clear past attendance records to start counting fresh from Next Monday">
-                      <Trash2 className="h-4 w-4 text-rose-200" />
+
+                  {/* Right: Date Navigation & Actions */}
+                  <div className="flex flex-wrap items-center gap-2">
+                    {/* Day-by-Day Navigator */}
+                    <div className="flex items-center gap-1 bg-white/15 backdrop-blur-md p-1 rounded-2xl border border-white/20 shadow-sm">
+                      <button
+                        type="button"
+                        onClick={() => handleDateChange(shiftDateKey(selectedDate, -1))}
+                        className="px-2.5 py-1.5 rounded-xl hover:bg-white/20 text-white text-xs font-bold transition-all flex items-center gap-1 active:scale-95"
+                        title="Previous Day"
+                      >
+                        <ChevronLeft className="h-3.5 w-3.5" /> Prev
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleDateChange(getTodayDateKey())}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all ${
+                          selectedDate === getTodayDateKey()
+                            ? "bg-white text-brand-900 shadow-sm"
+                            : "hover:bg-white/20 text-white"
+                        }`}
+                        title="Jump to Today"
+                      >
+                        Today
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleDateChange(shiftDateKey(selectedDate, 1))}
+                        className="px-2.5 py-1.5 rounded-xl hover:bg-white/20 text-white text-xs font-bold transition-all flex items-center gap-1 active:scale-95"
+                        title="Next Day"
+                      >
+                        Next <ChevronRight className="h-3.5 w-3.5" />
+                      </button>
+                      <input
+                        type="date"
+                        value={selectedDate}
+                        onChange={(e) => handleDateChange(e.target.value)}
+                        className="bg-white/20 hover:bg-white/30 text-white text-xs font-bold px-2 py-1 rounded-xl border border-white/30 focus:outline-none focus:ring-2 focus:ring-white/40 cursor-pointer"
+                        title="Select Date"
+                      />
+                    </div>
+
+                    <button type="button" className="inline-flex items-center gap-1.5 rounded-xl bg-rose-500/25 hover:bg-rose-500/35 border border-rose-300/30 px-3 py-2 text-xs font-bold text-white transition-all active:scale-95" onClick={handleResetAttendance} title="Clear past attendance records">
+                      <Trash2 className="h-3.5 w-3.5 text-rose-200" />
                       Reset Past
                     </button>
-                    <button type="button" className="inline-flex items-center gap-2 rounded-xl bg-white/15 px-4 py-2 text-sm font-semibold text-white transition-all hover:bg-white/25" onClick={() => setShowIdCard(true)}>
-                      <IdCard className="h-4 w-4" />
+                    <button type="button" className="inline-flex items-center gap-1.5 rounded-xl bg-white/15 px-3 py-2 text-xs font-bold text-white transition-all hover:bg-white/25" onClick={() => setShowIdCard(true)}>
+                      <IdCard className="h-3.5 w-3.5" />
                       {t.myId}
                     </button>
-                    <button type="button" className="inline-flex items-center gap-2 rounded-xl bg-white/15 px-4 py-2 text-sm font-semibold text-white transition-all hover:bg-white/25" onClick={loadDashboard}>
-                      <RefreshCcw className="h-4 w-4" />
+                    <button type="button" className="inline-flex items-center gap-1.5 rounded-xl bg-white/15 px-3 py-2 text-xs font-bold text-white transition-all hover:bg-white/25" onClick={() => loadDashboard(selectedDate)}>
+                      <RefreshCcw className="h-3.5 w-3.5" />
                       {t.refresh}
                     </button>
                   </div>

@@ -25,12 +25,13 @@ const getAssignedStudents = async (teacher) => {
 
 teacherRouter.get("/dashboard", async (req, res, next) => {
   try {
+    const selectedDate = req.query.date || dateKey();
     const today = dateKey();
     const students = await getAssignedStudents(req.user);
     const studentIds = students.map((student) => student._id);
 
     const [todayRecords, weekStats, sessionCounts] = await Promise.all([
-      Attendance.find({ date: today, student: { $in: studentIds } }),
+      Attendance.find({ date: selectedDate, student: { $in: studentIds } }),
       Attendance.aggregate([
         {
           $match: {
@@ -60,6 +61,7 @@ teacherRouter.get("/dashboard", async (req, res, next) => {
 
     res.json({
       teacher: req.user,
+      date: selectedDate,
       today,
       weekStats,
       students: students.map((student) => {
