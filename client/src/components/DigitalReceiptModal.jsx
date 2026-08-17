@@ -50,7 +50,67 @@ export default function DigitalReceiptModal({
   const dateStr = payment?.paidDate ? new Date(payment.paidDate).toLocaleDateString("fr-FR", { year: "numeric", month: "long", day: "numeric" }) : new Date().toLocaleDateString("fr-FR", { year: "numeric", month: "long", day: "numeric" });
 
   const handlePrint = () => {
-    window.print();
+    const printContent = receiptRef.current;
+    if (!printContent) return;
+
+    const printFrame = document.createElement("iframe");
+    printFrame.style.position = "fixed";
+    printFrame.style.right = "0";
+    printFrame.style.bottom = "0";
+    printFrame.style.width = "0";
+    printFrame.style.height = "0";
+    printFrame.style.border = "0";
+    document.body.appendChild(printFrame);
+
+    const doc = printFrame.contentWindow.document;
+    doc.open();
+    doc.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Reçu de Paiement - ${studentName}</title>
+          <meta charset="utf-8" />
+          <script src="https://cdn.tailwindcss.com"></script>
+          <style>
+            @media print {
+              @page {
+                size: A5 portrait;
+                margin: 6mm;
+              }
+              body {
+                background: white !important;
+                color: #0f172a !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+              }
+            }
+            body {
+              font-family: system-ui, -apple-system, sans-serif;
+              padding: 10px;
+              background: #ffffff;
+              color: #0f172a;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="max-w-[550px] mx-auto">
+            ${printContent.innerHTML}
+          </div>
+          <script>
+            window.onload = function() {
+              window.focus();
+              window.print();
+              setTimeout(function() {
+                if (window.frameElement && window.frameElement.parentNode) {
+                  window.frameElement.parentNode.removeChild(window.frameElement);
+                }
+              }, 1000);
+            };
+          </script>
+        </body>
+      </html>
+    `);
+    doc.close();
   };
 
   // WhatsApp share link to parent

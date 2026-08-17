@@ -195,3 +195,40 @@ textarea {
     @apply border-l-2 border-l-transparent transition-colors hover:border-l-brand-400 hover:bg-brand-50/30 dark:hover:bg-slate-700/30;
   }
 }
+
+/* ── Clean Print Isolation Styles ── */
+@media print {
+  @page {
+    margin: 8mm;
+    size: auto;
+  }
+
+  body {
+    background: white !important;
+    color: black !important;
+    font-size: 12pt !important;
+  }
+
+  /* Hide app navigation, background layout, modals overlay */
+  header,
+  nav,
+  aside,
+  footer,
+  .print-hidden,
+  .print\\:hidden,
+  button {
+    display: none !important;
+  }
+
+  /* Reset print container */
+  .printable-document {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+    background: white !important;
+    color: black !important;
+  }
+}
