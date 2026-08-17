@@ -79,17 +79,23 @@ export default function MonthlyFinancialRapportModal({
 
   const filteredStudents = useMemo(() => {
     if (!rapportData?.students) return [];
+    const q = (search || "").toLowerCase().trim();
     return rapportData.students.filter((st) => {
+      const sName = (st?.name || "").toLowerCase();
+      const sCourse = (st?.course || "").toLowerCase();
+      const sPhone = (st?.phone || "");
+
       const matchSearch =
-        st.name.toLowerCase().includes(search.toLowerCase()) ||
-        (st.course && st.course.toLowerCase().includes(search.toLowerCase())) ||
-        (st.phone && st.phone.includes(search));
+        !q ||
+        sName.includes(q) ||
+        sCourse.includes(q) ||
+        sPhone.includes(q);
 
       const matchStatus =
         statusFilter === "all" ||
-        st.status === statusFilter ||
-        (statusFilter === "assurance_paid" && st.assurancePaid) ||
-        (statusFilter === "assurance_unpaid" && !st.assurancePaid);
+        st?.status === statusFilter ||
+        (statusFilter === "assurance_paid" && Boolean(st?.assurancePaid)) ||
+        (statusFilter === "assurance_unpaid" && !Boolean(st?.assurancePaid));
 
       return matchSearch && matchStatus;
     });

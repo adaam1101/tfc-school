@@ -74,12 +74,15 @@ export default function StudentPaymentRowWidget({
     setSaving(true);
     setError("");
     try {
+      const sId = student?._id || student?.id || student;
+      if (!sId) return;
+
       const payload = {
-        studentId: student._id || student.id,
+        studentId: sId,
         month: currentMonth,
-        amount: tuitionFee,
+        amount: Number(tuitionFee) || defaultTuition,
         paidAmount: numPaid,
-        assurancePaid
+        assurancePaid: Boolean(assurancePaid)
       };
 
       const { data } = await api.post("/payments/quick", payload);

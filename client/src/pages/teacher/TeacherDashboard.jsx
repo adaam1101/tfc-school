@@ -18,7 +18,10 @@ import {
   Pencil,
   X,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Wallet,
+  TrendingUp,
+  BarChart2
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import TeacherGroupsPanel, { GroupBroadcastModal } from "../../components/TeacherGroupsPanel.jsx";
@@ -242,34 +245,38 @@ export default function TeacherDashboard() {
     loadSchedules();
   }, []);
 
-  const markAttendance = async (student, status) => {
-    setSavingId(student._id);
+  const markAttendance = async (studentOrId, status) => {
+    const sId = typeof studentOrId === "object" ? studentOrId?._id : studentOrId;
+    const sName = typeof studentOrId === "object" ? studentOrId?.name : (students.find(s => s._id === sId)?.name || "Student");
+    if (!sId) return;
+
+    setSavingId(sId);
     setMessage("");
     setError("");
     try {
       const { data: response } = await api.post("/teacher/attendance", {
-        studentId: student._id,
+        studentId: sId,
         status,
-        note: notes[student._id] || "",
+        note: notes[sId] || "",
         date: selectedDate
       });
 
       setData((current) => ({
         ...current,
-        students: current.students.map((item) =>
-          item._id === student._id ? { ...item, todayAttendance: response.attendance } : item
+        students: (current?.students || []).map((item) =>
+          item._id === sId ? { ...item, todayAttendance: response.attendance } : item
         )
       }));
 
       if (status === "Absent") {
-        const n = response.attendance.parentNotification;
+        const n = response.attendance?.parentNotification;
         setMessage(
           n?.sent
-            ? `Parent alert sent for ${student.name}.`
-            : `Absent saved for ${student.name}. ${n?.error || "Notification not sent."}`
+            ? `Parent alert sent for ${sName}.`
+            : `Absent saved for ${sName}. ${n?.error || "Notification not sent."}`
         );
       } else {
-        setMessage(`${student.name} marked present for ${formatDisplayDate(selectedDate, lang)}.`);
+        setMessage(`${sName} marked present for ${formatDisplayDate(selectedDate, lang)}.`);
       }
     } catch (markError) {
       setError(getApiError(markError));
