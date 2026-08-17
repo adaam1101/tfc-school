@@ -6,9 +6,11 @@ import {
   ShieldCheck,
   ShieldAlert,
   Save,
-  AlertCircle
+  AlertCircle,
+  Receipt
 } from "lucide-react";
 import { api, getApiError } from "../api/http.js";
+import DigitalReceiptModal from "./DigitalReceiptModal.jsx";
 
 /**
  * StudentPaymentRowWidget
@@ -45,6 +47,7 @@ export default function StudentPaymentRowWidget({
   const [justSaved, setJustSaved] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
   const [error, setError] = useState("");
+  const [showReceipt, setShowReceipt] = useState(false);
 
   // Sync if initialPayment changes
   useEffect(() => {
@@ -214,6 +217,17 @@ export default function StudentPaymentRowWidget({
           <span>{restAmount.toLocaleString()} DA</span>
         </div>
 
+        {/* Digital Receipt Trigger */}
+        <button
+          type="button"
+          onClick={() => setShowReceipt(true)}
+          className="inline-flex items-center gap-1 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 px-2 py-1 text-[11px] font-bold text-slate-700 dark:text-slate-200 shadow-2xs active:scale-95 transition-all"
+          title="Afficher et envoyer le reçu numérique"
+        >
+          <Receipt className="h-3 w-3 text-emerald-600" />
+          <span>Reçu</span>
+        </button>
+
         {/* Save button if changed */}
         {hasChanges && (
           <button
@@ -238,6 +252,22 @@ export default function StudentPaymentRowWidget({
         <p className="text-[10px] text-rose-500 font-bold flex items-center gap-1">
           <AlertCircle className="h-3 w-3" /> {error}
         </p>
+      )}
+
+      {showReceipt && (
+        <DigitalReceiptModal
+          payment={{
+            amount: Number(tuitionFee) || defaultTuition,
+            paidAmount: numPaid,
+            restAmount,
+            assurancePaid,
+            assuranceAmount: assuranceFee,
+            month: currentMonth,
+            paidDate: new Date()
+          }}
+          student={student}
+          onClose={() => setShowReceipt(false)}
+        />
       )}
     </div>
   );

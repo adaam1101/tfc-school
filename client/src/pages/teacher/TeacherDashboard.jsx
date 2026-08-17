@@ -39,6 +39,7 @@ import TimetableGrid from "../../components/TimetableGrid.jsx";
 import TeacherCourseworkPanel from "../../components/TeacherCourseworkPanel.jsx";
 import StudentPaymentRowWidget from "../../components/StudentPaymentRowWidget.jsx";
 import MonthlyFinancialRapportModal from "../../components/MonthlyFinancialRapportModal.jsx";
+import DigitalBulletinModal from "../../components/DigitalBulletinModal.jsx";
 
 const TAB_IDS = [
   { id: "attendance", key: "attendance", icon: ClipboardCheck },
@@ -101,6 +102,7 @@ export default function TeacherDashboard() {
   const [editingSessionsStudent, setEditingSessionsStudent] = useState(null);
   const [editingCourseStudent, setEditingCourseStudent] = useState(null);
   const [observationsStudent, setObservationsStudent] = useState(null);
+  const [bulletinStudent, setBulletinStudent] = useState(null);
   const [selectedStatus, setSelectedStatus] = useState("all");
   const [bulkSaving, setBulkSaving] = useState(false);
   const [showMonthlyRapport, setShowMonthlyRapport] = useState(false);
@@ -752,6 +754,15 @@ export default function TeacherDashboard() {
                                   >
                                     <span>📝 Files & Notes</span>
                                   </button>
+
+                                  <button
+                                    type="button"
+                                    onClick={() => setBulletinStudent(student)}
+                                    className="inline-flex items-center gap-1 bg-indigo-50 dark:bg-indigo-950/40 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200/60 dark:border-indigo-800/60 px-2 py-0.5 rounded-lg text-[10px] font-bold transition-all active:scale-95 cursor-pointer shadow-2xs group"
+                                    title="Générer et envoyer le bulletin numérique"
+                                  >
+                                    <span>🎓 Bulletin</span>
+                                  </button>
                                 </div>
 
                                 {student.studentProfile?.parentPhone && (
@@ -890,6 +901,13 @@ export default function TeacherDashboard() {
         <StudentObservationsModal
           student={observationsStudent}
           onClose={() => setObservationsStudent(null)}
+        />
+      )}
+      {bulletinStudent && (
+        <DigitalBulletinModal
+          student={bulletinStudent}
+          teacherName={data?.teacher?.name}
+          onClose={() => setBulletinStudent(null)}
         />
       )}
       {showMonthlyRapport && (

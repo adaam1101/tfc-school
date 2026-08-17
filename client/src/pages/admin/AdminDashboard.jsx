@@ -38,6 +38,7 @@ import StatusBadge from "../../components/StatusBadge.jsx";
 import { SkeletonStatCard, SkeletonListCard } from "../../components/Skeleton.jsx";
 import AppLayout from "../../layouts/AppLayout.jsx";
 import IDCardModal from "../../components/IDCardModal.jsx";
+import DigitalBulletinModal from "../../components/DigitalBulletinModal.jsx";
 import EnrollmentsPanel from "./EnrollmentsPanel.jsx";
 import PaymentsPanel from "./PaymentsPanel.jsx";
 import AnnouncementsPanel from "./AnnouncementsPanel.jsx";
@@ -129,6 +130,7 @@ export default function AdminDashboard() {
   const [saving, setSaving] = useState(false);
   const [tab, setTab] = useState("overview");
   const [idCardStudent, setIdCardStudent] = useState(null);
+  const [bulletinStudent, setBulletinStudent] = useState(null);
   const [userSubTab, setUserSubTab] = useState("students");
   const [userSearch, setUserSearch] = useState("");
   const [showForm, setShowForm] = useState(false);
@@ -994,6 +996,11 @@ export default function AdminDashboard() {
                                 <button type="button" className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 shadow-sm transition-all hover:border-brand-200 hover:bg-brand-50 hover:text-brand-700 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-400 dark:hover:border-brand-500 dark:hover:bg-slate-700 dark:hover:text-brand-400" onClick={() => editUser(u)} title="Edit">
                                   <Pencil className="h-3.5 w-3.5" />
                                 </button>
+                                {u.role === "student" && (
+                                  <button type="button" className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-indigo-200 bg-indigo-50 text-indigo-700 shadow-sm transition-all hover:bg-indigo-100 dark:border-indigo-800 dark:bg-indigo-950/60 dark:text-indigo-300" onClick={() => setBulletinStudent(u)} title="Digital Bulletin / Relevé">
+                                    <GraduationCap className="h-3.5 w-3.5" />
+                                  </button>
+                                )}
                                 {u.role !== "admin" && (
                                   <button type="button" className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 shadow-sm transition-all hover:border-brand-200 hover:bg-brand-50 hover:text-brand-700 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-400 dark:hover:border-brand-500 dark:hover:bg-slate-700 dark:hover:text-brand-400" onClick={() => setIdCardStudent(u)} title="ID card">
                                     <IdCard className="h-3.5 w-3.5" />
@@ -1027,6 +1034,7 @@ export default function AdminDashboard() {
       </div>
 
       {idCardStudent && <IDCardModal user={idCardStudent} onClose={() => setIdCardStudent(null)} />}
+      {bulletinStudent && <DigitalBulletinModal student={bulletinStudent} onClose={() => setBulletinStudent(null)} />}
 
       {resetLink && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
