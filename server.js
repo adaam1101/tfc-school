@@ -20,6 +20,8 @@ import { submissionRouter } from "./routes/submissionRoutes.js";
 import { scheduleRouter } from "./routes/scheduleRoutes.js";
 import { announcementRouter } from "./routes/announcementRoutes.js";
 import { paymentRouter } from "./routes/paymentRoutes.js";
+import { enrollmentRouter } from "./routes/enrollmentRoutes.js";
+import { auditRouter } from "./routes/auditRoutes.js";
 import { demoRouter } from "./demo/demoRoutes.js";
 
 dotenv.config();
@@ -56,7 +58,7 @@ app.use(morgan("dev"));
 app.use(
   rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: 300,
+    max: 500,
     standardHeaders: true,
     legacyHeaders: false
   })
@@ -80,12 +82,17 @@ if (demoMode) {
   app.use("/api/schedules", scheduleRouter);
   app.use("/api/announcements", announcementRouter);
   app.use("/api/payments", paymentRouter);
+  app.use("/api/enrollments", enrollmentRouter);
+  app.use("/api/audit", auditRouter);
 }
 
 const clientDistCandidates = [
+  path.resolve(__dirname, "client/dist"),
+  path.resolve(__dirname, "../client/dist"),
   path.resolve(__dirname, "../../client/dist"),
   path.resolve(process.cwd(), "client/dist"),
-  path.resolve(process.cwd(), "../client/dist")
+  path.resolve(process.cwd(), "../client/dist"),
+  path.resolve(process.cwd(), "../../client/dist")
 ];
 const clientDist = clientDistCandidates.find((candidate) => existsSync(candidate));
 

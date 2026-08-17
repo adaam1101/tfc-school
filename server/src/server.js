@@ -24,6 +24,7 @@ import { announcementRouter } from "./routes/announcementRoutes.js";
 import { auditRouter } from "./routes/auditRoutes.js";
 import { scheduleRouter } from "./routes/scheduleRoutes.js";
 import { courseworkRouter } from "./routes/courseworkRoutes.js";
+import { submissionRouter } from "./routes/submissionRoutes.js";
 
 dotenv.config();
 
@@ -47,7 +48,8 @@ app.use(helmet({
 }));
 app.use(mongoSanitize());
 app.use(cors({ origin: (origin, callback) => { if (!origin || allowedOrigins.includes(origin)) return callback(null, true); return callback(new Error("Origin is not allowed by CORS.")); }, credentials: true }));
-app.use(express.json({ limit: "5mb" })); // allow base64 ID-card photos
+app.use(express.json({ limit: "15mb" })); // allow base64 files and ID-card photos
+app.use(express.urlencoded({ limit: "15mb", extended: true }));
 app.use(morgan(process.env.NODE_ENV === "production" ? "combined" : "dev"));
 // Increased from 100 → 500 to support polling dashboard widgets without lockout
 app.use(rateLimit({ windowMs: 15 * 60 * 1000, max: 500, standardHeaders: true, legacyHeaders: false, validate: { xForwardedForHeader: false } }));
@@ -66,11 +68,15 @@ app.use("/api/announcements", announcementRouter);
 app.use("/api/audit", auditRouter);
 app.use("/api/schedules", scheduleRouter);
 app.use("/api/coursework", courseworkRouter);
+app.use("/api/submissions", submissionRouter);
 
 const clientDistCandidates = [
   path.resolve(__dirname, "../../client/dist"),
+  path.resolve(__dirname, "../client/dist"),
+  path.resolve(__dirname, "../../../client/dist"),
   path.resolve(process.cwd(), "client/dist"),
-  path.resolve(process.cwd(), "../client/dist")
+  path.resolve(process.cwd(), "../client/dist"),
+  path.resolve(process.cwd(), "../../client/dist")
 ];
 const clientDist = clientDistCandidates.find((candidate) => existsSync(candidate));
 
