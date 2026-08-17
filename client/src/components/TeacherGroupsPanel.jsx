@@ -23,6 +23,7 @@ import { api, getApiError } from "../api/http.js";
 import { useAuth } from "../context/AuthContext.jsx";
 import ErrorAlert from "./ErrorAlert.jsx";
 import StudentObservationsModal from "./StudentObservationsModal.jsx";
+import StudentPaymentRowWidget from "./StudentPaymentRowWidget.jsx";
 
 // ── Register new student modal ────────────────────────────────────────────────
 
@@ -601,6 +602,9 @@ function GroupCard({ group, myStudents, onEdit, onDelete, onTrackStudent, onMove
                           <span className="ml-1.5 font-bold text-rose-500">⛔ Stopped</span>
                         )}
                       </p>
+                      <div className="mt-1">
+                        <StudentPaymentRowWidget compact student={s} />
+                      </div>
                     </div>
                   </div>
                   <div className="flex shrink-0 items-center gap-1">

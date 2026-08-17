@@ -25,18 +25,22 @@ const statusBadge = {
 
 const emptyForm = {
   student: "",
-  month: "",
+  month: new Date().toISOString().slice(0, 7),
   period: "",
-  amount: "",
+  amount: "7500",
   paidAmount: "0",
+  assuranceAmount: "800",
+  assurancePaid: false,
   dueDate: "",
   method: "cash",
   notes: ""
 };
 
+import MonthlyFinancialRapportModal from "../../components/MonthlyFinancialRapportModal.jsx";
+
 const PANEL_TABS = [
   { id: "records",  label: "Records",  icon: Wallet    },
-  { id: "report",   label: "Monthly Report", icon: BarChart2 }
+  { id: "report",   label: "📊 Monthly Rapport (7,500 DA / Rest / Assurance)", icon: BarChart2 }
 ];
 
 function formatMonth(m) {
@@ -48,6 +52,7 @@ function formatMonth(m) {
 }
 
 function MonthlyReport() {
+  const [showModal, setShowModal] = useState(false);
   const [report, setReport] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -63,78 +68,109 @@ function MonthlyReport() {
     [report]
   );
 
-  if (loading) return <p className="text-sm text-slate-400">Loading report…</p>;
-
-  if (!report.length) {
-    return (
-      <div className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-200 py-12 text-center">
-        <BarChart2 className="h-10 w-10 text-slate-300" />
-        <p className="mt-3 text-sm font-medium text-slate-500">No payment data yet</p>
-      </div>
-    );
-  }
-
   return (
     <div className="grid gap-6">
-      {/* Bar chart */}
-      <div className="card p-6">
-        <h3 className="mb-4 text-base font-bold text-slate-800">Monthly Revenue</h3>
-        <div className="flex items-end gap-2 overflow-x-auto pb-2" style={{ minHeight: "160px" }}>
-          {[...report].reverse().map((r) => {
-            const pct = Math.round(((r.totalCollected || 0) / maxCollected) * 100);
-            return (
-              <div key={r._id} className="flex flex-col items-center gap-1" style={{ minWidth: "56px" }}>
-                <span className="text-[10px] font-bold text-slate-700">
-                  {(r.totalCollected || 0).toLocaleString()}
-                </span>
-                <div
-                  className="w-10 rounded-t-lg bg-gradient-to-t from-brand-600 to-brand-400 transition-all"
-                  style={{ height: `${Math.max(4, (pct / 100) * 130)}px` }}
-                  title={`${formatMonth(r._id)}: ${(r.totalCollected || 0).toLocaleString()} DA collected`}
-                />
-                <span className="text-[10px] text-slate-500 text-center">{formatMonth(r._id)}</span>
-              </div>
-            );
-          })}
+      {/* Top Banner with Full Detailed Report Trigger */}
+      <div className="rounded-3xl border border-emerald-200 dark:border-emerald-800/60 bg-gradient-to-r from-emerald-600 via-teal-600 to-indigo-700 p-6 text-white shadow-lg flex flex-wrap items-center justify-between gap-4">
+        <div className="space-y-1">
+          <span className="rounded-full bg-white/20 px-3 py-1 text-xs font-black uppercase tracking-wider text-emerald-100">
+            📊 Executive Financial Rapport
+          </span>
+          <h3 className="text-xl font-black">
+            Monthly Tuition (7,500 DA), Rest & Assurance (800 DA)
+          </h3>
+          <p className="text-xs text-emerald-100">
+            View full student-by-student financial table, rest to collect, insurance totals, and print official documents.
+          </p>
         </div>
+        <button
+          type="button"
+          onClick={() => setShowModal(true)}
+          className="inline-flex items-center gap-2 rounded-2xl bg-white text-emerald-950 font-black px-6 py-3.5 text-sm shadow-md hover:bg-emerald-50 active:scale-95 transition-all"
+        >
+          <BarChart2 className="h-5 w-5 text-emerald-700" />
+          <span>Open Full Monthly Rapport</span>
+        </button>
       </div>
 
-      {/* Table */}
-      <div className="card p-6">
-        <h3 className="mb-4 text-base font-bold text-slate-800">Breakdown by Month</h3>
-        <div className="overflow-x-auto">
-          <table className="min-w-full text-sm">
-            <thead>
-              <tr className="border-b border-slate-100">
-                {["Month", "Billed", "Collected", "Paid", "Pending", "Overdue", "Partial"].map((h) => (
-                  <th key={h} className="pb-3 pr-4 text-left text-xs font-bold uppercase tracking-wider text-slate-400 first:pl-2">{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-50">
-              {report.map((r) => (
-                <tr key={r._id} className="hover:bg-slate-50 transition-colors">
-                  <td className="py-3 pl-2 pr-4 font-semibold text-slate-800">{formatMonth(r._id)}</td>
-                  <td className="py-3 pr-4 text-slate-600">{(r.totalBilled || 0).toLocaleString()} DA</td>
-                  <td className="py-3 pr-4 font-semibold text-emerald-700">{(r.totalCollected || 0).toLocaleString()} DA</td>
-                  <td className="py-3 pr-4">
-                    <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-800">{r.countPaid || 0}</span>
-                  </td>
-                  <td className="py-3 pr-4">
-                    <span className="rounded-full bg-sky-100 px-2 py-0.5 text-[10px] font-bold text-sky-800">{r.countPending || 0}</span>
-                  </td>
-                  <td className="py-3 pr-4">
-                    <span className="rounded-full bg-red-100 px-2 py-0.5 text-[10px] font-bold text-red-800">{r.countOverdue || 0}</span>
-                  </td>
-                  <td className="py-3">
-                    <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-800">{r.countPartial || 0}</span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      {loading ? (
+        <p className="text-sm text-slate-400">Loading summary…</p>
+      ) : !report.length ? (
+        <div className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-200 py-12 text-center">
+          <BarChart2 className="h-10 w-10 text-slate-300" />
+          <p className="mt-3 text-sm font-medium text-slate-500">No payment data yet</p>
         </div>
-      </div>
+      ) : (
+        <>
+          {/* Bar chart */}
+          <div className="card p-6">
+            <h3 className="mb-4 text-base font-bold text-slate-800 dark:text-white">Monthly Revenue History</h3>
+            <div className="flex items-end gap-2 overflow-x-auto pb-2" style={{ minHeight: "160px" }}>
+              {[...report].reverse().map((r) => {
+                const pct = Math.round(((r.totalCollected || 0) / maxCollected) * 100);
+                return (
+                  <div key={r._id} className="flex flex-col items-center gap-1" style={{ minWidth: "56px" }}>
+                    <span className="text-[10px] font-bold text-slate-700 dark:text-slate-300">
+                      {(r.totalCollected || 0).toLocaleString()}
+                    </span>
+                    <div
+                      className="w-10 rounded-t-lg bg-gradient-to-t from-brand-600 to-brand-400 transition-all"
+                      style={{ height: `${Math.max(4, (pct / 100) * 130)}px` }}
+                      title={`${formatMonth(r._id)}: ${(r.totalCollected || 0).toLocaleString()} DA collected`}
+                    />
+                    <span className="text-[10px] text-slate-500 text-center">{formatMonth(r._id)}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Table */}
+          <div className="card p-6">
+            <h3 className="mb-4 text-base font-bold text-slate-800 dark:text-white">Aggregate Breakdown</h3>
+            <div className="overflow-x-auto">
+              <table className="min-w-full text-sm">
+                <thead>
+                  <tr className="border-b border-slate-100 dark:border-slate-700 text-xs font-bold uppercase tracking-wider text-slate-400">
+                    <th className="pb-3 pr-4 text-left pl-2">Month</th>
+                    <th className="pb-3 pr-4 text-left">Tuition Billed</th>
+                    <th className="pb-3 pr-4 text-left">Collected</th>
+                    <th className="pb-3 pr-4 text-left">Rest (Remaining)</th>
+                    <th className="pb-3 pr-4 text-left">Assurance (800 DA)</th>
+                    <th className="pb-3 pr-4 text-left">Paid Students</th>
+                    <th className="pb-3 pr-4 text-left">Partial</th>
+                    <th className="pb-3 text-left">Unpaid</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-50 dark:divide-slate-700/60 font-medium">
+                  {report.map((r) => (
+                    <tr key={r._id} className="hover:bg-slate-50 dark:hover:bg-slate-700/40 transition-colors">
+                      <td className="py-3 pl-2 pr-4 font-bold text-slate-900 dark:text-white">{formatMonth(r._id)}</td>
+                      <td className="py-3 pr-4 text-slate-600 dark:text-slate-300">{(r.totalBilled || 0).toLocaleString()} DA</td>
+                      <td className="py-3 pr-4 font-bold text-emerald-600 dark:text-emerald-400">{(r.totalCollected || 0).toLocaleString()} DA</td>
+                      <td className="py-3 pr-4 font-bold text-rose-600 dark:text-rose-400">{(r.totalRest || 0).toLocaleString()} DA</td>
+                      <td className="py-3 pr-4 font-bold text-teal-600 dark:text-teal-400">{(r.totalAssurance || 0).toLocaleString()} DA</td>
+                      <td className="py-3 pr-4">
+                        <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-800">{r.countPaid || 0}</span>
+                      </td>
+                      <td className="py-3 pr-4">
+                        <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-800">{r.countPartial || 0}</span>
+                      </td>
+                      <td className="py-3">
+                        <span className="rounded-full bg-rose-100 px-2 py-0.5 text-[10px] font-bold text-rose-800">{r.countPending || 0}</span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </>
+      )}
+
+      {showModal && (
+        <MonthlyFinancialRapportModal onClose={() => setShowModal(false)} />
+      )}
     </div>
   );
 }
@@ -486,12 +522,12 @@ export default function PaymentsPanel({ students = [] }) {
                   <input className="input" value={form.period} onChange={setF("period")} placeholder="e.g. January 2026" />
                 </label>
                 <label className="field">
-                  Amount (DA)
-                  <input className="input" type="number" min="0" value={form.amount} onChange={setF("amount")} required />
+                  Tuition Fee (DA)
+                  <input className="input font-bold" type="number" min="0" value={form.amount} onChange={setF("amount")} placeholder="7500" required />
                 </label>
                 <label className="field">
-                  Paid (DA)
-                  <input className="input" type="number" min="0" value={form.paidAmount} onChange={setF("paidAmount")} placeholder="0" />
+                  Paid Amount (DA)
+                  <input className="input font-bold" type="number" min="0" value={form.paidAmount} onChange={setF("paidAmount")} placeholder="0" />
                 </label>
                 <label className="field">
                   Due date
@@ -506,6 +542,30 @@ export default function PaymentsPanel({ students = [] }) {
                     <option value="card">Card</option>
                     <option value="other">Other</option>
                   </select>
+                </label>
+              </div>
+
+              {/* Calculated Rest & Assurance Banner */}
+              <div className="flex flex-wrap items-center justify-between gap-2 p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 text-xs">
+                <div>
+                  <span className="text-slate-400 font-bold uppercase block text-[10px]">Rest (Remaining):</span>
+                  <span className={`font-black text-sm ${
+                    Math.max(0, (Number(form.amount) || 7500) - (Number(form.paidAmount) || 0)) === 0
+                      ? "text-emerald-600"
+                      : "text-rose-600"
+                  }`}>
+                    {Math.max(0, (Number(form.amount) || 7500) - (Number(form.paidAmount) || 0)).toLocaleString()} DA
+                  </span>
+                </div>
+
+                <label className="flex items-center gap-2 cursor-pointer select-none font-bold text-slate-700 dark:text-slate-200">
+                  <input
+                    type="checkbox"
+                    className="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
+                    checked={Boolean(form.assurancePaid)}
+                    onChange={(e) => setForm(f => ({ ...f, assurancePaid: e.target.checked }))}
+                  />
+                  <span>🛡️ Assurance (800 DA) Paid</span>
                 </label>
               </div>
 

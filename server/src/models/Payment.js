@@ -5,10 +5,15 @@ const { Schema } = mongoose;
 const paymentSchema = new Schema(
   {
     student: { type: Schema.Types.ObjectId, ref: "User", required: true, index: true },
-    period: { type: String, trim: true }, // e.g. "January 2026" or "Term 1" (legacy field)
-    month: { type: String, trim: true }, // YYYY-MM format e.g. "2026-06"
-    amount: { type: Number, required: true, min: 0 },
-    paidAmount: { type: Number, default: 0, min: 0 },
+    teacher: { type: Schema.Types.ObjectId, ref: "User", index: true },
+    period: { type: String, trim: true }, // e.g. "August 2026"
+    month: { type: String, trim: true, index: true }, // YYYY-MM format e.g. "2026-08"
+    amount: { type: Number, default: 7500, min: 0 }, // Default monthly tuition: 7500 DA
+    paidAmount: { type: Number, default: 0, min: 0 }, // Paid amount e.g. 4000 DA
+    restAmount: { type: Number, default: 7500, min: 0 }, // Rest to pay e.g. 3500 DA
+    assuranceAmount: { type: Number, default: 800, min: 0 }, // Assurance: 800 DA
+    assurancePaid: { type: Boolean, default: false }, // Whether assurance is paid
+    assurancePaidAmount: { type: Number, default: 0, min: 0 },
     dueDate: { type: Date },
     paidDate: { type: Date },
     status: {
@@ -25,8 +30,24 @@ const paymentSchema = new Schema(
   { timestamps: true }
 );
 
-// Derive status from amounts and dates whenever the doc is saved.
-paymentSchema.pre("save", function deriveStatus(next) {
+// Derive status and restAmount whenever the doc is saved
+paymentSchema.pre("save", function derivePaymentFields(next) {
+  const tuitionFee = typeof this.amount === "number" && !isNaN(this.amount) ? this.amount : 7500;
+  const paid = typeof this.paidAmount === "number" && !isNaN(this.paidAmount) ? this.paidAmount : 0;
+  this.amount = tuitionFee;
+  this.paidAmount = paid;
+  this.restAmount = Math.max(0, tuitionFee - paid);
+
+  if (this.assuranceAmount == null || isNaN(this.assuranceAmount)) {
+    this.assuranceAmount = 800;
+  }
+
+  if (this.assurancePaid && (!this.assurancePaidAmount || this.assurancePaidAmount === 0)) {
+    this.assurancePaidAmount = this.assuranceAmount;
+  } else if (!this.assurancePaid && this.assurancePaidAmount >= this.assuranceAmount && this.assuranceAmount > 0) {
+    this.assurancePaid = true;
+  }
+
   // If fully paid
   if (this.paidAmount >= this.amount && this.amount > 0) {
     this.status = "paid";
@@ -34,7 +55,6 @@ paymentSchema.pre("save", function deriveStatus(next) {
   } else if (this.paidAmount > 0) {
     this.status = "partial";
   } else if (this.dueDate && this.dueDate < new Date() && this.status !== "paid") {
-    // Past due and not paid => overdue
     this.status = "overdue";
   } else if (this.status !== "overdue") {
     this.status = "unpaid";

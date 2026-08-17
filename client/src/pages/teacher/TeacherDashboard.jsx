@@ -34,6 +34,8 @@ import AnnouncementsCard from "../../components/AnnouncementsCard.jsx";
 import IDCardModal from "../../components/IDCardModal.jsx";
 import TimetableGrid from "../../components/TimetableGrid.jsx";
 import TeacherCourseworkPanel from "../../components/TeacherCourseworkPanel.jsx";
+import StudentPaymentRowWidget from "../../components/StudentPaymentRowWidget.jsx";
+import MonthlyFinancialRapportModal from "../../components/MonthlyFinancialRapportModal.jsx";
 
 const TAB_IDS = [
   { id: "attendance", key: "attendance", icon: ClipboardCheck },
@@ -98,6 +100,7 @@ export default function TeacherDashboard() {
   const [observationsStudent, setObservationsStudent] = useState(null);
   const [selectedStatus, setSelectedStatus] = useState("all");
   const [bulkSaving, setBulkSaving] = useState(false);
+  const [showMonthlyRapport, setShowMonthlyRapport] = useState(false);
 
   const handleBulkAttendance = async (status) => {
     if (filteredStudents.length === 0) return;
@@ -334,32 +337,43 @@ export default function TeacherDashboard() {
           ))}
         </section>
 
-        {/* Pill tabs */}
-        <div className="flex flex-wrap gap-2">
-          {TAB_IDS.map((tab_item) => {
-            const Icon = tab_item.icon;
-            const active = tab === tab_item.id;
-            const label = tab_item.label || t[tab_item.key];
-            return (
-              <button
-                key={tab_item.id}
-                onClick={() => setTab(tab_item.id)}
-                className={`inline-flex items-center gap-2.5 rounded-2xl px-6 py-3 text-sm font-bold transition-all duration-200 ${
-                  active
-                    ? "bg-gradient-to-r from-brand-600 to-brand-700 text-white shadow-md shadow-brand-200 dark:shadow-brand-900"
-                    : "border border-slate-200 bg-white text-slate-600 hover:border-brand-200 hover:bg-brand-50 hover:text-brand-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-brand-600 dark:hover:bg-slate-700"
-                }`}
-              >
-                <Icon className="h-4 w-4" />
-                {label}
-                {tab_item.id === "attendance" && unmarkedCount > 0 && (
-                  <span className={`rounded-full px-2 py-0.5 text-[10px] font-black ${active ? "bg-white/20 text-white" : "bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200"}`}>
-                    {unmarkedCount}
-                  </span>
-                )}
-              </button>
-            );
-          })}
+        {/* Pill tabs & Monthly Rapport trigger */}
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-wrap gap-2">
+            {TAB_IDS.map((tab_item) => {
+              const Icon = tab_item.icon;
+              const active = tab === tab_item.id;
+              const label = tab_item.label || t[tab_item.key];
+              return (
+                <button
+                  key={tab_item.id}
+                  onClick={() => setTab(tab_item.id)}
+                  className={`inline-flex items-center gap-2.5 rounded-2xl px-6 py-3 text-sm font-bold transition-all duration-200 ${
+                    active
+                      ? "bg-gradient-to-r from-brand-600 to-brand-700 text-white shadow-md shadow-brand-200 dark:shadow-brand-900"
+                      : "border border-slate-200 bg-white text-slate-600 hover:border-brand-200 hover:bg-brand-50 hover:text-brand-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-brand-600 dark:hover:bg-slate-700"
+                  }`}
+                >
+                  <Icon className="h-4 w-4" />
+                  {label}
+                  {tab_item.id === "attendance" && unmarkedCount > 0 && (
+                    <span className={`rounded-full px-2 py-0.5 text-[10px] font-black ${active ? "bg-white/20 text-white" : "bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200"}`}>
+                      {unmarkedCount}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setShowMonthlyRapport(true)}
+            className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 hover:from-emerald-700 hover:to-teal-800 text-white px-5 py-3 text-sm font-black shadow-md hover:shadow-lg active:scale-98 transition-all"
+          >
+            <Wallet className="h-4 w-4" />
+            <span>📊 Monthly Rapport (7,500 DA / Rest / Assurance)</span>
+          </button>
         </div>
 
         {/* ── Students & Groups tab ── */}
@@ -746,6 +760,14 @@ export default function TeacherDashboard() {
                               </div>
                             </div>
 
+                            {/* Student Monthly Payment, Rest & Assurance row widget */}
+                            <div className="mb-3">
+                              <StudentPaymentRowWidget
+                                student={student}
+                                month={selectedDate?.slice(0, 7)}
+                              />
+                            </div>
+
                             {/* Note Section header & toggle */}
                             <div className="flex items-center justify-between mb-2">
                               <span className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 font-semibold">
@@ -861,6 +883,13 @@ export default function TeacherDashboard() {
         <StudentObservationsModal
           student={observationsStudent}
           onClose={() => setObservationsStudent(null)}
+        />
+      )}
+      {showMonthlyRapport && (
+        <MonthlyFinancialRapportModal
+          teacherId={data?.teacher?._id}
+          teacherName={data?.teacher?.name}
+          onClose={() => setShowMonthlyRapport(false)}
         />
       )}
     </AppLayout>
