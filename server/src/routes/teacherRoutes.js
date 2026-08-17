@@ -5,6 +5,7 @@ import { Attendance } from "../models/Attendance.js";
 import { User } from "../models/User.js";
 import { Group } from "../models/Group.js";
 import { StudentNote } from "../models/StudentNote.js";
+import { Payment } from "../models/Payment.js";
 import { dateKey, daysAgo } from "../utils/dates.js";
 import { sendAbsenceNotification } from "../utils/email.js";
 import { attendanceSchema } from "../validators/schemas.js";
@@ -27,10 +28,11 @@ teacherRouter.get("/dashboard", async (req, res, next) => {
   try {
     const selectedDate = req.query.date || dateKey();
     const today = dateKey();
+    const currentMonth = selectedDate.slice(0, 7); // e.g. "2026-08"
     const students = await getAssignedStudents(req.user);
     const studentIds = students.map((student) => student._id);
 
-    const [todayRecords, weekStats, sessionCounts] = await Promise.all([
+    const [todayRecords, weekStats, sessionCounts, monthlyPayments] = await Promise.all([
       Attendance.find({ date: selectedDate, student: { $in: studentIds } }),
       Attendance.aggregate([
         {
@@ -49,7 +51,11 @@ teacherRouter.get("/dashboard", async (req, res, next) => {
           }
         },
         { $group: { _id: "$student", count: { $sum: 1 } } }
-      ])
+      ]),
+      Payment.find({
+        student: { $in: studentIds },
+        month: currentMonth
+      })
     ]);
 
     const attendanceByStudent = new Map(
@@ -58,11 +64,15 @@ teacherRouter.get("/dashboard", async (req, res, next) => {
     const sessionsByStudent = new Map(
       sessionCounts.map((item) => [String(item._id), item.count])
     );
+    const paymentsByStudent = new Map(
+      monthlyPayments.map((payment) => [String(payment.student), payment])
+    );
 
     res.json({
       teacher: req.user,
       date: selectedDate,
       today,
+      month: currentMonth,
       weekStats,
       students: students.map((student) => {
         const baseSessions = student.studentProfile?.sessionsAttended || 0;
@@ -70,6 +80,7 @@ teacherRouter.get("/dashboard", async (req, res, next) => {
         return {
           ...student.toJSON(),
           todayAttendance: attendanceByStudent.get(String(student._id)) || null,
+          currentPayment: paymentsByStudent.get(String(student._id)) || null,
           sessionsAttended: baseSessions + presentCount
         };
       })

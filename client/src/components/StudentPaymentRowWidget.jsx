@@ -43,6 +43,7 @@ export default function StudentPaymentRowWidget({
     Boolean(initialPayment?.assurancePaid)
   );
 
+  const [savedPaymentRecord, setSavedPaymentRecord] = useState(initialPayment || null);
   const [saving, setSaving] = useState(false);
   const [justSaved, setJustSaved] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
@@ -52,6 +53,7 @@ export default function StudentPaymentRowWidget({
   // Sync if initialPayment changes
   useEffect(() => {
     if (initialPayment) {
+      setSavedPaymentRecord(initialPayment);
       setTuitionFee(initialPayment.amount != null ? initialPayment.amount : defaultTuition);
       setPaidInput(initialPayment.paidAmount != null ? String(initialPayment.paidAmount) : "0");
       setAssurancePaid(Boolean(initialPayment.assurancePaid));
@@ -60,7 +62,7 @@ export default function StudentPaymentRowWidget({
   }, [initialPayment]);
 
   const numPaid = Math.max(0, parseInt(paidInput, 10) || 0);
-  const restAmount = Math.max(0, tuitionFee - numPaid);
+  const restAmount = Math.max(0, (Number(tuitionFee) || defaultTuition) - numPaid);
 
   const handlePaidChange = (val) => {
     const clean = val.replace(/\D/g, "");
@@ -78,7 +80,7 @@ export default function StudentPaymentRowWidget({
     setError("");
     try {
       const sId = student?._id || student?.id || student;
-      if (!sId) return;
+      if (!sId) return null;
 
       const payload = {
         studentId: sId,
@@ -89,15 +91,25 @@ export default function StudentPaymentRowWidget({
       };
 
       const { data } = await api.post("/payments/quick", payload);
+      setSavedPaymentRecord(data.payment);
       setJustSaved(true);
       setHasChanges(false);
       if (onPaymentUpdated) onPaymentUpdated(data.payment);
       setTimeout(() => setJustSaved(false), 2000);
+      return data.payment;
     } catch (err) {
       setError(getApiError(err));
+      return null;
     } finally {
       setSaving(false);
     }
+  };
+
+  const handleOpenReceipt = async () => {
+    if (hasChanges) {
+      await savePayment();
+    }
+    setShowReceipt(true);
   };
 
   const isFullyPaid = numPaid >= tuitionFee && tuitionFee > 0;
@@ -112,6 +124,7 @@ export default function StudentPaymentRowWidget({
             type="text"
             value={paidInput}
             onChange={(e) => handlePaidChange(e.target.value)}
+            onBlur={() => { if (hasChanges) savePayment(); }}
             className="w-14 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-lg px-1.5 py-0.5 text-xs font-bold text-slate-800 dark:text-white text-right focus:outline-none focus:ring-1 focus:ring-brand-500"
           />
           <span className="text-[10px] font-semibold text-slate-500">DA</span>
@@ -143,6 +156,16 @@ export default function StudentPaymentRowWidget({
           Assurance 800DA
         </button>
 
+        <button
+          type="button"
+          onClick={handleOpenReceipt}
+          className="inline-flex items-center gap-1 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 px-2 py-1 text-[10px] font-bold text-slate-700 dark:text-slate-200 shadow-2xs active:scale-95 transition-all"
+          title="Afficher et envoyer le reçu numérique"
+        >
+          <Receipt className="h-3 w-3 text-emerald-600" />
+          <span>Reçu</span>
+        </button>
+
         {hasChanges && (
           <button
             type="button"
@@ -159,6 +182,24 @@ export default function StudentPaymentRowWidget({
           <span className="text-[10px] font-black text-emerald-600 flex items-center gap-0.5">
             <Check className="h-3 w-3" /> Saved
           </span>
+        )}
+
+        {showReceipt && (
+          <DigitalReceiptModal
+            payment={
+              savedPaymentRecord || {
+                amount: Number(tuitionFee) || defaultTuition,
+                paidAmount: numPaid,
+                restAmount,
+                assurancePaid: Boolean(assurancePaid),
+                assuranceAmount: assuranceFee,
+                month: currentMonth,
+                paidDate: new Date()
+              }
+            }
+            student={student}
+            onClose={() => setShowReceipt(false)}
+          />
         )}
       </div>
     );
@@ -198,6 +239,7 @@ export default function StudentPaymentRowWidget({
             placeholder="0"
             value={paidInput}
             onChange={(e) => handlePaidChange(e.target.value)}
+            onBlur={() => { if (hasChanges) savePayment(); }}
             className="w-16 text-right font-black text-xs text-slate-900 dark:text-white bg-transparent focus:outline-none"
           />
           <span className="text-[10px] font-bold text-slate-400">DA</span>
@@ -220,7 +262,7 @@ export default function StudentPaymentRowWidget({
         {/* Digital Receipt Trigger */}
         <button
           type="button"
-          onClick={() => setShowReceipt(true)}
+          onClick={handleOpenReceipt}
           className="inline-flex items-center gap-1 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 px-2 py-1 text-[11px] font-bold text-slate-700 dark:text-slate-200 shadow-2xs active:scale-95 transition-all"
           title="Afficher et envoyer le reçu numérique"
         >
@@ -256,15 +298,17 @@ export default function StudentPaymentRowWidget({
 
       {showReceipt && (
         <DigitalReceiptModal
-          payment={{
-            amount: Number(tuitionFee) || defaultTuition,
-            paidAmount: numPaid,
-            restAmount,
-            assurancePaid,
-            assuranceAmount: assuranceFee,
-            month: currentMonth,
-            paidDate: new Date()
-          }}
+          payment={
+            savedPaymentRecord || {
+              amount: Number(tuitionFee) || defaultTuition,
+              paidAmount: numPaid,
+              restAmount,
+              assurancePaid: Boolean(assurancePaid),
+              assuranceAmount: assuranceFee,
+              month: currentMonth,
+              paidDate: new Date()
+            }
+          }
           student={student}
           onClose={() => setShowReceipt(false)}
         />

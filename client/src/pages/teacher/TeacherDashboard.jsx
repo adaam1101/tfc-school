@@ -783,6 +783,15 @@ export default function TeacherDashboard() {
                               <StudentPaymentRowWidget
                                 student={student}
                                 month={selectedDate?.slice(0, 7)}
+                                initialPayment={student.currentPayment}
+                                onPaymentUpdated={(updatedPayment) => {
+                                  setData(curr => ({
+                                    ...curr,
+                                    students: (curr?.students || []).map(s =>
+                                      s._id === student._id ? { ...s, currentPayment: updatedPayment } : s
+                                    )
+                                  }));
+                                }}
                               />
                             </div>
 
