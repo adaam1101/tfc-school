@@ -14,7 +14,11 @@ import {
   TrendingUp,
   Award,
   Download,
-  ClipboardCheck
+  ClipboardCheck,
+  UploadCloud,
+  Inbox,
+  Sparkles,
+  MessageSquare
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { api, getApiError } from "../../api/http.js";
@@ -27,6 +31,7 @@ import { T } from "../../translations/dashboards.js";
 import AnnouncementsCard from "../../components/AnnouncementsCard.jsx";
 import IDCardModal from "../../components/IDCardModal.jsx";
 import TimetableGrid from "../../components/TimetableGrid.jsx";
+import StudentSubmissionModal from "../../components/StudentSubmissionModal.jsx";
 
 const payStatusBadge = {
   paid:     "bg-emerald-100 text-emerald-700 ring-emerald-200 dark:bg-emerald-900 dark:text-emerald-300 dark:ring-emerald-700",
@@ -48,6 +53,8 @@ export default function StudentDashboard() {
   const [payments, setPayments] = useState([]);
   const [schedules, setSchedules] = useState([]);
   const [coursework, setCoursework] = useState([]);
+  const [submissions, setSubmissions] = useState([]);
+  const [submittingCoursework, setSubmittingCoursework] = useState(null);
   const [showIdCard, setShowIdCard] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
@@ -57,6 +64,15 @@ export default function StudentDashboard() {
     try {
       const { data } = await api.get("/schedules");
       setSchedules(data.schedules || []);
+    } catch {
+      // ignore
+    }
+  };
+
+  const loadSubmissions = async () => {
+    try {
+      const { data } = await api.get("/submissions/mine");
+      setSubmissions(data.submissions || []);
     } catch {
       // ignore
     }
@@ -77,6 +93,7 @@ export default function StudentDashboard() {
     loadProfile();
     api.get("/payments/mine").then(({ data }) => setPayments(data.payments || [])).catch(() => {});
     api.get("/coursework/mine").then(({ data }) => setCoursework(data.items || [])).catch(() => {});
+    loadSubmissions();
     loadSchedules();
   }, []);
 
@@ -460,50 +477,153 @@ export default function StudentDashboard() {
                   <div>
                     <div className="mb-3 flex items-center justify-between"><h3 className="text-sm font-black uppercase tracking-widest text-rose-700 dark:text-rose-300">Assignments</h3><span className="rounded-full bg-rose-50 px-2.5 py-1 text-xs font-bold text-rose-600 dark:bg-rose-950/50 dark:text-rose-300">{assignments.length}</span></div>
                     <div className="space-y-3">
-                      {assignments.length ? assignments.map((item) => (
-                        <article key={item._id} className="rounded-2xl border border-rose-100 bg-gradient-to-br from-rose-50/70 to-white p-4 transition hover:-translate-y-0.5 hover:shadow-md dark:border-rose-900/60 dark:from-rose-950/25 dark:to-slate-800">
-                          <div className="flex items-start gap-3">
-                            <div className="rounded-xl bg-rose-500 p-2 text-white shadow-sm"><ClipboardCheck className="h-5 w-5" /></div>
-                            <div className="min-w-0 flex-1">
-                              <div className="flex flex-wrap items-center justify-between gap-2">
-                                <p className="font-bold text-slate-900 dark:text-white">{item.title}</p>
-                                {item.dueDate && <span className="rounded-full bg-rose-100 px-2.5 py-1 text-xs font-black text-rose-700 dark:bg-rose-900/50 dark:text-rose-200">Due {item.dueDate}</span>}
-                              </div>
-                              <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-slate-600 dark:text-slate-300">{item.body}</p>
-
-                              {item.attachments && item.attachments.length > 0 && (
-                                <div className="mt-3 pt-2.5 border-t border-rose-100 dark:border-rose-900/60 grid gap-2 sm:grid-cols-2">
-                                  {item.attachments.map((att, idx) => (
-                                    <div key={idx} className="flex items-center gap-2 rounded-xl bg-white dark:bg-slate-900/60 p-2 border border-rose-100 dark:border-rose-900/50 shadow-2xs">
-                                      {att.fileType === "image" ? (
-                                        <a href={att.fileData} target="_blank" rel="noreferrer">
-                                          <img src={att.fileData} alt={att.fileName} className="h-9 w-9 rounded-lg object-cover border shrink-0" />
-                                        </a>
-                                      ) : (
-                                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-rose-500 text-white font-black text-[10px]">
-                                          PDF
-                                        </div>
-                                      )}
-                                      <div className="min-w-0 flex-1">
-                                        <p className="text-xs font-bold text-slate-800 dark:text-slate-200 truncate">{att.fileName}</p>
-                                        <a href={att.fileData} download={att.fileName} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-[10px] font-bold text-rose-600 dark:text-rose-400">
-                                          <Download className="h-3 w-3" /> View / Download
-                                        </a>
-                                      </div>
-                                    </div>
-                                  ))}
+                      {assignments.length ? assignments.map((item) => {
+                        const existingSub = submissions.find(
+                          (s) => String(s.coursework?._id || s.coursework) === String(item._id)
+                        );
+                        return (
+                          <article key={item._id} className="rounded-2xl border border-rose-100 bg-gradient-to-br from-rose-50/70 to-white p-4 transition hover:-translate-y-0.5 hover:shadow-md dark:border-rose-900/60 dark:from-rose-950/25 dark:to-slate-800">
+                            <div className="flex items-start gap-3">
+                              <div className="rounded-xl bg-rose-500 p-2 text-white shadow-sm shrink-0"><ClipboardCheck className="h-5 w-5" /></div>
+                              <div className="min-w-0 flex-1">
+                                <div className="flex flex-wrap items-center justify-between gap-2">
+                                  <p className="font-bold text-slate-900 dark:text-white">{item.title}</p>
+                                  {item.dueDate && <span className="rounded-full bg-rose-100 px-2.5 py-1 text-xs font-black text-rose-700 dark:bg-rose-900/50 dark:text-rose-200">Due {item.dueDate}</span>}
                                 </div>
-                              )}
+                                <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-slate-600 dark:text-slate-300">{item.body}</p>
 
-                              <p className="mt-3 text-xs font-bold text-rose-600 dark:text-rose-300">Complete this before the due date.</p>
+                                {item.attachments && item.attachments.length > 0 && (
+                                  <div className="mt-3 pt-2.5 border-t border-rose-100 dark:border-rose-900/60 grid gap-2 sm:grid-cols-2">
+                                    {item.attachments.map((att, idx) => (
+                                      <div key={idx} className="flex items-center gap-2 rounded-xl bg-white dark:bg-slate-900/60 p-2 border border-rose-100 dark:border-rose-900/50 shadow-2xs">
+                                        {att.fileType === "image" ? (
+                                          <a href={att.fileData} target="_blank" rel="noreferrer">
+                                            <img src={att.fileData} alt={att.fileName} className="h-9 w-9 rounded-lg object-cover border shrink-0" />
+                                          </a>
+                                        ) : (
+                                          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-rose-500 text-white font-black text-[10px]">
+                                            PDF
+                                          </div>
+                                        )}
+                                        <div className="min-w-0 flex-1">
+                                          <p className="text-xs font-bold text-slate-800 dark:text-slate-200 truncate">{att.fileName}</p>
+                                          <a href={att.fileData} download={att.fileName} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-[10px] font-bold text-rose-600 dark:text-rose-400">
+                                            <Download className="h-3 w-3" /> View / Download
+                                          </a>
+                                        </div>
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+
+                                {/* Submission status & Submit Work button */}
+                                <div className="mt-3.5 pt-3 border-t border-rose-100 dark:border-rose-900/50 flex flex-wrap items-center justify-between gap-2">
+                                  {existingSub ? (
+                                    <div className="flex flex-wrap items-center gap-2">
+                                      <span className="inline-flex items-center gap-1 rounded-xl bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 px-2.5 py-1 text-xs font-bold">
+                                        <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" /> Submitted
+                                      </span>
+                                      {existingSub.grade && (
+                                        <span className="rounded-xl bg-emerald-600 text-white font-black px-2.5 py-1 text-xs shadow-2xs">
+                                          🏆 Grade: {existingSub.grade}
+                                        </span>
+                                      )}
+                                    </div>
+                                  ) : (
+                                    <span className="text-[11px] font-medium text-slate-400">
+                                      Not submitted yet
+                                    </span>
+                                  )}
+
+                                  <button
+                                    type="button"
+                                    onClick={() => setSubmittingCoursework(item)}
+                                    className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-rose-600 via-brand-600 to-indigo-600 px-3.5 py-1.5 text-xs font-bold text-white shadow-xs hover:from-rose-700 hover:to-indigo-700 transition active:scale-95 ml-auto"
+                                  >
+                                    <UploadCloud className="h-3.5 w-3.5" />
+                                    {existingSub ? "Update Your Work" : "Submit Work"}
+                                  </button>
+                                </div>
+                              </div>
                             </div>
-                          </div>
-                        </article>
-                      )) : <div className="rounded-2xl border-2 border-dashed border-rose-100 p-7 text-center dark:border-rose-900"><CheckCircle2 className="mx-auto h-9 w-9 text-rose-200 dark:text-rose-800" /><p className="mt-3 text-sm font-semibold text-slate-500">No assignments right now. You are all caught up!</p></div>}
+                          </article>
+                        );
+                      }) : <div className="rounded-2xl border-2 border-dashed border-rose-100 p-7 text-center dark:border-rose-900"><CheckCircle2 className="mx-auto h-9 w-9 text-rose-200 dark:text-rose-800" /><p className="mt-3 text-sm font-semibold text-slate-500">No assignments right now. You are all caught up!</p></div>}
                     </div>
                   </div>
                 </div>
               </section>
+
+              {/* Submissions & Teacher Feedback Log Card */}
+              {submissions.length > 0 && (
+                <section className="card p-6 border border-indigo-100 dark:border-indigo-900/60 bg-gradient-to-br from-indigo-50/20 via-white to-emerald-50/20 dark:from-slate-900 dark:to-slate-800 lg:col-span-2">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-600 to-emerald-600 text-white shadow-sm">
+                        <GraduationCap className="h-5 w-5" />
+                      </div>
+                      <div>
+                        <h3 className="text-base font-black text-slate-900 dark:text-white">Your Submitted Work & Teacher Grades</h3>
+                        <p className="text-xs text-slate-500 dark:text-slate-400">Track homework grades, answers, and feedback from your teacher</p>
+                      </div>
+                    </div>
+                    <span className="rounded-full bg-indigo-50 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 font-black px-3 py-1 text-xs">
+                      {submissions.length} Turn-in(s)
+                    </span>
+                  </div>
+
+                  <div className="grid gap-3.5 sm:grid-cols-2 xl:grid-cols-3">
+                    {submissions.map((sub) => (
+                      <div key={sub._id} className="rounded-2xl border border-slate-200 dark:border-slate-700/80 bg-white dark:bg-slate-800/90 p-4 space-y-2.5 shadow-2xs flex flex-col justify-between">
+                        <div className="space-y-2">
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="min-w-0">
+                              <p className="font-bold text-slate-900 dark:text-white text-sm truncate">
+                                {sub.assignmentTitle || sub.coursework?.title || "Homework Submission"}
+                              </p>
+                              <p className="text-[10px] text-slate-400">
+                                {new Date(sub.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
+                              </p>
+                            </div>
+                            {sub.grade ? (
+                              <span className="rounded-xl bg-emerald-600 text-white font-black px-2.5 py-1 text-xs shadow-2xs shrink-0">
+                                {sub.grade}
+                              </span>
+                            ) : (
+                              <span className="rounded-full bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300 px-2 py-0.5 text-[10px] font-bold shrink-0">
+                                Pending
+                              </span>
+                            )}
+                          </div>
+
+                          {sub.comment && (
+                            <p className="text-xs text-slate-600 dark:text-slate-300 line-clamp-2 italic bg-slate-50 dark:bg-slate-900/50 p-2 rounded-xl border border-slate-100 dark:border-slate-800">
+                              "{sub.comment}"
+                            </p>
+                          )}
+
+                          {sub.feedback && (
+                            <div className="rounded-xl bg-emerald-50 dark:bg-emerald-950/40 p-2.5 border border-emerald-200 dark:border-emerald-800/50 text-xs text-emerald-900 dark:text-emerald-200">
+                              <span className="font-bold block text-[10px] uppercase text-emerald-700 dark:text-emerald-400">
+                                💬 Teacher Remark:
+                              </span>
+                              "{sub.feedback}"
+                            </div>
+                          )}
+                        </div>
+
+                        {sub.attachments && sub.attachments.length > 0 && (
+                          <div className="pt-2 border-t border-slate-100 dark:border-slate-700/60 flex items-center justify-between text-xs text-slate-500">
+                            <span>📎 {sub.attachments.length} attachment(s)</span>
+                            <span className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400">Uploaded</span>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              )}
+
               <AnnouncementsCard />
 
               {/* My fees quick summary */}
@@ -558,6 +678,17 @@ export default function StudentDashboard() {
       </div>
 
       {showIdCard && student && <IDCardModal user={student} onClose={() => setShowIdCard(false)} />}
+
+      {submittingCoursework && (
+        <StudentSubmissionModal
+          coursework={submittingCoursework}
+          existingSubmission={submissions.find(
+            (s) => String(s.coursework?._id || s.coursework) === String(submittingCoursework._id)
+          )}
+          onSuccess={() => loadSubmissions()}
+          onClose={() => setSubmittingCoursework(null)}
+        />
+      )}
     </AppLayout>
   );
 }

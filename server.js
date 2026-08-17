@@ -15,6 +15,11 @@ import { rfidRouter } from "./routes/rfidRoutes.js";
 import { studentRouter } from "./routes/studentRoutes.js";
 import { teacherRouter } from "./routes/teacherRoutes.js";
 import { ratingRouter } from "./routes/ratingRoutes.js";
+import { courseworkRouter } from "./routes/courseworkRoutes.js";
+import { submissionRouter } from "./routes/submissionRoutes.js";
+import { scheduleRouter } from "./routes/scheduleRoutes.js";
+import { announcementRouter } from "./routes/announcementRoutes.js";
+import { paymentRouter } from "./routes/paymentRoutes.js";
 import { demoRouter } from "./demo/demoRoutes.js";
 
 dotenv.config();
@@ -70,6 +75,11 @@ if (demoMode) {
   app.use("/api/teacher", teacherRouter);
   app.use("/api/student", studentRouter);
   app.use("/api/ratings", ratingRouter);
+  app.use("/api/coursework", courseworkRouter);
+  app.use("/api/submissions", submissionRouter);
+  app.use("/api/schedules", scheduleRouter);
+  app.use("/api/announcements", announcementRouter);
+  app.use("/api/payments", paymentRouter);
 }
 
 const clientDistCandidates = [
