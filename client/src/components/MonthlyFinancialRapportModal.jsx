@@ -115,10 +115,10 @@ export default function MonthlyFinancialRapportModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-3 sm:p-5 animate-fade-in overflow-y-auto print:p-0 print:bg-white print:static">
-      <div className="w-full max-w-6xl rounded-3xl bg-white dark:bg-slate-900 shadow-2xl border border-slate-200 dark:border-slate-800 flex flex-col max-h-[94vh] overflow-hidden print:max-h-none print:border-none print:shadow-none">
+    <div className="fixed inset-0 z-[100] flex items-start justify-center bg-black/75 backdrop-blur-sm p-2 sm:p-4 md:p-6 animate-fade-in overflow-y-auto print:p-0 print:bg-white print:static">
+      <div className="w-full max-w-6xl rounded-3xl bg-white dark:bg-slate-900 shadow-2xl border border-slate-200 dark:border-slate-800 flex flex-col my-2 sm:my-4 max-h-[calc(100vh-2rem)] sm:max-h-[calc(100vh-3rem)] overflow-hidden print:max-h-none print:border-none print:shadow-none shrink-0">
         {/* Header */}
-        <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-brand-950 px-6 py-5 text-white flex flex-wrap items-center justify-between gap-4 shrink-0 print:bg-none print:text-black print:p-0 print:border-b print:pb-4">
+        <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-brand-950 px-5 sm:px-6 py-3.5 sm:py-4 text-white flex flex-wrap items-center justify-between gap-4 shrink-0 sticky top-0 z-20 print:bg-none print:text-black print:p-0 print:border-b print:pb-4">
           <div className="flex items-center gap-3">
             <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/10 backdrop-blur-sm text-brand-400 print:hidden">
               <TrendingUp className="h-6 w-6" />

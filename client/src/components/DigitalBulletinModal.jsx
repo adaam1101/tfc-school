@@ -127,8 +127,8 @@ export default function DigitalBulletinModal({
   const waUrl = buildWhatsAppUrl();
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 overflow-y-auto print:p-0 print:bg-white animate-fade-in">
-      <div className="w-full max-w-2xl rounded-3xl bg-white dark:bg-slate-900 shadow-2xl overflow-hidden border border-slate-100 dark:border-slate-800 print:border-0 print:shadow-none my-auto">
+    <div className="fixed inset-0 z-[100] flex items-start justify-center bg-black/75 backdrop-blur-sm p-3 sm:p-6 overflow-y-auto print:p-0 print:bg-white animate-fade-in">
+      <div className="w-full max-w-2xl rounded-3xl bg-white dark:bg-slate-900 shadow-2xl overflow-hidden border border-slate-100 dark:border-slate-800 print:border-0 print:shadow-none my-4 sm:my-8">
         
         {/* Top Controls (Hidden on print) */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/60 print:hidden">
