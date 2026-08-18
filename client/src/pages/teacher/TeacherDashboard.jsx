@@ -21,7 +21,8 @@ import {
   ChevronRight,
   Wallet,
   TrendingUp,
-  BarChart2
+  BarChart2,
+  UserPlus
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import TeacherGroupsPanel, { GroupBroadcastModal } from "../../components/TeacherGroupsPanel.jsx";
@@ -40,6 +41,7 @@ import TeacherCourseworkPanel from "../../components/TeacherCourseworkPanel.jsx"
 import StudentPaymentRowWidget from "../../components/StudentPaymentRowWidget.jsx";
 import MonthlyFinancialRapportModal from "../../components/MonthlyFinancialRapportModal.jsx";
 import DigitalBulletinModal from "../../components/DigitalBulletinModal.jsx";
+import TeacherCreateStudentModal from "../../components/TeacherCreateStudentModal.jsx";
 
 const TAB_IDS = [
   { id: "attendance", key: "attendance", icon: ClipboardCheck },
@@ -106,6 +108,7 @@ export default function TeacherDashboard() {
   const [selectedStatus, setSelectedStatus] = useState("all");
   const [bulkSaving, setBulkSaving] = useState(false);
   const [showMonthlyRapport, setShowMonthlyRapport] = useState(false);
+  const [showCreateStudentModal, setShowCreateStudentModal] = useState(false);
 
   const handleBulkAttendance = async (status) => {
     if (filteredStudents.length === 0) return;
@@ -509,6 +512,15 @@ export default function TeacherDashboard() {
                       />
                     </div>
 
+                    <button
+                      type="button"
+                      onClick={() => setShowCreateStudentModal(true)}
+                      className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-emerald-400 to-teal-500 hover:from-emerald-300 hover:to-teal-400 text-slate-950 px-3.5 py-2 text-xs font-black shadow-md transition-all active:scale-95 cursor-pointer"
+                      title="Créer un nouveau compte élève"
+                    >
+                      <UserPlus className="h-3.5 w-3.5" />
+                      <span>+ Add Student</span>
+                    </button>
                     <button type="button" className="inline-flex items-center gap-1.5 rounded-xl bg-rose-500/25 hover:bg-rose-500/35 border border-rose-300/30 px-3 py-2 text-xs font-bold text-white transition-all active:scale-95" onClick={handleResetAttendance} title="Clear past attendance records">
                       <Trash2 className="h-3.5 w-3.5 text-rose-200" />
                       Reset Past
@@ -531,7 +543,15 @@ export default function TeacherDashboard() {
               <div className="col-span-full flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-200 py-16 text-center dark:border-slate-700">
                 <UserRound className="h-12 w-12 text-slate-350 dark:text-slate-600 mb-3" />
                 <p className="text-sm font-bold text-slate-500 dark:text-slate-400">{t.noStudentsAssigned}</p>
-                <p className="text-xs text-slate-400 mt-1">{t.askAdmin}</p>
+                <p className="text-xs text-slate-400 mt-1 mb-4">Créez directement les comptes de vos élèves pour commencer.</p>
+                <button
+                  type="button"
+                  onClick={() => setShowCreateStudentModal(true)}
+                  className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-700 hover:to-indigo-700 text-white px-5 py-2.5 text-xs font-black shadow-md transition-all active:scale-95"
+                >
+                  <UserPlus className="h-4 w-4" />
+                  <span>+ Create Student Account</span>
+                </button>
               </div>
             ) : (
               <>
@@ -924,6 +944,16 @@ export default function TeacherDashboard() {
           teacherId={data?.teacher?._id}
           teacherName={data?.teacher?.name}
           onClose={() => setShowMonthlyRapport(false)}
+        />
+      )}
+      {showCreateStudentModal && (
+        <TeacherCreateStudentModal
+          defaultCourse={data?.teacher?.teacherProfile?.subject || "English - A1"}
+          groups={groups || []}
+          onClose={() => setShowCreateStudentModal(false)}
+          onStudentCreated={() => {
+            loadDashboard(selectedDate);
+          }}
         />
       )}
     </AppLayout>

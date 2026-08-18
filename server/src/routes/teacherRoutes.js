@@ -10,6 +10,7 @@ import { dateKey, daysAgo } from "../utils/dates.js";
 import { sendAbsenceNotification } from "../utils/email.js";
 import { attendanceSchema } from "../validators/schemas.js";
 import { sendWhatsAppMessage } from "../utils/whatsapp.js";
+import { recordAudit } from "../utils/audit.js";
 
 export const teacherRouter = express.Router();
 
@@ -23,6 +24,118 @@ const getAssignedStudents = async (teacher) => {
     $or: [{ "studentProfile.teacher": teacher._id }, { _id: { $in: assignedIds } }]
   }).sort({ name: 1 });
 };
+
+// ── Teacher: Create a new student account ──
+teacherRouter.post("/students", async (req, res, next) => {
+  try {
+    const {
+      name,
+      email,
+      username,
+      password,
+      phone,
+      photo,
+      course,
+      parentName,
+      parentPhone,
+      parentEmail,
+      age,
+      dateOfBirth,
+      groupId
+    } = req.body;
+
+    if (!name?.trim()) {
+      return res.status(400).json({ message: "Student full name is required." });
+    }
+
+    const userIdentifier = (username || email || "").trim();
+    if (!userIdentifier) {
+      return res.status(400).json({ message: "Student login username or email is required." });
+    }
+
+    if (!password || password.length < 6) {
+      return res.status(400).json({ message: "Password must be at least 6 characters." });
+    }
+
+    const resolvedCourse = (course || req.user.teacherProfile?.subject || "Standard").trim();
+
+    // Check if user with username or email already exists
+    const existing = await User.findOne({
+      $or: [
+        { email: userIdentifier.toLowerCase() },
+        { username: userIdentifier.toLowerCase() },
+        { email: `${userIdentifier.toLowerCase()}@tfc.local` }
+      ]
+    });
+
+    if (existing) {
+      return res.status(409).json({
+        message: `An account with username or email "${userIdentifier}" already exists. Please choose a different username.`
+      });
+    }
+
+    const studentUser = await User.create({
+      role: "student",
+      name: name.trim(),
+      email: userIdentifier.includes("@") ? userIdentifier.toLowerCase() : `${userIdentifier.toLowerCase()}@tfc.local`,
+      username: userIdentifier.toLowerCase().replace(/@.+/, ""),
+      password,
+      phone: phone?.trim() || "",
+      photo: photo || "",
+      status: "active",
+      studentProfile: {
+        course: resolvedCourse,
+        teacher: req.user._id,
+        parentName: parentName?.trim() || "",
+        parentPhone: parentPhone?.trim() || "",
+        parentEmail: parentEmail?.trim() || "",
+        age: age ? Number(age) : undefined,
+        dateOfBirth: dateOfBirth?.trim() || "",
+        sessionsAttended: 0,
+        isStopped: false,
+        enrollmentDate: new Date()
+      }
+    });
+
+    // Add to teacher's assigned students list
+    await User.findByIdAndUpdate(req.user._id, {
+      $addToSet: { "teacherProfile.assignedStudents": studentUser._id }
+    });
+
+    // If groupId is specified, add student to the group
+    if (groupId) {
+      const grp = await Group.findOne({ _id: groupId, teacher: req.user._id });
+      if (grp) {
+        grp.students.addToSet(studentUser._id);
+        await grp.save();
+      }
+    }
+
+    await recordAudit({
+      req,
+      action: "create",
+      entity: "student",
+      entityLabel: `${studentUser.name} (created by Teacher ${req.user.name})`
+    });
+
+    const populatedStudent = await User.findById(studentUser._id)
+      .select("-password")
+      .populate("studentProfile.teacher", "name email teacherProfile.subject");
+
+    res.status(201).json({
+      student: {
+        ...populatedStudent.toJSON(),
+        todayAttendance: null,
+        currentPayment: null,
+        sessionsAttended: 0
+      },
+      rawPassword: password,
+      message: `Student account for ${studentUser.name} created successfully! 🎉`
+    });
+  } catch (error) {
+    next(error);
+  }
+});
 
 teacherRouter.get("/dashboard", async (req, res, next) => {
   try {
