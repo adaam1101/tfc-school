@@ -10,6 +10,7 @@ import mongoSanitize from "express-mongo-sanitize";
 import morgan from "morgan";
 import { connectDB } from "./config/db.js";
 import { bootstrapAdmin } from "./config/bootstrapAdmin.js";
+import { bootstrapAdamA1 } from "./config/bootstrapAdamA1.js";
 import { initWhatsapp } from "./utils/whatsapp.js";
 import { errorHandler, notFound } from "./middleware/errorHandler.js";
 import { adminRouter } from "./routes/adminRoutes.js";
@@ -90,6 +91,7 @@ app.use(errorHandler);
 
 connectDB().then(async () => {
   await bootstrapAdmin();
+  await bootstrapAdamA1();
   if (process.env.WHATSAPP_ENABLED === "true") {
     await initWhatsapp();
   }
