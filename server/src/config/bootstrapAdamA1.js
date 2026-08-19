@@ -3,7 +3,7 @@ import { Group } from "../models/Group.js";
 import { Payment } from "../models/Payment.js";
 
 export const RAW_ADAM_STUDENTS_G1 = [
-  // --- Sheet 1 ---
+  // --- Sheet 1 & Attendance Sheet 1 ---
   {
     name: "فقيه يامنى",
     username: "fkih.yamna",
@@ -11,6 +11,7 @@ export const RAW_ADAM_STUDENTS_G1 = [
     parentPhone: "0667073976",
     paidAmount: 7500,
     assurancePaid: false,
+    sessionsAttended: 4,
     notes: "تم دفع كامل المبلغ 7500 دج"
   },
   {
@@ -20,6 +21,7 @@ export const RAW_ADAM_STUDENTS_G1 = [
     parentPhone: "0664896581",
     paidAmount: 5500,
     assurancePaid: true,
+    sessionsAttended: 8,
     notes: "الدفعة 1: 3500 دج + الدفعة 2: 2000 دج + حقوق تسجيل 800 دج"
   },
   {
@@ -29,6 +31,7 @@ export const RAW_ADAM_STUDENTS_G1 = [
     parentPhone: "0791892663",
     paidAmount: 2000,
     assurancePaid: true,
+    sessionsAttended: 5,
     notes: "الدفعة 1: 2000 دج + حقوق تسجيل 800 دج"
   },
   {
@@ -38,6 +41,7 @@ export const RAW_ADAM_STUDENTS_G1 = [
     parentPhone: "0558631454",
     paidAmount: 3000,
     assurancePaid: false,
+    sessionsAttended: 5,
     notes: "الدفعة 1: 3000 دج"
   },
   {
@@ -47,10 +51,11 @@ export const RAW_ADAM_STUDENTS_G1 = [
     parentPhone: "0673300390",
     paidAmount: 7000,
     assurancePaid: false,
+    sessionsAttended: 6,
     notes: "الدفعة 1: 7000 دج"
   },
 
-  // --- Sheet 2 (Adem A1 - G1) ---
+  // --- Sheet 2 (Adem A1 - G1 Attendance Sheet) ---
   {
     name: "طراد دينا",
     username: "trad.dina",
@@ -58,6 +63,7 @@ export const RAW_ADAM_STUDENTS_G1 = [
     parentPhone: "0661986093",
     paidAmount: 4000,
     assurancePaid: false,
+    sessionsAttended: 5,
     notes: "الدفعة 1: 4000 دج"
   },
   {
@@ -67,6 +73,7 @@ export const RAW_ADAM_STUDENTS_G1 = [
     parentPhone: "0660000001",
     paidAmount: 2500,
     assurancePaid: false,
+    sessionsAttended: 8,
     notes: "الدفعة 1: 2500 دج"
   },
   {
@@ -76,6 +83,7 @@ export const RAW_ADAM_STUDENTS_G1 = [
     parentPhone: "0660000002",
     paidAmount: 2500,
     assurancePaid: false,
+    sessionsAttended: 8,
     notes: "الدفعة 1: 2500 دج"
   },
   {
@@ -85,6 +93,7 @@ export const RAW_ADAM_STUDENTS_G1 = [
     parentPhone: "0656230032",
     paidAmount: 2500,
     assurancePaid: false,
+    sessionsAttended: 7,
     notes: "الدفعة 1: 2500 دج"
   },
   {
@@ -94,6 +103,7 @@ export const RAW_ADAM_STUDENTS_G1 = [
     parentPhone: "0776907068",
     paidAmount: 7500,
     assurancePaid: true,
+    sessionsAttended: 8,
     notes: "خالص كامل المبلغ 7500 دج + حقوق تسجيل 800 دج"
   },
   {
@@ -103,6 +113,7 @@ export const RAW_ADAM_STUDENTS_G1 = [
     parentPhone: "0665817156",
     paidAmount: 7500,
     assurancePaid: true,
+    sessionsAttended: 7,
     notes: "خالص كامل المبلغ 7500 دج + حقوق تسجيل 800 دج"
   },
   {
@@ -112,6 +123,7 @@ export const RAW_ADAM_STUDENTS_G1 = [
     parentPhone: "0664146581",
     paidAmount: 3500,
     assurancePaid: false,
+    sessionsAttended: 7,
     notes: "الدفعة 1: 3500 دج"
   },
   {
@@ -121,6 +133,7 @@ export const RAW_ADAM_STUDENTS_G1 = [
     parentPhone: "0668640119",
     paidAmount: 5000,
     assurancePaid: false,
+    sessionsAttended: 7,
     notes: "الدفعة 1: 5000 دج"
   },
   {
@@ -130,6 +143,7 @@ export const RAW_ADAM_STUDENTS_G1 = [
     parentPhone: "0792001110",
     paidAmount: 3500,
     assurancePaid: false,
+    sessionsAttended: 8,
     notes: "الدفعة 1: 3500 دج"
   },
   {
@@ -139,6 +153,7 @@ export const RAW_ADAM_STUDENTS_G1 = [
     parentPhone: "0557506638",
     paidAmount: 3500,
     assurancePaid: false,
+    sessionsAttended: 8,
     notes: "الدفعة 1: 3500 دج"
   },
   {
@@ -148,6 +163,7 @@ export const RAW_ADAM_STUDENTS_G1 = [
     parentPhone: "0668019092",
     paidAmount: 4000,
     assurancePaid: false,
+    sessionsAttended: 4,
     notes: "الدفعة 1: 4000 دج"
   },
   {
@@ -157,6 +173,7 @@ export const RAW_ADAM_STUDENTS_G1 = [
     parentPhone: "0772559452",
     paidAmount: 2000,
     assurancePaid: true,
+    sessionsAttended: 5,
     notes: "الدفعة 1: 2000 دج + حقوق تسجيل 800 دج"
   },
   {
@@ -166,6 +183,7 @@ export const RAW_ADAM_STUDENTS_G1 = [
     parentPhone: "0782223487",
     paidAmount: 3000,
     assurancePaid: false,
+    sessionsAttended: 6,
     notes: "الدفعة 1: 3000 دج"
   },
   {
@@ -175,6 +193,7 @@ export const RAW_ADAM_STUDENTS_G1 = [
     parentPhone: "0776780629",
     paidAmount: 7500,
     assurancePaid: false,
+    sessionsAttended: 7,
     notes: "خالص كامل المبلغ 7500 دج"
   },
   {
@@ -184,6 +203,7 @@ export const RAW_ADAM_STUDENTS_G1 = [
     parentPhone: "0655427802",
     paidAmount: 2000,
     assurancePaid: true,
+    sessionsAttended: 8,
     notes: "الدفعة 1: 2000 دج + حقوق تسجيل 800 دج"
   },
   {
@@ -193,6 +213,7 @@ export const RAW_ADAM_STUDENTS_G1 = [
     parentPhone: "0556106016",
     paidAmount: 4000,
     assurancePaid: false,
+    sessionsAttended: 8,
     notes: "الدفعة 1: 2000 دج + الدفعة 2: 2000 دج"
   },
   {
@@ -202,6 +223,7 @@ export const RAW_ADAM_STUDENTS_G1 = [
     parentPhone: "0660000003",
     paidAmount: 2400,
     assurancePaid: false,
+    sessionsAttended: 4,
     notes: "الدفعة 1: 2400 دج"
   },
   {
@@ -211,12 +233,13 @@ export const RAW_ADAM_STUDENTS_G1 = [
     parentPhone: "0556072568",
     paidAmount: 4000,
     assurancePaid: true,
+    sessionsAttended: 8,
     notes: "الدفعة 1: 2000 دج + الدفعة 2: 2000 دج + حقوق تسجيل 800 دج"
   }
 ];
 
 export const RAW_ADAM_STUDENTS_G2 = [
-  // --- Sheet 3 (Adem A1 - G2) ---
+  // --- Sheet 3 (Adem A1 - G2 Attendance Sheet) ---
   {
     name: "بوغابة أريج",
     username: "boughaba.aredj",
@@ -224,6 +247,7 @@ export const RAW_ADAM_STUDENTS_G2 = [
     parentPhone: "0660000010",
     paidAmount: 3000,
     assurancePaid: false,
+    sessionsAttended: 5,
     notes: "الدفعة 1: 3000 دج"
   },
   {
@@ -233,6 +257,7 @@ export const RAW_ADAM_STUDENTS_G2 = [
     parentPhone: "0660000011",
     paidAmount: 3000,
     assurancePaid: false,
+    sessionsAttended: 5,
     notes: "الدفعة 1: 3000 دج"
   },
   {
@@ -242,6 +267,7 @@ export const RAW_ADAM_STUDENTS_G2 = [
     parentPhone: "0698879100",
     paidAmount: 6000,
     assurancePaid: false,
+    sessionsAttended: 1,
     notes: "الدفعة 1: 2000 دج + الدفعة 2: 2000 دج + الدفعة 3: 2000 دج"
   },
   {
@@ -251,6 +277,7 @@ export const RAW_ADAM_STUDENTS_G2 = [
     parentPhone: "0660000012",
     paidAmount: 0,
     assurancePaid: false,
+    sessionsAttended: 0,
     notes: "غير مدفوع"
   },
   {
@@ -260,6 +287,7 @@ export const RAW_ADAM_STUDENTS_G2 = [
     parentPhone: "0673828365",
     paidAmount: 7500,
     assurancePaid: true,
+    sessionsAttended: 8,
     notes: "خالص كامل المبلغ 7500 دج + حقوق تسجيل 800 دج"
   },
   {
@@ -269,6 +297,7 @@ export const RAW_ADAM_STUDENTS_G2 = [
     parentPhone: "0555226589",
     paidAmount: 3500,
     assurancePaid: false,
+    sessionsAttended: 5,
     notes: "الدفعة 1: 3500 دج"
   },
   {
@@ -278,6 +307,7 @@ export const RAW_ADAM_STUDENTS_G2 = [
     parentPhone: "0660000013",
     paidAmount: 4000,
     assurancePaid: false,
+    sessionsAttended: 4,
     notes: "الدفعة 1: 4000 دج"
   },
   {
@@ -287,6 +317,7 @@ export const RAW_ADAM_STUDENTS_G2 = [
     parentPhone: "0660000014",
     paidAmount: 4000,
     assurancePaid: true,
+    sessionsAttended: 4,
     notes: "الدفعة 1: 4000 دج + حقوق تسجيل 800 دج"
   },
   {
@@ -296,6 +327,7 @@ export const RAW_ADAM_STUDENTS_G2 = [
     parentPhone: "0660000015",
     paidAmount: 1350,
     assurancePaid: false,
+    sessionsAttended: 2,
     notes: "الدفعة 1: 1350 دج"
   },
   {
@@ -305,6 +337,7 @@ export const RAW_ADAM_STUDENTS_G2 = [
     parentPhone: "0660000016",
     paidAmount: 0,
     assurancePaid: false,
+    sessionsAttended: 0,
     notes: "غير مدفوع"
   },
   {
@@ -314,6 +347,7 @@ export const RAW_ADAM_STUDENTS_G2 = [
     parentPhone: "0660000017",
     paidAmount: 3750,
     assurancePaid: true,
+    sessionsAttended: 4,
     notes: "الدفعة 1: 3750 دج (لمدة شهر فقط) + حقوق تسجيل 800 دج"
   },
   {
@@ -323,6 +357,7 @@ export const RAW_ADAM_STUDENTS_G2 = [
     parentPhone: "0660000018",
     paidAmount: 7500,
     assurancePaid: false,
+    sessionsAttended: 8,
     notes: "خالص كامل المبلغ 7500 دج"
   },
   {
@@ -332,6 +367,7 @@ export const RAW_ADAM_STUDENTS_G2 = [
     parentPhone: "0666736606",
     paidAmount: 7500,
     assurancePaid: false,
+    sessionsAttended: 8,
     notes: "خالص كامل المبلغ 7500 دج"
   },
   {
@@ -341,6 +377,7 @@ export const RAW_ADAM_STUDENTS_G2 = [
     parentPhone: "0666736606",
     paidAmount: 7500,
     assurancePaid: false,
+    sessionsAttended: 8,
     notes: "خالص كامل المبلغ 7500 دج"
   },
   {
@@ -350,6 +387,7 @@ export const RAW_ADAM_STUDENTS_G2 = [
     parentPhone: "0664998664",
     paidAmount: 7000,
     assurancePaid: false,
+    sessionsAttended: 3,
     notes: "الدفعة 1: 7000 دج"
   },
   {
@@ -359,6 +397,7 @@ export const RAW_ADAM_STUDENTS_G2 = [
     parentPhone: "0664998664",
     paidAmount: 7000,
     assurancePaid: false,
+    sessionsAttended: 3,
     notes: "الدفعة 1: 7000 دج"
   },
   {
@@ -368,6 +407,7 @@ export const RAW_ADAM_STUDENTS_G2 = [
     parentPhone: "0664998664",
     paidAmount: 7000,
     assurancePaid: false,
+    sessionsAttended: 3,
     notes: "الدفعة 1: 7000 دج"
   },
   {
@@ -377,6 +417,7 @@ export const RAW_ADAM_STUDENTS_G2 = [
     parentPhone: "0660000019",
     paidAmount: 3500,
     assurancePaid: false,
+    sessionsAttended: 4,
     notes: "الدفعة 1: 3500 دج"
   },
   {
@@ -386,6 +427,7 @@ export const RAW_ADAM_STUDENTS_G2 = [
     parentPhone: "0697614564",
     paidAmount: 2000,
     assurancePaid: false,
+    sessionsAttended: 3,
     notes: "الدفعة 1: 2000 دج"
   },
   {
@@ -395,6 +437,7 @@ export const RAW_ADAM_STUDENTS_G2 = [
     parentPhone: "0660000020",
     paidAmount: 7500,
     assurancePaid: true,
+    sessionsAttended: 3,
     notes: "الدفعة 1: 3000 دج + الدفعة 2: 4500 دج (خالص) + حقوق تسجيل 800 دج"
   }
 ];
@@ -428,6 +471,8 @@ const syncStudentList = async (rawList, adam, groupName, groupColor, groupDays) 
       ]
     });
 
+    const attendedCount = raw.sessionsAttended != null ? raw.sessionsAttended : 0;
+
     if (!student) {
       student = await User.create({
         role: "student",
@@ -442,7 +487,7 @@ const syncStudentList = async (rawList, adam, groupName, groupColor, groupDays) 
           teacher: adam._id,
           parentName: raw.name + " (Parent)",
           parentPhone: raw.parentPhone,
-          sessionsAttended: 0,
+          sessionsAttended: attendedCount,
           isStopped: false,
           enrollmentDate: new Date("2026-07-01")
         }
@@ -451,6 +496,7 @@ const syncStudentList = async (rawList, adam, groupName, groupColor, groupDays) 
       if (!student.studentProfile) student.studentProfile = {};
       student.studentProfile.teacher = adam._id;
       student.studentProfile.course = "A1";
+      student.studentProfile.sessionsAttended = attendedCount;
       if (raw.parentPhone && !student.studentProfile.parentPhone) {
         student.studentProfile.parentPhone = raw.parentPhone;
       }
@@ -564,7 +610,7 @@ export const bootstrapAdamA1 = async () => {
       { $pullAll: { "teacherProfile.assignedStudents": allAdamStudentIds } }
     );
 
-    console.log(`Successfully bootstrapped ${allAdamStudentIds.length} students across 2 groups strictly for Teacher Adam! 🎓`);
+    console.log(`Successfully bootstrapped ${allAdamStudentIds.length} students across 2 groups strictly for Teacher Adam with exact attendance sessions tracked! 🎓`);
   } catch (err) {
     console.error("Error in bootstrapAdamA1:", err);
   }
