@@ -1,9 +1,11 @@
 ﻿import { User } from "../models/User.js";
 import { Group } from "../models/Group.js";
 import { Payment } from "../models/Payment.js";
+import { Attendance } from "../models/Attendance.js";
+import { dateKey } from "../utils/dates.js";
 
 export const RAW_ADAM_STUDENTS_G1 = [
-  // --- Sheet 1 & Attendance Sheet 1 ---
+  // --- Group 1 (A1 New Group 01) ---
   {
     name: "فقيه يامنى",
     username: "fkih.yamna",
@@ -12,6 +14,7 @@ export const RAW_ADAM_STUDENTS_G1 = [
     paidAmount: 7500,
     assurancePaid: false,
     sessionsAttended: 4,
+    lastSessionStatus: "Absent",
     notes: "تم دفع كامل المبلغ 7500 دج"
   },
   {
@@ -22,6 +25,7 @@ export const RAW_ADAM_STUDENTS_G1 = [
     paidAmount: 5500,
     assurancePaid: true,
     sessionsAttended: 8,
+    lastSessionStatus: "Present",
     notes: "الدفعة 1: 3500 دج + الدفعة 2: 2000 دج + حقوق تسجيل 800 دج"
   },
   {
@@ -32,6 +36,7 @@ export const RAW_ADAM_STUDENTS_G1 = [
     paidAmount: 2000,
     assurancePaid: true,
     sessionsAttended: 5,
+    lastSessionStatus: "Absent",
     notes: "الدفعة 1: 2000 دج + حقوق تسجيل 800 دج"
   },
   {
@@ -42,6 +47,7 @@ export const RAW_ADAM_STUDENTS_G1 = [
     paidAmount: 3000,
     assurancePaid: false,
     sessionsAttended: 5,
+    lastSessionStatus: "Present",
     notes: "الدفعة 1: 3000 دج"
   },
   {
@@ -52,10 +58,9 @@ export const RAW_ADAM_STUDENTS_G1 = [
     paidAmount: 7000,
     assurancePaid: false,
     sessionsAttended: 6,
+    lastSessionStatus: "Present",
     notes: "الدفعة 1: 7000 دج"
   },
-
-  // --- Sheet 2 (Adem A1 - G1 Attendance Sheet) ---
   {
     name: "طراد دينا",
     username: "trad.dina",
@@ -64,6 +69,7 @@ export const RAW_ADAM_STUDENTS_G1 = [
     paidAmount: 4000,
     assurancePaid: false,
     sessionsAttended: 5,
+    lastSessionStatus: "Absent",
     notes: "الدفعة 1: 4000 دج"
   },
   {
@@ -74,6 +80,7 @@ export const RAW_ADAM_STUDENTS_G1 = [
     paidAmount: 2500,
     assurancePaid: false,
     sessionsAttended: 8,
+    lastSessionStatus: "Present",
     notes: "الدفعة 1: 2500 دج"
   },
   {
@@ -84,6 +91,7 @@ export const RAW_ADAM_STUDENTS_G1 = [
     paidAmount: 2500,
     assurancePaid: false,
     sessionsAttended: 8,
+    lastSessionStatus: "Present",
     notes: "الدفعة 1: 2500 دج"
   },
   {
@@ -94,6 +102,7 @@ export const RAW_ADAM_STUDENTS_G1 = [
     paidAmount: 2500,
     assurancePaid: false,
     sessionsAttended: 7,
+    lastSessionStatus: "Present",
     notes: "الدفعة 1: 2500 دج"
   },
   {
@@ -104,6 +113,7 @@ export const RAW_ADAM_STUDENTS_G1 = [
     paidAmount: 7500,
     assurancePaid: true,
     sessionsAttended: 8,
+    lastSessionStatus: "Present",
     notes: "خالص كامل المبلغ 7500 دج + حقوق تسجيل 800 دج"
   },
   {
@@ -114,6 +124,7 @@ export const RAW_ADAM_STUDENTS_G1 = [
     paidAmount: 7500,
     assurancePaid: true,
     sessionsAttended: 7,
+    lastSessionStatus: "Present",
     notes: "خالص كامل المبلغ 7500 دج + حقوق تسجيل 800 دج"
   },
   {
@@ -124,6 +135,7 @@ export const RAW_ADAM_STUDENTS_G1 = [
     paidAmount: 3500,
     assurancePaid: false,
     sessionsAttended: 7,
+    lastSessionStatus: "Absent",
     notes: "الدفعة 1: 3500 دج"
   },
   {
@@ -134,6 +146,7 @@ export const RAW_ADAM_STUDENTS_G1 = [
     paidAmount: 5000,
     assurancePaid: false,
     sessionsAttended: 7,
+    lastSessionStatus: "Present",
     notes: "الدفعة 1: 5000 دج"
   },
   {
@@ -144,6 +157,7 @@ export const RAW_ADAM_STUDENTS_G1 = [
     paidAmount: 3500,
     assurancePaid: false,
     sessionsAttended: 8,
+    lastSessionStatus: "Present",
     notes: "الدفعة 1: 3500 دج"
   },
   {
@@ -154,6 +168,7 @@ export const RAW_ADAM_STUDENTS_G1 = [
     paidAmount: 3500,
     assurancePaid: false,
     sessionsAttended: 8,
+    lastSessionStatus: "Present",
     notes: "الدفعة 1: 3500 دج"
   },
   {
@@ -164,6 +179,7 @@ export const RAW_ADAM_STUDENTS_G1 = [
     paidAmount: 4000,
     assurancePaid: false,
     sessionsAttended: 4,
+    lastSessionStatus: "Present",
     notes: "الدفعة 1: 4000 دج"
   },
   {
@@ -174,6 +190,7 @@ export const RAW_ADAM_STUDENTS_G1 = [
     paidAmount: 2000,
     assurancePaid: true,
     sessionsAttended: 5,
+    lastSessionStatus: "Absent",
     notes: "الدفعة 1: 2000 دج + حقوق تسجيل 800 دج"
   },
   {
@@ -184,6 +201,7 @@ export const RAW_ADAM_STUDENTS_G1 = [
     paidAmount: 3000,
     assurancePaid: false,
     sessionsAttended: 6,
+    lastSessionStatus: "Absent",
     notes: "الدفعة 1: 3000 دج"
   },
   {
@@ -194,6 +212,7 @@ export const RAW_ADAM_STUDENTS_G1 = [
     paidAmount: 7500,
     assurancePaid: false,
     sessionsAttended: 7,
+    lastSessionStatus: "Absent",
     notes: "خالص كامل المبلغ 7500 دج"
   },
   {
@@ -204,6 +223,7 @@ export const RAW_ADAM_STUDENTS_G1 = [
     paidAmount: 2000,
     assurancePaid: true,
     sessionsAttended: 8,
+    lastSessionStatus: "Present",
     notes: "الدفعة 1: 2000 دج + حقوق تسجيل 800 دج"
   },
   {
@@ -214,6 +234,7 @@ export const RAW_ADAM_STUDENTS_G1 = [
     paidAmount: 4000,
     assurancePaid: false,
     sessionsAttended: 8,
+    lastSessionStatus: "Present",
     notes: "الدفعة 1: 2000 دج + الدفعة 2: 2000 دج"
   },
   {
@@ -224,6 +245,7 @@ export const RAW_ADAM_STUDENTS_G1 = [
     paidAmount: 2400,
     assurancePaid: false,
     sessionsAttended: 4,
+    lastSessionStatus: "Absent",
     notes: "الدفعة 1: 2400 دج"
   },
   {
@@ -234,12 +256,13 @@ export const RAW_ADAM_STUDENTS_G1 = [
     paidAmount: 4000,
     assurancePaid: true,
     sessionsAttended: 8,
+    lastSessionStatus: "Present",
     notes: "الدفعة 1: 2000 دج + الدفعة 2: 2000 دج + حقوق تسجيل 800 دج"
   }
 ];
 
 export const RAW_ADAM_STUDENTS_G2 = [
-  // --- Sheet 3 (Adem A1 - G2 Attendance Sheet) ---
+  // --- Group 2 (A1 New Group 02) ---
   {
     name: "بوغابة أريج",
     username: "boughaba.aredj",
@@ -248,6 +271,7 @@ export const RAW_ADAM_STUDENTS_G2 = [
     paidAmount: 3000,
     assurancePaid: false,
     sessionsAttended: 5,
+    lastSessionStatus: "Present",
     notes: "الدفعة 1: 3000 دج"
   },
   {
@@ -258,6 +282,7 @@ export const RAW_ADAM_STUDENTS_G2 = [
     paidAmount: 3000,
     assurancePaid: false,
     sessionsAttended: 5,
+    lastSessionStatus: "Present",
     notes: "الدفعة 1: 3000 دج"
   },
   {
@@ -268,6 +293,7 @@ export const RAW_ADAM_STUDENTS_G2 = [
     paidAmount: 6000,
     assurancePaid: false,
     sessionsAttended: 1,
+    lastSessionStatus: "Absent",
     notes: "الدفعة 1: 2000 دج + الدفعة 2: 2000 دج + الدفعة 3: 2000 دج"
   },
   {
@@ -278,6 +304,7 @@ export const RAW_ADAM_STUDENTS_G2 = [
     paidAmount: 0,
     assurancePaid: false,
     sessionsAttended: 0,
+    lastSessionStatus: "Absent",
     notes: "غير مدفوع"
   },
   {
@@ -288,6 +315,7 @@ export const RAW_ADAM_STUDENTS_G2 = [
     paidAmount: 7500,
     assurancePaid: true,
     sessionsAttended: 8,
+    lastSessionStatus: "Present",
     notes: "خالص كامل المبلغ 7500 دج + حقوق تسجيل 800 دج"
   },
   {
@@ -298,6 +326,7 @@ export const RAW_ADAM_STUDENTS_G2 = [
     paidAmount: 3500,
     assurancePaid: false,
     sessionsAttended: 5,
+    lastSessionStatus: "Absent",
     notes: "الدفعة 1: 3500 دج"
   },
   {
@@ -308,6 +337,7 @@ export const RAW_ADAM_STUDENTS_G2 = [
     paidAmount: 4000,
     assurancePaid: false,
     sessionsAttended: 4,
+    lastSessionStatus: "Absent",
     notes: "الدفعة 1: 4000 دج"
   },
   {
@@ -318,6 +348,7 @@ export const RAW_ADAM_STUDENTS_G2 = [
     paidAmount: 4000,
     assurancePaid: true,
     sessionsAttended: 4,
+    lastSessionStatus: "Absent",
     notes: "الدفعة 1: 4000 دج + حقوق تسجيل 800 دج"
   },
   {
@@ -328,6 +359,7 @@ export const RAW_ADAM_STUDENTS_G2 = [
     paidAmount: 1350,
     assurancePaid: false,
     sessionsAttended: 2,
+    lastSessionStatus: "Absent",
     notes: "الدفعة 1: 1350 دج"
   },
   {
@@ -338,6 +370,7 @@ export const RAW_ADAM_STUDENTS_G2 = [
     paidAmount: 0,
     assurancePaid: false,
     sessionsAttended: 0,
+    lastSessionStatus: "Absent",
     notes: "غير مدفوع"
   },
   {
@@ -348,6 +381,7 @@ export const RAW_ADAM_STUDENTS_G2 = [
     paidAmount: 3750,
     assurancePaid: true,
     sessionsAttended: 4,
+    lastSessionStatus: "Absent",
     notes: "الدفعة 1: 3750 دج (لمدة شهر فقط) + حقوق تسجيل 800 دج"
   },
   {
@@ -358,6 +392,7 @@ export const RAW_ADAM_STUDENTS_G2 = [
     paidAmount: 7500,
     assurancePaid: false,
     sessionsAttended: 8,
+    lastSessionStatus: "Present",
     notes: "خالص كامل المبلغ 7500 دج"
   },
   {
@@ -368,6 +403,7 @@ export const RAW_ADAM_STUDENTS_G2 = [
     paidAmount: 7500,
     assurancePaid: false,
     sessionsAttended: 8,
+    lastSessionStatus: "Present",
     notes: "خالص كامل المبلغ 7500 دج"
   },
   {
@@ -378,6 +414,7 @@ export const RAW_ADAM_STUDENTS_G2 = [
     paidAmount: 7500,
     assurancePaid: false,
     sessionsAttended: 8,
+    lastSessionStatus: "Present",
     notes: "خالص كامل المبلغ 7500 دج"
   },
   {
@@ -388,6 +425,7 @@ export const RAW_ADAM_STUDENTS_G2 = [
     paidAmount: 7000,
     assurancePaid: false,
     sessionsAttended: 3,
+    lastSessionStatus: "Absent",
     notes: "الدفعة 1: 7000 دج"
   },
   {
@@ -398,6 +436,7 @@ export const RAW_ADAM_STUDENTS_G2 = [
     paidAmount: 7000,
     assurancePaid: false,
     sessionsAttended: 3,
+    lastSessionStatus: "Absent",
     notes: "الدفعة 1: 7000 دج"
   },
   {
@@ -408,6 +447,7 @@ export const RAW_ADAM_STUDENTS_G2 = [
     paidAmount: 7000,
     assurancePaid: false,
     sessionsAttended: 3,
+    lastSessionStatus: "Absent",
     notes: "الدفعة 1: 7000 دج"
   },
   {
@@ -418,6 +458,7 @@ export const RAW_ADAM_STUDENTS_G2 = [
     paidAmount: 3500,
     assurancePaid: false,
     sessionsAttended: 4,
+    lastSessionStatus: "Absent",
     notes: "الدفعة 1: 3500 دج"
   },
   {
@@ -428,6 +469,7 @@ export const RAW_ADAM_STUDENTS_G2 = [
     paidAmount: 2000,
     assurancePaid: false,
     sessionsAttended: 3,
+    lastSessionStatus: "Absent",
     notes: "الدفعة 1: 2000 دج"
   },
   {
@@ -438,6 +480,7 @@ export const RAW_ADAM_STUDENTS_G2 = [
     paidAmount: 7500,
     assurancePaid: true,
     sessionsAttended: 3,
+    lastSessionStatus: "Absent",
     notes: "الدفعة 1: 3000 دج + الدفعة 2: 4500 دج (خالص) + حقوق تسجيل 800 دج"
   }
 ];
@@ -461,6 +504,7 @@ const syncStudentList = async (rawList, adam, groupName, groupColor, groupDays) 
   }
 
   const studentObjectIds = [];
+  const todayStr = dateKey();
 
   for (const raw of rawList) {
     let student = await User.findOne({
@@ -472,6 +516,7 @@ const syncStudentList = async (rawList, adam, groupName, groupColor, groupDays) 
     });
 
     const attendedCount = raw.sessionsAttended != null ? raw.sessionsAttended : 0;
+    const todayStatus = raw.lastSessionStatus || "Present";
 
     if (!student) {
       student = await User.create({
@@ -504,6 +549,22 @@ const syncStudentList = async (rawList, adam, groupName, groupColor, groupDays) 
     }
 
     studentObjectIds.push(student._id);
+
+    // Sync Today's Attendance Record
+    let todayAtt = await Attendance.findOne({ student: student._id, date: todayStr });
+    if (!todayAtt) {
+      await Attendance.create({
+        student: student._id,
+        teacher: adam._id,
+        date: todayStr,
+        status: todayStatus,
+        source: "manual"
+      });
+    } else {
+      todayAtt.teacher = adam._id;
+      todayAtt.status = todayStatus;
+      await todayAtt.save();
+    }
 
     // Payments for August & July 2026
     for (const m of ["2026-08", "2026-07"]) {
@@ -610,7 +671,7 @@ export const bootstrapAdamA1 = async () => {
       { $pullAll: { "teacherProfile.assignedStudents": allAdamStudentIds } }
     );
 
-    console.log(`Successfully bootstrapped ${allAdamStudentIds.length} students across 2 groups strictly for Teacher Adam with exact attendance sessions tracked! 🎓`);
+    console.log(`Successfully bootstrapped ${allAdamStudentIds.length} students across 2 groups strictly for Teacher Adam with today's attendance live! 🎓`);
   } catch (err) {
     console.error("Error in bootstrapAdamA1:", err);
   }
