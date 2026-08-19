@@ -567,13 +567,45 @@ teacherRouter.delete("/students/:studentId", async (req, res, next) => {
 
 // â”€â”€ Group management â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-// List this teacher's groups
+// List this teacher's groups with student payments & sessions
 teacherRouter.get("/groups", async (req, res, next) => {
   try {
+    const currentMonth = dateKey().slice(0, 7);
     const groups = await Group.find({ teacher: req.user._id })
-      .populate("students", "name email studentProfile photo")
+      .populate("students", "name email username phone studentProfile photo")
       .sort({ createdAt: 1 });
-    res.json({ groups });
+
+    const allStudentIds = [];
+    groups.forEach((g) => {
+      (g.students || []).forEach((st) => {
+        if (st && st._id) allStudentIds.push(st._id);
+      });
+    });
+
+    const payments = await Payment.find({
+      student: { $in: allStudentIds },
+      month: currentMonth
+    });
+
+    const paymentsMap = new Map(
+      payments.map((p) => [String(p.student), p])
+    );
+
+    const populatedGroups = groups.map((g) => {
+      const gObj = g.toObject();
+      gObj.students = (gObj.students || []).map((st) => {
+        const p = paymentsMap.get(String(st._id)) || null;
+        return {
+          ...st,
+          currentPayment: p,
+          sessionsAttended: st.studentProfile?.sessionsAttended != null ? st.studentProfile.sessionsAttended : 0,
+          absencesCount: st.studentProfile?.absencesCount != null ? st.studentProfile.absencesCount : 0
+        };
+      });
+      return gObj;
+    });
+
+    res.json({ groups: populatedGroups });
   } catch (err) { next(err); }
 });
 

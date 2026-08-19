@@ -590,54 +590,68 @@ function GroupCard({ group, myStudents, onEdit, onDelete, onTrackStudent, onMove
             {(group.students || []).length === 0 ? (
               <p className="text-xs text-slate-400 italic text-center py-3">No students in this group yet.</p>
             ) : (
-              group.students.map((s) => (
-                <div key={s._id} className="flex items-center justify-between gap-3 rounded-xl bg-slate-50 dark:bg-slate-700/50 px-3 py-2">
-                  <div className="flex items-center gap-3 min-w-0">
-                    <Avatar student={s} />
-                    <div className="min-w-0">
-                      <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 truncate">{s.name}</p>
-                      <p className="text-xs text-slate-400 truncate">
-                        {s.studentProfile?.course} · Age {s.studentProfile?.age || "–"} · <span className="font-bold text-emerald-600 dark:text-emerald-400">📖 {s.sessionsAttended ?? 0} Sessions</span>
-                        {(s.studentProfile?.isStopped || s.status === "stopped") && (
-                          <span className="ml-1.5 font-bold text-rose-500">⛔ Stopped</span>
-                        )}
-                      </p>
-                      <div className="mt-1">
-                        <StudentPaymentRowWidget compact student={s} />
+              group.students.map((s) => {
+                const myStudentMatch = (myStudents || []).find((ms) => String(ms._id) === String(s._id));
+                const fullStudent = myStudentMatch ? { ...s, ...myStudentMatch } : s;
+                const payment = fullStudent.currentPayment || s.currentPayment;
+
+                return (
+                  <div key={s._id} className="flex items-center justify-between gap-3 rounded-xl bg-slate-50 dark:bg-slate-700/50 px-3 py-2">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <Avatar student={fullStudent} />
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 truncate">{fullStudent.name}</p>
+                        <p className="text-xs text-slate-400 truncate">
+                          {fullStudent.studentProfile?.course} · Age {fullStudent.studentProfile?.age || "–"} · <span className="font-bold text-emerald-600 dark:text-emerald-400">📖 {fullStudent.sessionsAttended ?? 0} Sessions</span>
+                          {(fullStudent.studentProfile?.isStopped || fullStudent.status === "stopped") && (
+                            <span className="ml-1.5 font-bold text-rose-500">⛔ Stopped</span>
+                          )}
+                        </p>
+                        <div className="mt-1">
+                          <StudentPaymentRowWidget 
+                            compact 
+                            student={fullStudent} 
+                            initialPayment={payment}
+                            onPaymentUpdated={(updated) => {
+                              fullStudent.currentPayment = updated;
+                              s.currentPayment = updated;
+                            }}
+                          />
+                        </div>
                       </div>
                     </div>
+                    <div className="flex shrink-0 items-center gap-1">
+                      <button
+                        onClick={() => onOpenNotes && onOpenNotes(s)}
+                        className="inline-flex items-center gap-1 rounded-lg border border-purple-200 hover:border-purple-300 bg-purple-50 hover:bg-purple-100 px-2 py-1 text-xs font-bold text-purple-700 dark:border-purple-800 dark:bg-purple-950/40 dark:text-purple-300 transition-all active:scale-95"
+                        title="Upload pictures, PDF files or write observations"
+                      >
+                        <FileText className="h-3.5 w-3.5" /> Notes & Files
+                      </button>
+                      <button
+                        onClick={() => onTrackStudent(s, group)}
+                        className="inline-flex items-center gap-1 rounded-lg border border-slate-200 hover:border-brand-300 bg-white hover:bg-brand-50 px-2 py-1 text-xs font-bold text-slate-600 hover:text-brand-700 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-350 dark:hover:bg-slate-700 transition-all active:scale-95"
+                      >
+                        <CalendarDays className="h-3.5 w-3.5" /> Track
+                      </button>
+                      <button
+                        onClick={() => onMoveStudent && onMoveStudent(s, group)}
+                        className="inline-flex items-center gap-1 rounded-lg border border-slate-200 hover:border-indigo-300 bg-white hover:bg-indigo-50 px-2 py-1 text-xs font-bold text-slate-600 hover:text-indigo-700 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-350 dark:hover:bg-slate-700 transition-all active:scale-95"
+                        title={`Move ${s.name} to another group`}
+                      >
+                        Move
+                      </button>
+                      <button
+                        onClick={() => onRemoveFromGroup && onRemoveFromGroup(s, group)}
+                        className="flex h-7 w-7 items-center justify-center rounded-lg border border-rose-200 bg-white text-rose-500 hover:bg-rose-50 dark:border-rose-900 dark:bg-slate-800"
+                        title={`Remove ${s.name} from this group only`}
+                      >
+                        <UserMinus className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
                   </div>
-                  <div className="flex shrink-0 items-center gap-1">
-                    <button
-                      onClick={() => onOpenNotes && onOpenNotes(s)}
-                      className="inline-flex items-center gap-1 rounded-lg border border-purple-200 hover:border-purple-300 bg-purple-50 hover:bg-purple-100 px-2 py-1 text-xs font-bold text-purple-700 dark:border-purple-800 dark:bg-purple-950/40 dark:text-purple-300 transition-all active:scale-95"
-                      title="Upload pictures, PDF files or write observations"
-                    >
-                      <FileText className="h-3.5 w-3.5" /> Notes & Files
-                    </button>
-                    <button
-                      onClick={() => onTrackStudent(s, group)}
-                      className="inline-flex items-center gap-1 rounded-lg border border-slate-200 hover:border-brand-300 bg-white hover:bg-brand-50 px-2 py-1 text-xs font-bold text-slate-600 hover:text-brand-700 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-350 dark:hover:bg-slate-700 transition-all active:scale-95"
-                    >
-                      <CalendarDays className="h-3.5 w-3.5" /> Track
-                    </button>
-                    <button
-                      onClick={() => onMoveStudent && onMoveStudent(s, group)}
-                      className="inline-flex items-center gap-1 rounded-lg border border-slate-200 hover:border-indigo-300 bg-white hover:bg-indigo-50 px-2 py-1 text-xs font-bold text-slate-600 hover:text-indigo-700 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-350 dark:hover:bg-slate-700 transition-all active:scale-95"
-                      title={`Move ${s.name} to another group`}
-                    >
-                      Move
-                    </button>
-                    <button
-                      onClick={() => onRemoveFromGroup && onRemoveFromGroup(s, group)}
-                      className="flex h-7 w-7 items-center justify-center rounded-lg border border-rose-200 bg-white text-rose-500 hover:bg-rose-50 dark:border-rose-900 dark:bg-slate-800"
-                      title={`Remove ${s.name} from this group only`}
-                    >
-                      <UserMinus className="h-3.5 w-3.5" />
-                    </button>
-                  </div>
-                </div>
-              ))
+                );
+              })
             )}
           </div>
         )}
@@ -1139,28 +1153,40 @@ export default function TeacherGroupsPanel() {
 
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
             {myStudents.map((s) => (
-              <div key={s._id} className="flex items-center gap-3 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-3 shadow-sm">
+              <div key={s._id} className="flex items-start gap-3 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 shadow-sm">
                 <Avatar student={s} size="md" />
                 <div className="flex-1 min-w-0">
-                  <p className="font-bold text-slate-900 dark:text-slate-100 truncate">{s.name}</p>
+                  <div className="flex items-center justify-between">
+                    <p className="font-bold text-slate-900 dark:text-slate-100 truncate">{s.name}</p>
+                    <button
+                      onClick={() => handleRemoveStudent(s)}
+                      disabled={removingId === s._id}
+                      className="shrink-0 flex h-7 w-7 items-center justify-center rounded-xl hover:bg-rose-50 dark:hover:bg-rose-950/40 text-slate-400 hover:text-rose-600 transition-colors disabled:opacity-50"
+                      title="Remove from class"
+                    >
+                      {removingId === s._id
+                        ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                        : <UserMinus className="h-3.5 w-3.5" />
+                      }
+                    </button>
+                  </div>
                   <p className="text-xs text-slate-400 truncate">
                     {s.studentProfile?.course || "–"} · Age {s.studentProfile?.age || "–"} · <span className="font-bold text-emerald-600 dark:text-emerald-400">📖 {s.sessionsAttended ?? 0} Sessions</span>
                     {(s.studentProfile?.isStopped || s.status === "stopped") && (
                       <span className="ml-1.5 font-bold text-rose-500 font-black">⛔ Stopped</span>
                     )}
                   </p>
+                  <div className="mt-2">
+                    <StudentPaymentRowWidget 
+                      compact 
+                      student={s} 
+                      initialPayment={s.currentPayment}
+                      onPaymentUpdated={(updated) => {
+                        s.currentPayment = updated;
+                      }}
+                    />
+                  </div>
                 </div>
-                <button
-                  onClick={() => handleRemoveStudent(s)}
-                  disabled={removingId === s._id}
-                  className="shrink-0 flex h-8 w-8 items-center justify-center rounded-xl hover:bg-rose-50 dark:hover:bg-rose-950/40 text-slate-400 hover:text-rose-600 transition-colors disabled:opacity-50"
-                  title="Remove from class"
-                >
-                  {removingId === s._id
-                    ? <Loader2 className="h-4 w-4 animate-spin" />
-                    : <UserMinus className="h-4 w-4" />
-                  }
-                </button>
               </div>
             ))}
           </div>
