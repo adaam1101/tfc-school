@@ -2,6 +2,7 @@ import express from "express";
 import { protect, allowRoles } from "../middleware/auth.js";
 import { Payment } from "../models/Payment.js";
 import { User } from "../models/User.js";
+import { Group } from "../models/Group.js";
 import { recordAudit } from "../utils/audit.js";
 
 export const paymentRouter = express.Router();
@@ -48,6 +49,15 @@ paymentRouter.get("/monthly-rapport", allowRoles("admin", "sous-admin", "moderat
       .sort({ name: 1 });
 
     const studentIds = students.map((s) => s._id);
+
+    // Fetch groups for these students
+    const groups = await Group.find({ students: { $in: studentIds } }).select("name students");
+    const studentGroupMap = new Map();
+    groups.forEach((g) => {
+      g.students.forEach((sId) => {
+        studentGroupMap.set(String(sId), g.name);
+      });
+    });
 
     // Fetch payments for this month
     const payments = await Payment.find({
@@ -100,6 +110,7 @@ paymentRouter.get("/monthly-rapport", allowRoles("admin", "sous-admin", "moderat
         phone: student.phone,
         photo: student.photo,
         course: student.studentProfile?.course || "Standard",
+        groupName: studentGroupMap.get(String(student._id)) || student.studentProfile?.course || "Standard Group",
         teacher: student.studentProfile?.teacher?.name || "Teacher",
         isStopped: student.studentProfile?.isStopped || student.status === "stopped",
         paymentId: p?._id || null,

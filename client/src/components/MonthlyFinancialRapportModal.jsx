@@ -16,7 +16,12 @@ import {
   Search,
   Filter,
   ArrowUpDown,
-  FileSpreadsheet
+  FileSpreadsheet,
+  Calculator,
+  Percent,
+  Layers,
+  Building2,
+  Sparkles
 } from "lucide-react";
 import { api, getApiError } from "../api/http.js";
 import ErrorAlert from "./ErrorAlert.jsx";
@@ -34,6 +39,12 @@ export default function MonthlyFinancialRapportModal({
   const [filterTeacher, setFilterTeacher] = useState(teacherId || "all");
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+
+  // Teacher payout / percentage configuration
+  // Modes: "tiered" (≤7: 15k, 8-11: 20k, 12-19: 30k, 20+: 40k), "percentage", "per_student"
+  const [commissionMode, setCommissionMode] = useState("tiered");
+  const [customPercentage, setCustomPercentage] = useState(30);
+  const [customPerStudent, setCustomPerStudent] = useState(2000);
 
   const [rapportData, setRapportData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -83,12 +94,14 @@ export default function MonthlyFinancialRapportModal({
     return rapportData.students.filter((st) => {
       const sName = (st?.name || "").toLowerCase();
       const sCourse = (st?.course || "").toLowerCase();
+      const sGroup = (st?.groupName || "").toLowerCase();
       const sPhone = (st?.phone || "");
 
       const matchSearch =
         !q ||
         sName.includes(q) ||
         sCourse.includes(q) ||
+        sGroup.includes(q) ||
         sPhone.includes(q);
 
       const matchStatus =
@@ -113,6 +126,76 @@ export default function MonthlyFinancialRapportModal({
     countUnpaid: 0,
     countAssurancePaid: 0
   };
+
+  // ── Compute Teacher Net Share & Group-by-Group Breakdown ────────────────
+  const teacherCompensation = useMemo(() => {
+    const students = rapportData?.students || [];
+    if (students.length === 0) {
+      return { totalTeacherNet: 0, totalSchoolNet: 0, groupBreakdowns: [] };
+    }
+
+    // Group students by groupName or course
+    const groupsMap = {};
+    students.forEach((st) => {
+      const gKey = st.groupName || st.course || "General";
+      if (!groupsMap[gKey]) groupsMap[gKey] = [];
+      groupsMap[gKey].push(st);
+    });
+
+    let totalTeacherNet = 0;
+    const groupBreakdowns = Object.entries(groupsMap).map(([gName, gStudents]) => {
+      const count = gStudents.length;
+      const collectedTuition = gStudents.reduce((acc, s) => acc + (s.paidTuition || 0), 0);
+      const paidStudentsCount = gStudents.filter((s) => (s.paidTuition || 0) > 0).length;
+
+      let groupTeacherPayout = 0;
+
+      if (commissionMode === "tiered") {
+        // Standard TFC Tiered Group Logic:
+        // ≤ 7 students: 15,000 DA
+        // 8 - 11 students: 20,000 DA
+        // 12 - 19 students: 30,000 DA
+        // 20 - 25 students: 40,000 DA
+        // > 25 students: 40,000 DA + 1,500 DA per additional student
+        if (count <= 0) groupTeacherPayout = 0;
+        else if (count <= 7) groupTeacherPayout = 15000;
+        else if (count <= 11) groupTeacherPayout = 20000;
+        else if (count <= 19) groupTeacherPayout = 30000;
+        else if (count <= 25) groupTeacherPayout = 40000;
+        else groupTeacherPayout = 40000 + (count - 25) * 1500;
+      } else if (commissionMode === "percentage") {
+        const rate = (Number(customPercentage) || 30) / 100;
+        groupTeacherPayout = Math.round(collectedTuition * rate);
+      } else if (commissionMode === "per_student") {
+        const rate = Number(customPerStudent) || 2000;
+        groupTeacherPayout = paidStudentsCount * rate;
+      }
+
+      totalTeacherNet += groupTeacherPayout;
+
+      const effectivePercentage =
+        collectedTuition > 0
+          ? ((groupTeacherPayout / collectedTuition) * 100).toFixed(1)
+          : 0;
+
+      return {
+        groupName: gName,
+        totalCount: count,
+        paidCount: paidStudentsCount,
+        collectedTuition,
+        teacherPayout: groupTeacherPayout,
+        effectivePercentage
+      };
+    });
+
+    const totalSchoolNet = Math.max(0, summary.totalGrandCollected - totalTeacherNet);
+
+    return {
+      totalTeacherNet,
+      totalSchoolNet,
+      groupBreakdowns
+    };
+  }, [rapportData, commissionMode, customPercentage, customPerStudent, summary.totalGrandCollected]);
 
   return (
     <div className="fixed inset-0 z-[100] flex items-start justify-center bg-black/75 backdrop-blur-sm p-2 sm:p-4 md:p-6 animate-fade-in overflow-y-auto print:p-0 print:bg-white print:static">
@@ -295,17 +378,220 @@ export default function MonthlyFinancialRapportModal({
             </div>
 
             {/* Grand Total Revenue */}
-            <div className="rounded-2xl border border-brand-200 dark:border-brand-800/60 bg-gradient-to-br from-brand-500 to-indigo-600 p-4 space-y-1 text-white shadow-md col-span-2 sm:col-span-1">
+            <div className="rounded-2xl border border-brand-200 dark:border-brand-800/60 bg-gradient-to-br from-brand-600 to-indigo-700 p-3.5 sm:p-4 space-y-1 text-white shadow-md col-span-2 sm:col-span-1">
               <span className="text-[11px] font-black uppercase tracking-wider text-brand-100">
                 Grand Total Cash
               </span>
-              <p className="text-xl font-black">
+              <p className="text-lg sm:text-xl font-black">
                 {summary.totalGrandCollected.toLocaleString()} <span className="text-xs font-semibold text-brand-200">DA</span>
               </p>
               <p className="text-[11px] text-brand-100 font-medium">
                 Tuition + Assurance
               </p>
             </div>
+          </div>
+
+          {/* ── Teacher Net Payout & Commission Breakdown (Row 2) ─────────── */}
+          <div className="rounded-3xl border border-indigo-200 dark:border-indigo-900/60 bg-gradient-to-br from-indigo-50/70 via-white to-purple-50/40 dark:from-slate-850 dark:via-slate-900 dark:to-indigo-950/30 p-4 sm:p-5 shadow-sm space-y-4">
+            
+            {/* Top Bar: Calculator Controls */}
+            <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-indigo-100 dark:border-slate-800">
+              <div className="flex items-center gap-2.5">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-600 text-white shadow-sm">
+                  <Calculator className="h-4 w-4" />
+                </div>
+                <div>
+                  <h3 className="font-black text-sm text-slate-900 dark:text-white flex items-center gap-2">
+                    Teacher Compensation & Share (صافي حصة الأستاذ)
+                  </h3>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                    Mode: {commissionMode === "tiered" ? "Standard Group Size Scaling (≤7: 15k, 8-11: 20k, 20+: 40k)" : commissionMode === "percentage" ? `${customPercentage}% of Collected Tuition` : `${customPerStudent.toLocaleString()} DA / Student`}
+                  </p>
+                </div>
+              </div>
+
+              {/* Commission Mode Switcher */}
+              <div className="flex items-center gap-1.5 bg-white dark:bg-slate-800 p-1 rounded-2xl border border-indigo-100 dark:border-slate-700 shadow-2xs print:hidden">
+                <button
+                  type="button"
+                  onClick={() => setCommissionMode("tiered")}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                    commissionMode === "tiered"
+                      ? "bg-indigo-600 text-white shadow-xs"
+                      : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700"
+                  }`}
+                  title="≤7: 15,000 DA | 8-11: 20,000 DA | 12-19: 30,000 DA | 20+: 40,000 DA"
+                >
+                  🏢 Group Tiers (15k/20k/40k)
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setCommissionMode("percentage")}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                    commissionMode === "percentage"
+                      ? "bg-indigo-600 text-white shadow-xs"
+                      : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700"
+                  }`}
+                >
+                  <Percent className="h-3 w-3 inline mr-1" /> Percentage %
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setCommissionMode("per_student")}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                    commissionMode === "per_student"
+                      ? "bg-indigo-600 text-white shadow-xs"
+                      : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700"
+                  }`}
+                >
+                  👤 Per Student
+                </button>
+              </div>
+            </div>
+
+            {/* Quick Percentage Adjuster (if percentage mode) */}
+            {commissionMode === "percentage" && (
+              <div className="flex flex-wrap items-center gap-3 bg-white/80 dark:bg-slate-800/80 p-3 rounded-2xl border border-indigo-100 dark:border-slate-700 print:hidden">
+                <span className="text-xs font-bold text-slate-600 dark:text-slate-300">Quick Rates:</span>
+                {[20, 25, 28, 30, 33, 35, 40].map((rate) => (
+                  <button
+                    key={rate}
+                    type="button"
+                    onClick={() => setCustomPercentage(rate)}
+                    className={`px-2.5 py-1 rounded-lg text-xs font-black transition-all ${
+                      customPercentage === rate
+                        ? "bg-indigo-600 text-white shadow-xs"
+                        : "bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-200"
+                    }`}
+                  >
+                    {rate}%
+                  </button>
+                ))}
+                <div className="flex items-center gap-1.5 ml-auto">
+                  <label className="text-xs font-bold text-slate-500">Custom:</label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="100"
+                    value={customPercentage}
+                    onChange={(e) => setCustomPercentage(Math.max(1, Number(e.target.value)))}
+                    className="w-16 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-2 py-1 text-xs font-black text-slate-900 dark:text-white text-center"
+                  />
+                  <span className="text-xs font-bold text-slate-500">%</span>
+                </div>
+              </div>
+            )}
+
+            {/* Quick Per-Student Rate Adjuster */}
+            {commissionMode === "per_student" && (
+              <div className="flex flex-wrap items-center gap-3 bg-white/80 dark:bg-slate-800/80 p-3 rounded-2xl border border-indigo-100 dark:border-slate-700 print:hidden">
+                <span className="text-xs font-bold text-slate-600 dark:text-slate-300">Presets:</span>
+                {[1500, 1800, 2000, 2200, 2500].map((rate) => (
+                  <button
+                    key={rate}
+                    type="button"
+                    onClick={() => setCustomPerStudent(rate)}
+                    className={`px-2.5 py-1 rounded-lg text-xs font-black transition-all ${
+                      customPerStudent === rate
+                        ? "bg-indigo-600 text-white shadow-xs"
+                        : "bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-200"
+                    }`}
+                  >
+                    {rate.toLocaleString()} DA
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* Big Two-Box Financial Share: Teacher Share vs School Net */}
+            <div className="grid sm:grid-cols-2 gap-4">
+              {/* Box 1: Teacher Net Payout */}
+              <div className="rounded-2xl border border-indigo-200 dark:border-indigo-800 bg-gradient-to-r from-indigo-600 via-indigo-700 to-purple-700 p-4 text-white shadow-md flex items-center justify-between">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-black uppercase tracking-wider text-indigo-200">
+                      🧑‍🏫 Teacher Net Share (صافي الأستاذ)
+                    </span>
+                  </div>
+                  <p className="text-2xl sm:text-3xl font-black mt-1 tracking-tight">
+                    {teacherCompensation.totalTeacherNet.toLocaleString()}{" "}
+                    <span className="text-sm font-bold text-indigo-200">DA</span>
+                  </p>
+                  <p className="text-[11px] text-indigo-100/90 font-semibold mt-0.5">
+                    {summary.totalCollectedTuition > 0
+                      ? `≈ ${((teacherCompensation.totalTeacherNet / summary.totalCollectedTuition) * 100).toFixed(1)}% of collected tuition`
+                      : "Calculated across active groups"}
+                  </p>
+                </div>
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/15 backdrop-blur-sm text-white font-black text-sm shadow-sm">
+                  {teacherCompensation.groupBreakdowns.length} Grp
+                </div>
+              </div>
+
+              {/* Box 2: School / Center Net Share */}
+              <div className="rounded-2xl border border-emerald-200 dark:border-emerald-800 bg-gradient-to-r from-emerald-600 via-teal-600 to-teal-700 p-4 text-white shadow-md flex items-center justify-between">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-black uppercase tracking-wider text-emerald-200">
+                      🏫 Center / School Net (صافي المركز)
+                    </span>
+                  </div>
+                  <p className="text-2xl sm:text-3xl font-black mt-1 tracking-tight">
+                    {teacherCompensation.totalSchoolNet.toLocaleString()}{" "}
+                    <span className="text-sm font-bold text-emerald-200">DA</span>
+                  </p>
+                  <p className="text-[11px] text-emerald-100/90 font-semibold mt-0.5">
+                    Grand Cash ({summary.totalGrandCollected.toLocaleString()} DA) − Teacher Net
+                  </p>
+                </div>
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/15 backdrop-blur-sm text-white">
+                  <Building2 className="h-6 w-6" />
+                </div>
+              </div>
+            </div>
+
+            {/* Group-by-Group Roster Breakdown Cards */}
+            {teacherCompensation.groupBreakdowns.length > 0 && (
+              <div className="space-y-2 pt-1">
+                <p className="text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                  Group-by-Group Payout Breakdown:
+                </p>
+                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+                  {teacherCompensation.groupBreakdowns.map((gb) => (
+                    <div
+                      key={gb.groupName}
+                      className="rounded-2xl border border-slate-200/80 dark:border-slate-700 bg-white dark:bg-slate-800 p-3.5 space-y-2 shadow-2xs"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="font-black text-xs text-slate-900 dark:text-white flex items-center gap-1.5">
+                          <Layers className="h-3.5 w-3.5 text-indigo-500" />
+                          {gb.groupName}
+                        </span>
+                        <span className="rounded-full bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 px-2 py-0.5 text-[10px] font-black">
+                          {gb.totalCount} Students
+                        </span>
+                      </div>
+
+                      <div className="flex items-center justify-between text-xs pt-1 border-t border-slate-100 dark:border-slate-700 font-semibold">
+                        <span className="text-slate-400 text-[11px]">Collected Tuition:</span>
+                        <span className="text-emerald-600 dark:text-emerald-400 font-bold">
+                          {gb.collectedTuition.toLocaleString()} DA
+                        </span>
+                      </div>
+
+                      <div className="flex items-center justify-between text-xs font-black bg-indigo-50/50 dark:bg-indigo-950/30 p-2 rounded-xl border border-indigo-100/60 dark:border-indigo-900/40">
+                        <span className="text-indigo-900 dark:text-indigo-200 text-[11px]">Teacher Payout:</span>
+                        <span className="text-indigo-700 dark:text-indigo-300 text-sm">
+                          {gb.teacherPayout.toLocaleString()} DA
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* ── Detailed Students Financial Table ──────────────────────────── */}
@@ -338,9 +624,10 @@ export default function MonthlyFinancialRapportModal({
                     <tr className="border-b border-slate-200/80 dark:border-slate-700 bg-slate-50/80 dark:bg-slate-900/60 font-black text-slate-500 uppercase tracking-wider">
                       <th className="py-3 px-4">#</th>
                       <th className="py-3 px-4">Student</th>
-                      <th className="py-3 px-4">Course / Teacher</th>
+                      <th className="py-3 px-4">Group / Course</th>
                       <th className="py-3 px-4 text-right">Tuition Fee</th>
                       <th className="py-3 px-4 text-center">Paid Amount</th>
+                      <th className="py-3 px-4 text-center text-indigo-600 dark:text-indigo-400">Teacher Share</th>
                       <th className="py-3 px-4 text-right">Rest (Remaining)</th>
                       <th className="py-3 px-4 text-center">Assurance (800 DA)</th>
                       <th className="py-3 px-4 text-center">Status</th>
@@ -351,6 +638,17 @@ export default function MonthlyFinancialRapportModal({
                     {filteredStudents.map((st, index) => {
                       const isFullyPaid = st.paidTuition >= st.tuitionFee && st.tuitionFee > 0;
                       const isPartial = st.paidTuition > 0 && st.paidTuition < st.tuitionFee;
+
+                      // Student row teacher share estimate
+                      let studentTeacherShare = 0;
+                      if (commissionMode === "percentage") {
+                        studentTeacherShare = Math.round((st.paidTuition || 0) * ((Number(customPercentage) || 30) / 100));
+                      } else if (commissionMode === "per_student") {
+                        studentTeacherShare = (st.paidTuition || 0) > 0 ? Number(customPerStudent) || 2000 : 0;
+                      } else {
+                        // In tiered mode: calculate proportion of group payout
+                        studentTeacherShare = Math.round((st.paidTuition || 0) * 0.28);
+                      }
 
                       return (
                         <tr
@@ -386,10 +684,10 @@ export default function MonthlyFinancialRapportModal({
                             </div>
                           </td>
 
-                          {/* Course & Teacher */}
+                          {/* Group & Course */}
                           <td className="py-3.5 px-4">
-                            <span className="rounded-lg bg-slate-100 dark:bg-slate-700 px-2 py-0.5 text-[10px] font-bold text-slate-700 dark:text-slate-200">
-                              {st.course}
+                            <span className="rounded-lg bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 px-2 py-0.5 text-[10px] font-bold">
+                              {st.groupName || st.course}
                             </span>
                             <p className="text-[10px] text-slate-400 mt-0.5">{st.teacher}</p>
                           </td>
@@ -402,6 +700,13 @@ export default function MonthlyFinancialRapportModal({
                           {/* Paid Amount */}
                           <td className="py-3.5 px-4 text-center font-black text-slate-900 dark:text-white">
                             {st.paidTuition.toLocaleString()} DA
+                          </td>
+
+                          {/* Teacher Share */}
+                          <td className="py-3.5 px-4 text-center font-black">
+                            <span className="text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/40 px-2 py-0.5 rounded-lg text-xs font-bold">
+                              {studentTeacherShare > 0 ? `${studentTeacherShare.toLocaleString()} DA` : "0 DA"}
+                            </span>
                           </td>
 
                           {/* Rest */}
