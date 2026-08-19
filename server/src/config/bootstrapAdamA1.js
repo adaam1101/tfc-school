@@ -5,7 +5,7 @@ import { Attendance } from "../models/Attendance.js";
 import { dateKey } from "../utils/dates.js";
 
 export const RAW_ADAM_STUDENTS_G1 = [
-  // --- Group 1 (A1 New Group 01) ---
+  // --- Group 1 (A1 New Group) ---
   {
     name: "فقيه يامنى",
     username: "fkih.yamna",
@@ -262,7 +262,7 @@ export const RAW_ADAM_STUDENTS_G1 = [
 ];
 
 export const RAW_ADAM_STUDENTS_G2 = [
-  // --- Group 2 (A1 New Group 02) ---
+  // --- Group 2 (A2 New Group - 8 Sessions Studied) ---
   {
     name: "بوغابة أريج",
     username: "boughaba.aredj",
@@ -270,7 +270,7 @@ export const RAW_ADAM_STUDENTS_G2 = [
     parentPhone: "0660000010",
     paidAmount: 3000,
     assurancePaid: false,
-    sessionsAttended: 5,
+    sessionsAttended: 8,
     lastSessionStatus: "Present",
     notes: "الدفعة 1: 3000 دج"
   },
@@ -281,7 +281,7 @@ export const RAW_ADAM_STUDENTS_G2 = [
     parentPhone: "0660000011",
     paidAmount: 3000,
     assurancePaid: false,
-    sessionsAttended: 5,
+    sessionsAttended: 8,
     lastSessionStatus: "Present",
     notes: "الدفعة 1: 3000 دج"
   },
@@ -292,7 +292,7 @@ export const RAW_ADAM_STUDENTS_G2 = [
     parentPhone: "0698879100",
     paidAmount: 6000,
     assurancePaid: false,
-    sessionsAttended: 1,
+    sessionsAttended: 8,
     lastSessionStatus: "Absent",
     notes: "الدفعة 1: 2000 دج + الدفعة 2: 2000 دج + الدفعة 3: 2000 دج"
   },
@@ -303,7 +303,7 @@ export const RAW_ADAM_STUDENTS_G2 = [
     parentPhone: "0660000012",
     paidAmount: 0,
     assurancePaid: false,
-    sessionsAttended: 0,
+    sessionsAttended: 8,
     lastSessionStatus: "Absent",
     notes: "غير مدفوع"
   },
@@ -325,7 +325,7 @@ export const RAW_ADAM_STUDENTS_G2 = [
     parentPhone: "0555226589",
     paidAmount: 3500,
     assurancePaid: false,
-    sessionsAttended: 5,
+    sessionsAttended: 8,
     lastSessionStatus: "Absent",
     notes: "الدفعة 1: 3500 دج"
   },
@@ -336,7 +336,7 @@ export const RAW_ADAM_STUDENTS_G2 = [
     parentPhone: "0660000013",
     paidAmount: 4000,
     assurancePaid: false,
-    sessionsAttended: 4,
+    sessionsAttended: 8,
     lastSessionStatus: "Absent",
     notes: "الدفعة 1: 4000 دج"
   },
@@ -347,7 +347,7 @@ export const RAW_ADAM_STUDENTS_G2 = [
     parentPhone: "0660000014",
     paidAmount: 4000,
     assurancePaid: true,
-    sessionsAttended: 4,
+    sessionsAttended: 8,
     lastSessionStatus: "Absent",
     notes: "الدفعة 1: 4000 دج + حقوق تسجيل 800 دج"
   },
@@ -358,7 +358,7 @@ export const RAW_ADAM_STUDENTS_G2 = [
     parentPhone: "0660000015",
     paidAmount: 1350,
     assurancePaid: false,
-    sessionsAttended: 2,
+    sessionsAttended: 8,
     lastSessionStatus: "Absent",
     notes: "الدفعة 1: 1350 دج"
   },
@@ -369,7 +369,7 @@ export const RAW_ADAM_STUDENTS_G2 = [
     parentPhone: "0660000016",
     paidAmount: 0,
     assurancePaid: false,
-    sessionsAttended: 0,
+    sessionsAttended: 8,
     lastSessionStatus: "Absent",
     notes: "غير مدفوع"
   },
@@ -380,7 +380,7 @@ export const RAW_ADAM_STUDENTS_G2 = [
     parentPhone: "0660000017",
     paidAmount: 3750,
     assurancePaid: true,
-    sessionsAttended: 4,
+    sessionsAttended: 8,
     lastSessionStatus: "Absent",
     notes: "الدفعة 1: 3750 دج (لمدة شهر فقط) + حقوق تسجيل 800 دج"
   },
@@ -424,7 +424,7 @@ export const RAW_ADAM_STUDENTS_G2 = [
     parentPhone: "0664998664",
     paidAmount: 7000,
     assurancePaid: false,
-    sessionsAttended: 3,
+    sessionsAttended: 8,
     lastSessionStatus: "Absent",
     notes: "الدفعة 1: 7000 دج"
   },
@@ -435,7 +435,7 @@ export const RAW_ADAM_STUDENTS_G2 = [
     parentPhone: "0664998664",
     paidAmount: 7000,
     assurancePaid: false,
-    sessionsAttended: 3,
+    sessionsAttended: 8,
     lastSessionStatus: "Absent",
     notes: "الدفعة 1: 7000 دج"
   },
@@ -446,7 +446,7 @@ export const RAW_ADAM_STUDENTS_G2 = [
     parentPhone: "0664998664",
     paidAmount: 7000,
     assurancePaid: false,
-    sessionsAttended: 3,
+    sessionsAttended: 8,
     lastSessionStatus: "Absent",
     notes: "الدفعة 1: 7000 دج"
   },
@@ -457,7 +457,7 @@ export const RAW_ADAM_STUDENTS_G2 = [
     parentPhone: "0660000019",
     paidAmount: 3500,
     assurancePaid: false,
-    sessionsAttended: 4,
+    sessionsAttended: 8,
     lastSessionStatus: "Absent",
     notes: "الدفعة 1: 3500 دج"
   },
@@ -468,7 +468,7 @@ export const RAW_ADAM_STUDENTS_G2 = [
     parentPhone: "0697614564",
     paidAmount: 2000,
     assurancePaid: false,
-    sessionsAttended: 3,
+    sessionsAttended: 8,
     lastSessionStatus: "Absent",
     notes: "الدفعة 1: 2000 دج"
   },
@@ -479,16 +479,16 @@ export const RAW_ADAM_STUDENTS_G2 = [
     parentPhone: "0660000020",
     paidAmount: 7500,
     assurancePaid: true,
-    sessionsAttended: 3,
+    sessionsAttended: 8,
     lastSessionStatus: "Absent",
     notes: "الدفعة 1: 3000 دج + الدفعة 2: 4500 دج (خالص) + حقوق تسجيل 800 دج"
   }
 ];
 
-const syncStudentList = async (rawList, adam, groupName, groupColor, groupDays) => {
+const syncStudentList = async (rawList, adam, groupName, groupColor, groupDays, courseLevel = "A1") => {
   let group = await Group.findOne({
     teacher: adam._id,
-    name: groupName
+    $or: [{ name: groupName }, { name: groupName.replace("A2", "A1") }]
   });
 
   if (!group) {
@@ -501,6 +501,10 @@ const syncStudentList = async (rawList, adam, groupName, groupColor, groupDays) 
       days: groupDays
     });
     console.log(`Created group "${groupName}" for Teacher Adam`);
+  } else {
+    group.name = groupName;
+    group.color = groupColor;
+    group.days = groupDays;
   }
 
   const studentObjectIds = [];
@@ -515,7 +519,7 @@ const syncStudentList = async (rawList, adam, groupName, groupColor, groupDays) 
       ]
     });
 
-    const attendedCount = raw.sessionsAttended != null ? raw.sessionsAttended : 0;
+    const attendedCount = raw.sessionsAttended != null ? raw.sessionsAttended : 8;
     const todayStatus = raw.lastSessionStatus || "Present";
 
     if (!student) {
@@ -528,7 +532,7 @@ const syncStudentList = async (rawList, adam, groupName, groupColor, groupDays) 
         phone: raw.phone,
         status: "active",
         studentProfile: {
-          course: "A1",
+          course: courseLevel,
           teacher: adam._id,
           parentName: raw.name + " (Parent)",
           parentPhone: raw.parentPhone,
@@ -540,7 +544,7 @@ const syncStudentList = async (rawList, adam, groupName, groupColor, groupDays) 
     } else {
       if (!student.studentProfile) student.studentProfile = {};
       student.studentProfile.teacher = adam._id;
-      student.studentProfile.course = "A1";
+      student.studentProfile.course = courseLevel;
       student.studentProfile.sessionsAttended = attendedCount;
       if (raw.parentPhone && !student.studentProfile.parentPhone) {
         student.studentProfile.parentPhone = raw.parentPhone;
@@ -633,29 +637,31 @@ export const bootstrapAdamA1 = async () => {
         password: "Teacher@12345",
         status: "active",
         teacherProfile: {
-          subject: "English - A1",
+          subject: "English (A1 / A2)",
           contactInfo: "0555000000"
         }
       });
       console.log("Created Teacher Adam account: adam@tfcschool.dz");
     }
 
-    // 2. Sync Group 1 ("A1 New Group (01)")
+    // 2. Sync Group 1 ("A1 New Group")
     const g1StudentIds = await syncStudentList(
       RAW_ADAM_STUDENTS_G1,
       adam,
-      "A1 New Group (01)",
+      "A1 New Group",
       "#3B82F6",
-      ["Sunday", "Tuesday", "Thursday"]
+      ["Sunday", "Tuesday", "Thursday"],
+      "A1"
     );
 
-    // 3. Sync Group 2 ("A1 New Group (02)")
+    // 3. Sync Group 2 ("A2 New Group" - 8 Sessions Studied)
     const g2StudentIds = await syncStudentList(
       RAW_ADAM_STUDENTS_G2,
       adam,
-      "A1 New Group (02)",
+      "A2 New Group",
       "#8B5CF6",
-      ["Monday", "Wednesday", "Saturday"]
+      ["Monday", "Wednesday", "Saturday"],
+      "A2"
     );
 
     const allAdamStudentIds = [...g1StudentIds, ...g2StudentIds];
@@ -671,7 +677,7 @@ export const bootstrapAdamA1 = async () => {
       { $pullAll: { "teacherProfile.assignedStudents": allAdamStudentIds } }
     );
 
-    console.log(`Successfully bootstrapped ${allAdamStudentIds.length} students across 2 groups strictly for Teacher Adam with today's attendance live! 🎓`);
+    console.log(`Successfully bootstrapped ${allAdamStudentIds.length} students across A1 New Group & A2 New Group (8 sessions studied) strictly for Teacher Adam! 🎓`);
   } catch (err) {
     console.error("Error in bootstrapAdamA1:", err);
   }
