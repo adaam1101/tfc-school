@@ -2,7 +2,7 @@
 import { Group } from "../models/Group.js";
 import { Payment } from "../models/Payment.js";
 
-export const RAW_ADAM_STUDENTS = [
+export const RAW_ADAM_STUDENTS_G1 = [
   // --- Sheet 1 ---
   {
     name: "فقيه يامنى",
@@ -50,7 +50,7 @@ export const RAW_ADAM_STUDENTS = [
     notes: "الدفعة 1: 7000 دج"
   },
 
-  // --- Sheet 2 (Adem A1) ---
+  // --- Sheet 2 (Adem A1 - G1) ---
   {
     name: "طراد دينا",
     username: "trad.dina",
@@ -215,6 +215,298 @@ export const RAW_ADAM_STUDENTS = [
   }
 ];
 
+export const RAW_ADAM_STUDENTS_G2 = [
+  // --- Sheet 3 (Adem A1 - G2) ---
+  {
+    name: "بوغابة أريج",
+    username: "boughaba.aredj",
+    phone: "0660000010",
+    parentPhone: "0660000010",
+    paidAmount: 3000,
+    assurancePaid: false,
+    notes: "الدفعة 1: 3000 دج"
+  },
+  {
+    name: "بوغابة ساجدة",
+    username: "boughaba.sajida",
+    phone: "0660000011",
+    parentPhone: "0660000011",
+    paidAmount: 3000,
+    assurancePaid: false,
+    notes: "الدفعة 1: 3000 دج"
+  },
+  {
+    name: "بوشتة إيناس",
+    username: "bouchta.ines",
+    phone: "0698879100",
+    parentPhone: "0698879100",
+    paidAmount: 6000,
+    assurancePaid: false,
+    notes: "الدفعة 1: 2000 دج + الدفعة 2: 2000 دج + الدفعة 3: 2000 دج"
+  },
+  {
+    name: "حوماني ميساء",
+    username: "houmani.mayssa",
+    phone: "0660000012",
+    parentPhone: "0660000012",
+    paidAmount: 0,
+    assurancePaid: false,
+    notes: "غير مدفوع"
+  },
+  {
+    name: "جدوعي محمد",
+    username: "djedouai.mohamed",
+    phone: "0673828365",
+    parentPhone: "0673828365",
+    paidAmount: 7500,
+    assurancePaid: true,
+    notes: "خالص كامل المبلغ 7500 دج + حقوق تسجيل 800 دج"
+  },
+  {
+    name: "أحمد ناصر عبد الحي",
+    username: "ahmed.nacer.abdelhay",
+    phone: "0555226589",
+    parentPhone: "0555226589",
+    paidAmount: 3500,
+    assurancePaid: false,
+    notes: "الدفعة 1: 3500 دج"
+  },
+  {
+    name: "بن لعماري محمد",
+    username: "benlamari.mohamed",
+    phone: "0660000013",
+    parentPhone: "0660000013",
+    paidAmount: 4000,
+    assurancePaid: false,
+    notes: "الدفعة 1: 4000 دج"
+  },
+  {
+    name: "مراح لؤي",
+    username: "merah.louay",
+    phone: "0660000014",
+    parentPhone: "0660000014",
+    paidAmount: 4000,
+    assurancePaid: true,
+    notes: "الدفعة 1: 4000 دج + حقوق تسجيل 800 دج"
+  },
+  {
+    name: "سوشة ميليسا",
+    username: "soucha.melissa",
+    phone: "0660000015",
+    parentPhone: "0660000015",
+    paidAmount: 1350,
+    assurancePaid: false,
+    notes: "الدفعة 1: 1350 دج"
+  },
+  {
+    name: "مقراني مروة",
+    username: "mokrani.marwa",
+    phone: "0660000016",
+    parentPhone: "0660000016",
+    paidAmount: 0,
+    assurancePaid: false,
+    notes: "غير مدفوع"
+  },
+  {
+    name: "سلطاني وئام",
+    username: "soltani.wiam",
+    phone: "0660000017",
+    parentPhone: "0660000017",
+    paidAmount: 3750,
+    assurancePaid: true,
+    notes: "الدفعة 1: 3750 دج (لمدة شهر فقط) + حقوق تسجيل 800 دج"
+  },
+  {
+    name: "حلافي إبراهيم",
+    username: "hellafi.ibrahim",
+    phone: "0660000018",
+    parentPhone: "0660000018",
+    paidAmount: 7500,
+    assurancePaid: false,
+    notes: "خالص كامل المبلغ 7500 دج"
+  },
+  {
+    name: "كريبات سيرين",
+    username: "kribat.sirine",
+    phone: "0666736606",
+    parentPhone: "0666736606",
+    paidAmount: 7500,
+    assurancePaid: false,
+    notes: "خالص كامل المبلغ 7500 دج"
+  },
+  {
+    name: "كريبات أروى رنيم",
+    username: "kribat.arwa.ranim",
+    phone: "0666736607",
+    parentPhone: "0666736606",
+    paidAmount: 7500,
+    assurancePaid: false,
+    notes: "خالص كامل المبلغ 7500 دج"
+  },
+  {
+    name: "سديرة ضحى",
+    username: "sedira.dhoha",
+    phone: "0664998665",
+    parentPhone: "0664998664",
+    paidAmount: 7000,
+    assurancePaid: false,
+    notes: "الدفعة 1: 7000 دج"
+  },
+  {
+    name: "سديرة ملاك",
+    username: "sedira.malak",
+    phone: "0664998664",
+    parentPhone: "0664998664",
+    paidAmount: 7000,
+    assurancePaid: false,
+    notes: "الدفعة 1: 7000 دج"
+  },
+  {
+    name: "سديرة مريم",
+    username: "sedira.meriem",
+    phone: "0664998666",
+    parentPhone: "0664998664",
+    paidAmount: 7000,
+    assurancePaid: false,
+    notes: "الدفعة 1: 7000 دج"
+  },
+  {
+    name: "بوامحولة عبد الله",
+    username: "bouamhoula.abdellah",
+    phone: "0660000019",
+    parentPhone: "0660000019",
+    paidAmount: 3500,
+    assurancePaid: false,
+    notes: "الدفعة 1: 3500 دج"
+  },
+  {
+    name: "بوالحراس نزار",
+    username: "boualheras.nizar",
+    phone: "0697614564",
+    parentPhone: "0697614564",
+    paidAmount: 2000,
+    assurancePaid: false,
+    notes: "الدفعة 1: 2000 دج"
+  },
+  {
+    name: "صنهاجي أيسر",
+    username: "sanhadji.ayser",
+    phone: "0660000020",
+    parentPhone: "0660000020",
+    paidAmount: 7500,
+    assurancePaid: true,
+    notes: "الدفعة 1: 3000 دج + الدفعة 2: 4500 دج (خالص) + حقوق تسجيل 800 دج"
+  }
+];
+
+const syncStudentList = async (rawList, adam, groupName, groupColor, groupDays) => {
+  let group = await Group.findOne({
+    teacher: adam._id,
+    name: groupName
+  });
+
+  if (!group) {
+    group = await Group.create({
+      name: groupName,
+      description: `Groupe ${groupName} - Enseignant Adam Ameyoud`,
+      teacher: adam._id,
+      students: [],
+      color: groupColor,
+      days: groupDays
+    });
+    console.log(`Created group "${groupName}" for Teacher Adam`);
+  }
+
+  const studentObjectIds = [];
+
+  for (const raw of rawList) {
+    let student = await User.findOne({
+      $or: [
+        { name: raw.name },
+        { username: raw.username },
+        { email: raw.username + "@tfc.local" }
+      ]
+    });
+
+    if (!student) {
+      student = await User.create({
+        role: "student",
+        name: raw.name,
+        username: raw.username,
+        email: raw.username + "@tfc.local",
+        password: "Student@12345",
+        phone: raw.phone,
+        status: "active",
+        studentProfile: {
+          course: "A1",
+          teacher: adam._id,
+          parentName: raw.name + " (Parent)",
+          parentPhone: raw.parentPhone,
+          sessionsAttended: 0,
+          isStopped: false,
+          enrollmentDate: new Date("2026-07-01")
+        }
+      });
+    } else {
+      if (!student.studentProfile) student.studentProfile = {};
+      student.studentProfile.teacher = adam._id;
+      student.studentProfile.course = "A1";
+      if (raw.parentPhone && !student.studentProfile.parentPhone) {
+        student.studentProfile.parentPhone = raw.parentPhone;
+      }
+      await student.save();
+    }
+
+    studentObjectIds.push(student._id);
+
+    // Payments for August & July 2026
+    for (const m of ["2026-08", "2026-07"]) {
+      const periodName = m === "2026-08" ? "August 2026" : "July 2026";
+      let payment = await Payment.findOne({ student: student._id, month: m });
+
+      const tuitionFee = 7500;
+      const paid = raw.paidAmount;
+      const assuranceFee = 800;
+      const isAssurancePaid = Boolean(raw.assurancePaid);
+
+      if (!payment) {
+        await Payment.create({
+          student: student._id,
+          teacher: adam._id,
+          month: m,
+          period: periodName,
+          amount: tuitionFee,
+          paidAmount: paid,
+          restAmount: Math.max(0, tuitionFee - paid),
+          assuranceAmount: assuranceFee,
+          assurancePaid: isAssurancePaid,
+          assurancePaidAmount: isAssurancePaid ? assuranceFee : 0,
+          status: paid >= tuitionFee ? "paid" : paid > 0 ? "partial" : "unpaid",
+          notes: raw.notes || "",
+          method: "cash",
+          recordedBy: adam._id
+        });
+      } else {
+        payment.teacher = adam._id;
+        payment.amount = tuitionFee;
+        payment.paidAmount = paid;
+        payment.restAmount = Math.max(0, tuitionFee - paid);
+        payment.assuranceAmount = assuranceFee;
+        payment.assurancePaid = isAssurancePaid;
+        payment.assurancePaidAmount = isAssurancePaid ? assuranceFee : 0;
+        payment.status = paid >= tuitionFee ? "paid" : paid > 0 ? "partial" : "unpaid";
+        if (!payment.notes) payment.notes = raw.notes;
+        await payment.save();
+      }
+    }
+  }
+
+  group.students = studentObjectIds;
+  await group.save();
+
+  return studentObjectIds;
+};
+
 export const bootstrapAdamA1 = async () => {
   try {
     // 1. Locate Teacher Adam / Adem
@@ -227,7 +519,6 @@ export const bootstrapAdamA1 = async () => {
     });
 
     if (!adam) {
-      // Create Teacher Adam if not found
       adam = await User.create({
         role: "teacher",
         name: "Ameyoud Adam",
@@ -242,126 +533,38 @@ export const bootstrapAdamA1 = async () => {
       console.log("Created Teacher Adam account: adam@tfcschool.dz");
     }
 
-    // 2. Locate or create Group "A1 New Group"
-    let a1Group = await Group.findOne({
-      teacher: adam._id,
-      name: { $regex: /A1 New Group|A1 - G1|A1/i }
-    });
-
-    if (!a1Group) {
-      a1Group = await Group.create({
-        name: "A1 New Group",
-        description: "Groupe A1 - Enseignant Adam Ameyoud",
-        teacher: adam._id,
-        students: [],
-        color: "#3B82F6",
-        days: ["Sunday", "Tuesday", "Thursday"]
-      });
-      console.log("Created group A1 New Group for Teacher Adam");
-    }
-
-    const studentObjectIds = [];
-
-    // 3. Process all 23 students
-    for (const raw of RAW_ADAM_STUDENTS) {
-      let student = await User.findOne({
-        $or: [
-          { name: raw.name },
-          { username: raw.username },
-          { email: raw.username + "@tfc.local" }
-        ]
-      });
-
-      if (!student) {
-        student = await User.create({
-          role: "student",
-          name: raw.name,
-          username: raw.username,
-          email: raw.username + "@tfc.local",
-          password: "Student@12345",
-          phone: raw.phone,
-          status: "active",
-          studentProfile: {
-            course: "A1",
-            teacher: adam._id,
-            parentName: raw.name + " (Parent)",
-            parentPhone: raw.parentPhone,
-            sessionsAttended: 0,
-            isStopped: false,
-            enrollmentDate: new Date("2026-07-01")
-          }
-        });
-      } else {
-        // Enforce assignment strictly to Teacher Adam
-        if (!student.studentProfile) student.studentProfile = {};
-        student.studentProfile.teacher = adam._id;
-        student.studentProfile.course = "A1";
-        if (raw.parentPhone && !student.studentProfile.parentPhone) {
-          student.studentProfile.parentPhone = raw.parentPhone;
-        }
-        await student.save();
-      }
-
-      studentObjectIds.push(student._id);
-
-      // 4. Create or update payment for August 2026 (and July 2026)
-      for (const m of ["2026-08", "2026-07"]) {
-        const periodName = m === "2026-08" ? "August 2026" : "July 2026";
-        let payment = await Payment.findOne({ student: student._id, month: m });
-
-        const tuitionFee = 7500;
-        const paid = raw.paidAmount;
-        const assuranceFee = 800;
-        const isAssurancePaid = Boolean(raw.assurancePaid);
-
-        if (!payment) {
-          await Payment.create({
-            student: student._id,
-            teacher: adam._id,
-            month: m,
-            period: periodName,
-            amount: tuitionFee,
-            paidAmount: paid,
-            restAmount: Math.max(0, tuitionFee - paid),
-            assuranceAmount: assuranceFee,
-            assurancePaid: isAssurancePaid,
-            assurancePaidAmount: isAssurancePaid ? assuranceFee : 0,
-            status: paid >= tuitionFee ? "paid" : paid > 0 ? "partial" : "unpaid",
-            notes: raw.notes || "",
-            method: "cash",
-            recordedBy: adam._id
-          });
-        } else {
-          payment.teacher = adam._id;
-          payment.amount = tuitionFee;
-          payment.paidAmount = paid;
-          payment.restAmount = Math.max(0, tuitionFee - paid);
-          payment.assuranceAmount = assuranceFee;
-          payment.assurancePaid = isAssurancePaid;
-          payment.assurancePaidAmount = isAssurancePaid ? assuranceFee : 0;
-          payment.status = paid >= tuitionFee ? "paid" : paid > 0 ? "partial" : "unpaid";
-          if (!payment.notes) payment.notes = raw.notes;
-          await payment.save();
-        }
-      }
-    }
-
-    // 5. Update Teacher Adam's assigned students list
-    await User.findByIdAndUpdate(adam._id, {
-      $addToSet: { "teacherProfile.assignedStudents": { $each: studentObjectIds } }
-    });
-
-    // 6. Update Group "A1 New Group" with all student IDs
-    a1Group.students = studentObjectIds;
-    await a1Group.save();
-
-    // 7. Ensure no other teachers accidentally have these students assigned
-    await User.updateMany(
-      { role: "teacher", _id: { $ne: adam._id } },
-      { $pullAll: { "teacherProfile.assignedStudents": studentObjectIds } }
+    // 2. Sync Group 1 ("A1 New Group (01)")
+    const g1StudentIds = await syncStudentList(
+      RAW_ADAM_STUDENTS_G1,
+      adam,
+      "A1 New Group (01)",
+      "#3B82F6",
+      ["Sunday", "Tuesday", "Thursday"]
     );
 
-    console.log(`Successfully bootstrapped ${studentObjectIds.length} students in "A1 New Group" strictly for Teacher Adam with organized payments! 🎓`);
+    // 3. Sync Group 2 ("A1 New Group (02)")
+    const g2StudentIds = await syncStudentList(
+      RAW_ADAM_STUDENTS_G2,
+      adam,
+      "A1 New Group (02)",
+      "#8B5CF6",
+      ["Monday", "Wednesday", "Saturday"]
+    );
+
+    const allAdamStudentIds = [...g1StudentIds, ...g2StudentIds];
+
+    // 4. Update Teacher Adam's assigned students list
+    await User.findByIdAndUpdate(adam._id, {
+      $addToSet: { "teacherProfile.assignedStudents": { $each: allAdamStudentIds } }
+    });
+
+    // 5. Ensure no other teachers have these students assigned
+    await User.updateMany(
+      { role: "teacher", _id: { $ne: adam._id } },
+      { $pullAll: { "teacherProfile.assignedStudents": allAdamStudentIds } }
+    );
+
+    console.log(`Successfully bootstrapped ${allAdamStudentIds.length} students across 2 groups strictly for Teacher Adam! 🎓`);
   } catch (err) {
     console.error("Error in bootstrapAdamA1:", err);
   }
