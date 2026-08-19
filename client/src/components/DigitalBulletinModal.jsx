@@ -36,6 +36,12 @@ export default function DigitalBulletinModal({
   const studentCourse = student?.studentProfile?.course || "Course Level";
   const parentPhone = student?.studentProfile?.parentPhone || "";
   const sessionsCount = student?.sessionsAttended ?? 0;
+  const absencesCount = student?.absencesCount ?? 0;
+  const targetSessions = student?.targetSessions || 12;
+  const isReadyForTest = sessionsCount >= 11;
+  const totalHeld = sessionsCount + absencesCount;
+  const presencePct = totalHeld > 0 ? Math.round((sessionsCount / totalHeld) * 100) : 100;
+
   const age = student?.studentProfile?.age || "–";
   const isStopped = student?.studentProfile?.isStopped || student?.status === "stopped";
   const bulletinNo = `BUL-${Date.now().toString().slice(-6)}`;
@@ -105,26 +111,18 @@ export default function DigitalBulletinModal({
     doc.close();
   };
 
-  const buildWhatsAppUrl = () => {
-    if (!parentPhone) return null;
-    const cleanPhone = parentPhone.replace(/[^0-9]/g, "");
-    const msg = `*📊 BULLETIN SCOLAIRE NUMÉRIQUE - ${schoolInfo.name || "TFC ACADEMY"}*\n` +
-      `━━━━━━━━━━━━━━━━━━━━\n` +
-      `📄 *Réf:* ${bulletinNo}\n` +
-      `👤 *Élève:* ${studentName} (Âge: ${age})\n` +
-      `🎓 *Niveau/Formation:* ${studentCourse}\n` +
-      `👨‍🏫 *Enseignant:* ${teacherName || "Équipe Pédagogique"}\n` +
-      `━━━━━━━━━━━━━━━━━━━━\n` +
-      `📖 *Séances Complétées:* ${sessionsCount} séances\n` +
-      `⚡ *Statut Assiduité:* ${isStopped ? "Arrêté" : "Actif & Régulier 🟢"}\n` +
-      `⭐ *Évaluation Générale:* Progression satisfaisante, participation active.\n` +
-      `━━━━━━━━━━━━━━━━━━━━\n` +
-      `_TFC School - Gestion 100% Dématérialisée_`;
+  const shareText = `🎓 *Bulletin Pédagogique - TFC Academy* 🎓\n\n` +
+    `👤 *Élève :* ${studentName}\n` +
+    `📚 *Niveau :* ${studentCourse}\n` +
+    `📖 *Séances Présentes :* ${sessionsCount} / ${targetSessions} séances\n` +
+    `🔴 *Absences :* ${absencesCount} séance(s)\n` +
+    `🎯 *Statut Test de Niveau :* ${isReadyForTest ? "Éligible pour le Test de Niveau (11-16 Séances)" : `En cours (${targetSessions - sessionsCount} séances restantes)`}\n` +
+    `📊 *Taux d'assiduité :* ${presencePct}%\n\n` +
+    `_Consultez les détails sur la plateforme TFC School._`;
 
-    return `https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`;
-  };
-
-  const waUrl = buildWhatsAppUrl();
+  const waUrl = parentPhone
+    ? `https://wa.me/${parentPhone.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(shareText)}`
+    : "";
 
   return (
     <div className="fixed inset-0 z-[100] flex items-start justify-center bg-black/75 backdrop-blur-sm p-3 sm:p-6 overflow-y-auto print:p-0 print:bg-white animate-fade-in">
@@ -203,7 +201,7 @@ export default function DigitalBulletinModal({
           </div>
 
           {/* Student Profile Card */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 rounded-2xl bg-gradient-to-r from-slate-50 to-indigo-50/40 dark:from-slate-800/40 dark:to-indigo-950/20 p-4 border border-slate-200/60 dark:border-slate-800 text-xs">
+          <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 rounded-2xl bg-gradient-to-r from-slate-50 to-indigo-50/40 dark:from-slate-800/40 dark:to-indigo-950/20 p-4 border border-slate-200/60 dark:border-slate-800 text-xs">
             <div>
               <span className="text-[10px] uppercase font-bold text-slate-400 block mb-0.5">Nom & Prénom</span>
               <strong className="text-sm font-black text-slate-900 dark:text-white">{studentName}</strong>
@@ -215,9 +213,18 @@ export default function DigitalBulletinModal({
               <span className="block text-[11px] text-slate-500 font-semibold mt-0.5">Professeur: {teacherName || "TFC Staff"}</span>
             </div>
             <div>
-              <span className="text-[10px] uppercase font-bold text-slate-400 block mb-0.5">Assiduité & Volume</span>
-              <strong className="text-sm font-black text-emerald-600 dark:text-emerald-400">📖 {sessionsCount} Séances</strong>
-              <span className="block text-[11px] text-slate-500 font-semibold mt-0.5">Contact: {parentPhone || "–"}</span>
+              <span className="text-[10px] uppercase font-bold text-slate-400 block mb-0.5">Séances & Absences</span>
+              <strong className="text-sm font-black text-emerald-600 dark:text-emerald-400">📖 {sessionsCount} / {targetSessions}</strong>
+              <span className="block text-[11px] text-rose-500 font-bold mt-0.5">🔴 {absencesCount} {absencesCount === 1 ? "Absence" : "Absences"}</span>
+            </div>
+            <div>
+              <span className="text-[10px] uppercase font-bold text-slate-400 block mb-0.5">Test de Niveau (11-16)</span>
+              {isReadyForTest ? (
+                <strong className="text-xs font-black text-emerald-600 dark:text-emerald-400 block">🎯 Éligible pour le Test!</strong>
+              ) : (
+                <strong className="text-xs font-bold text-amber-600 dark:text-amber-400 block">⏳ En cours ({targetSessions - sessionsCount} rest.)</strong>
+              )}
+              <span className="block text-[10px] text-slate-400 mt-0.5">Assiduité: {presencePct}%</span>
             </div>
           </div>
 

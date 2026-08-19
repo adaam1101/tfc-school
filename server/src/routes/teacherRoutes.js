@@ -145,7 +145,7 @@ teacherRouter.get("/dashboard", async (req, res, next) => {
     const students = await getAssignedStudents(req.user);
     const studentIds = students.map((student) => student._id);
 
-    const [todayRecords, weekStats, sessionCounts, monthlyPayments] = await Promise.all([
+    const [todayRecords, weekStats, sessionCounts, absenceCounts, monthlyPayments] = await Promise.all([
       Attendance.find({ date: selectedDate, student: { $in: studentIds } }),
       Attendance.aggregate([
         {
@@ -165,6 +165,15 @@ teacherRouter.get("/dashboard", async (req, res, next) => {
         },
         { $group: { _id: "$student", count: { $sum: 1 } } }
       ]),
+      Attendance.aggregate([
+        {
+          $match: {
+            student: { $in: studentIds },
+            status: "Absent"
+          }
+        },
+        { $group: { _id: "$student", count: { $sum: 1 } } }
+      ]),
       Payment.find({
         student: { $in: studentIds },
         month: currentMonth
@@ -177,6 +186,9 @@ teacherRouter.get("/dashboard", async (req, res, next) => {
     const sessionsByStudent = new Map(
       sessionCounts.map((item) => [String(item._id), item.count])
     );
+    const absencesByStudent = new Map(
+      absenceCounts.map((item) => [String(item._id), item.count])
+    );
     const paymentsByStudent = new Map(
       monthlyPayments.map((payment) => [String(payment.student), payment])
     );
@@ -188,13 +200,24 @@ teacherRouter.get("/dashboard", async (req, res, next) => {
       month: currentMonth,
       weekStats,
       students: students.map((student) => {
-        const baseSessions = student.studentProfile?.sessionsAttended || 0;
+        const baseSessions = student.studentProfile?.sessionsAttended != null ? student.studentProfile.sessionsAttended : 0;
         const presentCount = sessionsByStudent.get(String(student._id)) || 0;
+        const recordedAbsences = student.studentProfile?.absencesCount != null 
+          ? student.studentProfile.absencesCount 
+          : (absencesByStudent.get(String(student._id)) || 0);
+
+        const totalAttended = baseSessions > 0 ? baseSessions : presentCount;
+        const targetSessions = student.studentProfile?.targetSessions || 12; // 11-12 session test cycle (max 16)
+        const isReadyForTest = totalAttended >= 11;
+
         return {
           ...student.toJSON(),
           todayAttendance: attendanceByStudent.get(String(student._id)) || null,
           currentPayment: paymentsByStudent.get(String(student._id)) || null,
-          sessionsAttended: baseSessions + presentCount
+          sessionsAttended: totalAttended,
+          absencesCount: recordedAbsences,
+          targetSessions,
+          isReadyForTest
         };
       })
     });
@@ -203,11 +226,11 @@ teacherRouter.get("/dashboard", async (req, res, next) => {
   }
 });
 
-// Update a student's total studied sessions count
+// Update a student's total studied sessions count, absences & test cycle target
 teacherRouter.put("/students/:studentId/sessions", async (req, res, next) => {
   try {
     const { studentId } = req.params;
-    const { count } = req.body;
+    const { count, absencesCount, targetSessions } = req.body;
 
     const newCount = Math.max(0, parseInt(count, 10) || 0);
 
@@ -222,19 +245,26 @@ teacherRouter.put("/students/:studentId/sessions", async (req, res, next) => {
       return res.status(403).json({ message: "This student is not assigned to you." });
     }
 
-    const presentCount = await Attendance.countDocuments({ student: studentId, status: "Present" });
-
     if (!student.studentProfile) {
       student.studentProfile = {};
     }
 
-    student.studentProfile.sessionsAttended = Math.max(0, newCount - presentCount);
+    student.studentProfile.sessionsAttended = newCount;
+    if (absencesCount !== undefined) {
+      student.studentProfile.absencesCount = Math.max(0, parseInt(absencesCount, 10) || 0);
+    }
+    if (targetSessions !== undefined) {
+      student.studentProfile.targetSessions = parseInt(targetSessions, 10) || 12;
+    }
     await student.save();
 
     res.json({
       studentId,
       sessionsAttended: newCount,
-      message: `Sessions count for ${student.name} updated to ${newCount}.`
+      absencesCount: student.studentProfile.absencesCount ?? 0,
+      targetSessions: student.studentProfile.targetSessions ?? 12,
+      isReadyForTest: newCount >= 11,
+      message: `Sessions count for ${student.name} updated to ${newCount} (Absences: ${student.studentProfile.absencesCount ?? 0}).`
     });
   } catch (error) {
     next(error);

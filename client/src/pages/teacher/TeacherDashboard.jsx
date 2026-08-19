@@ -743,15 +743,44 @@ export default function TeacherDashboard() {
                                       Age {student.studentProfile.age}
                                     </span>
                                   )}
+
+                                  {/* Sessions & Absences Quick Button */}
                                   <button
                                     type="button"
                                     onClick={() => setEditingSessionsStudent(student)}
                                     className="inline-flex items-center gap-1 bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 text-emerald-700 dark:text-emerald-350 border border-emerald-200/60 dark:border-emerald-800/60 px-2 py-0.5 rounded-lg text-[10px] font-bold transition-all active:scale-95 cursor-pointer shadow-2xs group"
-                                    title="Click to edit total sessions studied"
+                                    title="Click to edit sessions attended, absences, and cycle target"
                                   >
-                                    <span>📖 {student.sessionsAttended ?? 0} {student.sessionsAttended === 1 ? "Session" : "Sessions"}</span>
+                                    <span>📖 {student.sessionsAttended ?? 0}/{student.targetSessions || 12} Sessions</span>
                                     <Pencil className="h-2.5 w-2.5 opacity-60 group-hover:opacity-100 ml-0.5" />
                                   </button>
+
+                                  {/* Absences Badge */}
+                                  {(student.absencesCount ?? 0) > 0 && (
+                                    <span 
+                                      className="inline-flex items-center gap-1 bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border border-rose-200/60 dark:border-rose-800/60 px-2 py-0.5 rounded-lg text-[10px] font-black shadow-2xs"
+                                      title="Total absences counted against the student"
+                                    >
+                                      <span>🔴 {student.absencesCount} {student.absencesCount === 1 ? "Absence" : "Absences"}</span>
+                                    </span>
+                                  )}
+
+                                  {/* Level Test Readiness Badge (11-12 max 16 sessions) */}
+                                  {(student.sessionsAttended ?? 0) >= 11 ? (
+                                    <span 
+                                      className="inline-flex items-center gap-1 bg-gradient-to-r from-amber-500 to-emerald-500 text-white font-black px-2.5 py-0.5 rounded-lg text-[10px] shadow-xs animate-pulse"
+                                      title="Student has completed 11+ sessions (11-16 max) and is ready for the Level Test to advance to the next level!"
+                                    >
+                                      <span>🎯 Ready for Level Test!</span>
+                                    </span>
+                                  ) : (student.sessionsAttended ?? 0) >= 8 ? (
+                                    <span 
+                                      className="inline-flex items-center gap-1 bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 border border-blue-200/60 dark:border-blue-800/60 px-2 py-0.5 rounded-lg text-[10px] font-bold"
+                                      title="Approaching level test (11-12 sessions needed)"
+                                    >
+                                      <span>⏳ Test Soon ({(student.targetSessions || 12) - (student.sessionsAttended ?? 0)} left)</span>
+                                    </span>
+                                  ) : null}
 
                                   <button
                                     type="button"
@@ -960,19 +989,28 @@ export default function TeacherDashboard() {
   );
 }
 
-// ── Edit Sessions Modal ───────────────────────────────────────────────────
+// ── Edit Sessions & Attendance Progress Modal ────────────────────────────
 
 export function EditSessionsModal({ student, onClose, onSaved }) {
   const [count, setCount] = useState(student.sessionsAttended ?? 0);
+  const [absencesCount, setAbsencesCount] = useState(student.absencesCount ?? 0);
+  const [targetSessions, setTargetSessions] = useState(student.targetSessions || 12);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+
+  const numAttended = Math.max(0, parseInt(count, 10) || 0);
+  const isReady = numAttended >= 11;
 
   const handleSave = async (e) => {
     e.preventDefault();
     setSaving(true);
     setError("");
     try {
-      await api.put(`/teacher/students/${student._id}/sessions`, { count });
+      await api.put(`/teacher/students/${student._id}/sessions`, { 
+        count: numAttended,
+        absencesCount: Math.max(0, parseInt(absencesCount, 10) || 0),
+        targetSessions: parseInt(targetSessions, 10) || 12
+      });
       if (onSaved) onSaved();
       onClose();
     } catch (err) {
@@ -984,15 +1022,15 @@ export function EditSessionsModal({ student, onClose, onSaved }) {
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 animate-fade-in">
-      <div className="w-full max-w-sm rounded-3xl bg-white dark:bg-slate-800 shadow-2xl overflow-hidden border border-slate-100 dark:border-slate-700">
+      <div className="w-full max-w-md rounded-3xl bg-white dark:bg-slate-800 shadow-2xl overflow-hidden border border-slate-100 dark:border-slate-700">
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
-          <div className="flex items-center gap-2">
-            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-sm font-bold text-sm">
-              📖
+          <div className="flex items-center gap-2.5">
+            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-sm font-bold text-base">
+              🎯
             </span>
             <div>
-              <h3 className="font-black text-slate-900 dark:text-slate-100 text-sm">Sessions Studied</h3>
-              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wide">{student.name}</p>
+              <h3 className="font-black text-slate-900 dark:text-slate-100 text-sm">Course Cycle & Test Progress</h3>
+              <p className="text-[11px] text-slate-400 font-bold uppercase tracking-wide">{student.name}</p>
             </div>
           </div>
           <button onClick={onClose} className="flex h-8 w-8 items-center justify-center rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 transition-colors">
@@ -1002,26 +1040,101 @@ export function EditSessionsModal({ student, onClose, onSaved }) {
 
         <form onSubmit={handleSave} className="p-6 space-y-4">
           <ErrorAlert message={error} />
-          <div>
-            <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1.5">
-              Total Sessions Attended
-            </label>
-            <input
-              type="number"
-              min="0"
-              max="999"
-              required
-              className="w-full rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/50 px-4 py-3 text-lg font-black text-slate-850 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 text-center"
-              value={count}
-              onChange={(e) => setCount(e.target.value)}
-              autoFocus
-            />
-            <p className="mt-2 text-[11px] text-slate-400 text-center">
-              Enter how many sessions {student.name} has completed.
-            </p>
+
+          {/* Test Readiness Status Banner */}
+          <div className={`p-3.5 rounded-2xl border transition-all ${
+            isReady
+              ? "bg-emerald-50 dark:bg-emerald-950/40 border-emerald-300 dark:border-emerald-800 text-emerald-800 dark:text-emerald-200"
+              : numAttended >= 8
+              ? "bg-blue-50 dark:bg-blue-950/40 border-blue-200 dark:border-blue-800 text-blue-800 dark:text-blue-200"
+              : "bg-amber-50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-200"
+          }`}>
+            <div className="flex items-center gap-2">
+              <span className="text-base">{isReady ? "🎯" : numAttended >= 8 ? "⏳" : "📖"}</span>
+              <div className="text-xs">
+                <strong className="block font-black">
+                  {isReady
+                    ? "Ready for Level Test (11-16 Sessions)!"
+                    : numAttended >= 8
+                    ? `Approaching Level Test (${targetSessions - numAttended} sessions left)`
+                    : `Cycle in Progress (${numAttended}/${targetSessions} Sessions)`}
+                </strong>
+                <span className="text-[11px] opacity-80">
+                  {isReady
+                    ? "The student has completed enough sessions to take the test and pass to the next level."
+                    : "Students study 11 to 12 sessions (max 16) before taking the test."}
+                </span>
+              </div>
+            </div>
           </div>
 
-          <div className="flex gap-2">
+          <div className="grid grid-cols-2 gap-3">
+            {/* Attended Sessions */}
+            <div>
+              <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1">
+                Attended Sessions
+              </label>
+              <input
+                type="number"
+                min="0"
+                max="99"
+                required
+                className="w-full rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/50 px-3 py-2.5 text-base font-black text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 text-center"
+                value={count}
+                onChange={(e) => setCount(e.target.value)}
+                autoFocus
+              />
+            </div>
+
+            {/* Absences Count */}
+            <div>
+              <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1">
+                Absences Count
+              </label>
+              <input
+                type="number"
+                min="0"
+                max="99"
+                required
+                className="w-full rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/50 px-3 py-2.5 text-base font-black text-rose-600 dark:text-rose-400 focus:outline-none focus:ring-2 focus:ring-rose-500/20 text-center"
+                value={absencesCount}
+                onChange={(e) => setAbsencesCount(e.target.value)}
+              />
+            </div>
+          </div>
+
+          {/* Cycle Target (12 or 16) */}
+          <div>
+            <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1">
+              Course Cycle Target (Test Level Threshold)
+            </label>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => setTargetSessions(12)}
+                className={`py-2 px-3 rounded-xl text-xs font-bold transition-all border ${
+                  targetSessions === 12
+                    ? "bg-brand-600 text-white border-brand-600 shadow-xs"
+                    : "bg-slate-50 dark:bg-slate-700 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-600"
+                }`}
+              >
+                12 Sessions (Standard)
+              </button>
+              <button
+                type="button"
+                onClick={() => setTargetSessions(16)}
+                className={`py-2 px-3 rounded-xl text-xs font-bold transition-all border ${
+                  targetSessions === 16
+                    ? "bg-brand-600 text-white border-brand-600 shadow-xs"
+                    : "bg-slate-50 dark:bg-slate-700 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-600"
+                }`}
+              >
+                16 Sessions (Max Cycle)
+              </button>
+            </div>
+          </div>
+
+          <div className="flex gap-2 pt-2">
             <button
               type="button"
               onClick={onClose}
@@ -1034,7 +1147,7 @@ export function EditSessionsModal({ student, onClose, onSaved }) {
               disabled={saving}
               className="flex-1 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 py-2.5 text-xs font-bold text-white shadow-md hover:from-emerald-600 hover:to-teal-700 transition-all disabled:opacity-50"
             >
-              {saving ? "Saving..." : "Save Sessions"}
+              {saving ? "Saving..." : "Save Progress"}
             </button>
           </div>
         </form>
