@@ -7,43 +7,48 @@ import { schoolLogo, schoolInfo } from "../config/branding.js";
 import { useAuth } from "../context/AuthContext.jsx";
 
 const genericConfig = {
-  title: "Sign in",
+  title: "Sign In",
   subtitle: "Access your dashboard",
   icon: LockKeyhole,
-  cta: "Sign in",
-  placeholder: "you@example.com"
+  cta: "Sign In",
+  placeholder: "Enter your username or email"
 };
 
 const roleConfig = {
   admin: {
-    title: "Admin Portal",
-    subtitle: "Authorized personnel only",
+    title: "Sign In",
+    subtitle: "Authorized access only",
     icon: ShieldCheck,
-    placeholder: `admin@${(import.meta.env.VITE_SCHOOL_SHORT || "tfc").toLowerCase()}school.dz`
+    cta: "Sign In",
+    placeholder: "Enter your username or email"
   },
   "sous-admin": {
-    title: "Sous-Admin Portal",
-    subtitle: "Gestion des utilisateurs",
+    title: "Sign In",
+    subtitle: "Authorized access only",
     icon: UserRound,
-    placeholder: `sousadmin@${(import.meta.env.VITE_SCHOOL_SHORT || "tfc").toLowerCase()}school.dz`
+    cta: "Sign In",
+    placeholder: "Enter your username or email"
   },
   moderator: {
-    title: "Moderator Portal",
-    subtitle: "Gestion des inscriptions",
+    title: "Sign In",
+    subtitle: "Authorized access only",
     icon: ShieldCheck,
-    placeholder: `moderator@${(import.meta.env.VITE_SCHOOL_SHORT || "tfc").toLowerCase()}school.dz`
+    cta: "Sign In",
+    placeholder: "Enter your username or email"
   },
   teacher: {
     title: "Teacher Portal",
     subtitle: "Welcome back, educator",
     icon: GraduationCap,
-    placeholder: `teacher@${(import.meta.env.VITE_SCHOOL_SHORT || "tfc").toLowerCase()}school.dz`
+    cta: "Sign In",
+    placeholder: "Enter your username or email"
   },
   student: {
     title: "Student Portal",
     subtitle: "Ready to learn today?",
     icon: UserRound,
-    placeholder: "Enter your username (e.g. adam123)"
+    cta: "Sign In",
+    placeholder: "Enter your username"
   }
 };
 
@@ -176,7 +181,7 @@ export default function LoginPage({ role }) {
                 className="mt-2 flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-brand-500 to-brand-700 py-4 text-sm font-black text-white shadow-lg shadow-brand-300/50 transition-all duration-200 hover:from-brand-400 hover:to-brand-600 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-brand-300 disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 <LockKeyhole className="h-4 w-4" />
-                {loading ? "Signing in…" : cfg.cta || `Sign in to ${cfg.title}`}
+                {loading ? "Signing in…" : cfg.cta || "Sign In"}
               </button>
 
               <Link

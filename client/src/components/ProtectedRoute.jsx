@@ -9,7 +9,7 @@ export default function ProtectedRoute({ role, roles, children }) {
   const fallbackRole = role || allowedRoles[0] || "admin";
 
   if (!isAuthenticated) {
-    return <Navigate to={`/${fallbackRole}/login`} replace state={{ from: location }} />;
+    return <Navigate to="/login" replace state={{ from: location }} />;
   }
 
   if (!allowedRoles.includes(user.role)) {
