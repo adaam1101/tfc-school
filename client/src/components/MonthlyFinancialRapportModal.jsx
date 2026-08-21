@@ -26,6 +26,7 @@ import {
 import { api, getApiError } from "../api/http.js";
 import ErrorAlert from "./ErrorAlert.jsx";
 import StudentPaymentRowWidget from "./StudentPaymentRowWidget.jsx";
+import { exportMonthlyFinancialRapportToExcel } from "../utils/excelExport.js";
 
 export default function MonthlyFinancialRapportModal({
   onClose,
@@ -224,6 +225,24 @@ export default function MonthlyFinancialRapportModal({
 
           {/* Top Actions */}
           <div className="flex items-center gap-2.5 print:hidden">
+            <button
+              type="button"
+              onClick={() => {
+                exportMonthlyFinancialRapportToExcel({
+                  month: selectedMonth,
+                  periodName: rapportData?.monthName || selectedMonth,
+                  teacher: { name: teacherName || "Ameyoud Adam" },
+                  summary,
+                  teacherCompensation,
+                  students: filteredStudents,
+                  commissionMode
+                });
+              }}
+              className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-2 text-xs font-bold transition-all shadow-sm active:scale-95"
+              title="Export complete financial summary and student ledger to Excel (.xlsx)"
+            >
+              <FileSpreadsheet className="h-4 w-4" /> Export Excel
+            </button>
             <button
               type="button"
               onClick={handlePrint}

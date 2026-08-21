@@ -17,13 +17,15 @@ import {
   UserRoundPlus,
   CalendarDays,
   Megaphone,
-  FileText
+  FileText,
+  FileSpreadsheet
 } from "lucide-react";
 import { api, getApiError } from "../api/http.js";
 import { useAuth } from "../context/AuthContext.jsx";
 import ErrorAlert from "./ErrorAlert.jsx";
 import StudentObservationsModal from "./StudentObservationsModal.jsx";
 import StudentPaymentRowWidget from "./StudentPaymentRowWidget.jsx";
+import { exportStudentsToExcel } from "../utils/excelExport.js";
 
 // ── Register new student modal ────────────────────────────────────────────────
 
@@ -559,6 +561,20 @@ function GroupCard({ group, myStudents, onEdit, onDelete, onTrackStudent, onMove
             </div>
           </div>
           <div className="flex items-center gap-1.5 shrink-0">
+            <button
+              onClick={() => {
+                const groupStudents = (group.students || []).map((s) => (typeof s === "object" ? s : myStudents.find((st) => st._id === s) || { _id: s, name: "Student" }));
+                exportStudentsToExcel({
+                  students: groupStudents,
+                  groupName: group.name,
+                  fileName: `TFC_${group.name.replace(/\s+/g, "_")}_Roster.xlsx`
+                });
+              }}
+              className="inline-flex items-center gap-1 rounded-xl bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 px-2.5 py-1.5 text-xs font-bold transition-all shadow-2xs active:scale-95"
+              title="Export this group roster to Microsoft Excel (.xlsx)"
+            >
+              <FileSpreadsheet className="h-3.5 w-3.5 text-emerald-600" /> Excel
+            </button>
             <button
               onClick={() => setShowBroadcast(true)}
               className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-teal-500 to-indigo-600 px-3 py-1.5 text-xs font-bold text-white shadow-sm hover:from-teal-600 hover:to-indigo-700 transition-all"
@@ -1134,6 +1150,19 @@ export default function TeacherGroupsPanel() {
               {myStudents.length === 0 ? "No students yet." : `${myStudents.length} student${myStudents.length > 1 ? "s" : ""} in your class`}
             </p>
             <div className="flex gap-2">
+              <button
+                onClick={() => {
+                  exportStudentsToExcel({
+                    students: myStudents,
+                    groupName: "All My Students",
+                    teacherName: user?.name || "Teacher"
+                  });
+                }}
+                className="inline-flex items-center gap-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100 px-3.5 py-2 text-xs font-bold shadow-sm transition-all active:scale-95"
+                title="Export all students to Excel (.xlsx)"
+              >
+                <FileSpreadsheet className="h-4 w-4 text-emerald-400 dark:text-emerald-600" /> Export Excel ({myStudents.length})
+              </button>
               <button
                 onClick={() => setShowAddStudent(true)}
                 className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-brand-600 to-brand-700 px-4 py-2 text-sm font-bold text-white shadow-sm hover:from-brand-700 hover:to-brand-800 transition-all"

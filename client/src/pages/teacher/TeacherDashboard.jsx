@@ -22,7 +22,8 @@ import {
   Wallet,
   TrendingUp,
   BarChart2,
-  UserPlus
+  UserPlus,
+  FileSpreadsheet
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import TeacherGroupsPanel, { GroupBroadcastModal } from "../../components/TeacherGroupsPanel.jsx";
@@ -42,6 +43,7 @@ import StudentPaymentRowWidget from "../../components/StudentPaymentRowWidget.js
 import MonthlyFinancialRapportModal from "../../components/MonthlyFinancialRapportModal.jsx";
 import DigitalBulletinModal from "../../components/DigitalBulletinModal.jsx";
 import TeacherCreateStudentModal from "../../components/TeacherCreateStudentModal.jsx";
+import { exportStudentsToExcel } from "../../utils/excelExport.js";
 
 const TAB_IDS = [
   { id: "attendance", key: "attendance", icon: ClipboardCheck },
@@ -609,6 +611,23 @@ export default function TeacherDashboard() {
                   </div>
 
                   <div className="flex flex-wrap gap-2 self-end">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const activeGroupName = selectedGroup !== "all"
+                          ? (groups.find((g) => g._id === selectedGroup)?.name || "Group")
+                          : "All Students";
+                        exportStudentsToExcel({
+                          students: filteredStudents,
+                          groupName: activeGroupName,
+                          teacherName: data?.teacher?.name || "Ameyoud Adam"
+                        });
+                      }}
+                      className="inline-flex items-center gap-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100 px-3.5 py-2 text-xs font-bold shadow-sm transition-all active:scale-95 cursor-pointer"
+                      title="Export displayed student roster to Microsoft Excel (.xlsx)"
+                    >
+                      <FileSpreadsheet className="h-4 w-4 text-emerald-400 dark:text-emerald-600" /> Export Excel ({filteredStudents.length})
+                    </button>
                     <button
                       type="button"
                       disabled={bulkSaving || filteredStudents.length === 0}
