@@ -145,7 +145,14 @@ teacherRouter.get("/dashboard", async (req, res, next) => {
     const students = await getAssignedStudents(req.user);
     const studentIds = students.map((student) => student._id);
 
-    const [todayRecords, weekStats, sessionCounts, absenceCounts, monthlyPayments] = await Promise.all([
+    // Get selected date's weekday name in Algiers timezone
+    const selectedWeekday = new Intl.DateTimeFormat("en-US", {
+      timeZone: process.env.SCHOOL_TIMEZONE || "Africa/Algiers",
+      weekday: "long"
+    }).format(new Date(selectedDate + "T12:00:00"));
+
+    const [groups, todayRecords, weekStats, sessionCounts, absenceCounts, monthlyPayments] = await Promise.all([
+      Group.find({ teacher: req.user._id }),
       Attendance.find({ date: selectedDate, student: { $in: studentIds } }),
       Attendance.aggregate([
         {
@@ -180,6 +187,18 @@ teacherRouter.get("/dashboard", async (req, res, next) => {
       })
     ]);
 
+    const studentGroupMap = new Map();
+    groups.forEach((g) => {
+      (g.students || []).forEach((stId) => {
+        studentGroupMap.set(String(stId), {
+          groupId: g._id,
+          groupName: g.name,
+          groupDays: g.days || [],
+          groupColor: g.color
+        });
+      });
+    });
+
     const attendanceByStudent = new Map(
       todayRecords.map((record) => [String(record.student), record])
     );
@@ -198,7 +217,9 @@ teacherRouter.get("/dashboard", async (req, res, next) => {
       date: selectedDate,
       today,
       month: currentMonth,
+      weekday: selectedWeekday,
       weekStats,
+      groups: groups.map(g => ({ _id: g._id, name: g.name, days: g.days || [], color: g.color, studentCount: (g.students || []).length })),
       students: students.map((student) => {
         const baseSessions = student.studentProfile?.sessionsAttended != null ? student.studentProfile.sessionsAttended : 0;
         const presentCount = sessionsByStudent.get(String(student._id)) || 0;
@@ -210,6 +231,10 @@ teacherRouter.get("/dashboard", async (req, res, next) => {
         const targetSessions = student.studentProfile?.targetSessions || 12; // 11-12 session test cycle (max 16)
         const isReadyForTest = totalAttended >= 11;
 
+        const grp = studentGroupMap.get(String(student._id)) || null;
+        const groupDays = grp?.groupDays || [];
+        const isStudyDayToday = groupDays.length === 0 || groupDays.includes(selectedWeekday);
+
         return {
           ...student.toJSON(),
           todayAttendance: attendanceByStudent.get(String(student._id)) || null,
@@ -217,7 +242,12 @@ teacherRouter.get("/dashboard", async (req, res, next) => {
           sessionsAttended: totalAttended,
           absencesCount: recordedAbsences,
           targetSessions,
-          isReadyForTest
+          isReadyForTest,
+          groupId: grp?.groupId || null,
+          groupName: grp?.groupName || student.studentProfile?.course || "General",
+          groupDays,
+          groupColor: grp?.groupColor || null,
+          isStudyDayToday
         };
       })
     });

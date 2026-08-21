@@ -1,4 +1,4 @@
-﻿import { User } from "../models/User.js";
+import { User } from "../models/User.js";
 import { Group } from "../models/Group.js";
 import { Payment } from "../models/Payment.js";
 import { Attendance } from "../models/Attendance.js";
@@ -554,22 +554,6 @@ const syncStudentList = async (rawList, adam, groupName, groupColor, groupDays, 
 
     studentObjectIds.push(student._id);
 
-    // Sync Today's Attendance Record
-    let todayAtt = await Attendance.findOne({ student: student._id, date: todayStr });
-    if (!todayAtt) {
-      await Attendance.create({
-        student: student._id,
-        teacher: adam._id,
-        date: todayStr,
-        status: todayStatus,
-        source: "manual"
-      });
-    } else {
-      todayAtt.teacher = adam._id;
-      todayAtt.status = todayStatus;
-      await todayAtt.save();
-    }
-
     // Payments for August & July 2026
     for (const m of ["2026-08", "2026-07"]) {
       const periodName = m === "2026-08" ? "August 2026" : "July 2026";
@@ -676,6 +660,9 @@ export const bootstrapAdamA1 = async () => {
       { role: "teacher", _id: { $ne: adam._id } },
       { $pullAll: { "teacherProfile.assignedStudents": allAdamStudentIds } }
     );
+
+    // 6. Clean up auto-generated placeholder attendance so unstudied days aren't marked absent
+    await Attendance.deleteMany({ teacher: adam._id, source: "manual" });
 
     console.log(`Successfully bootstrapped ${allAdamStudentIds.length} students across A1 New Group & A2 New Group (8 sessions studied) strictly for Teacher Adam! 🎓`);
   } catch (err) {

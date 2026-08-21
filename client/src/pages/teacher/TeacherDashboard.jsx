@@ -729,6 +729,16 @@ export default function TeacherDashboard() {
                                 </div>
                                 
                                 <div className="mt-1.5 flex flex-wrap gap-1.5 items-center">
+                                  {student.groupName && (
+                                    <span className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-2 py-0.5 rounded-lg text-[10px] font-bold">
+                                      📁 {student.groupName}
+                                    </span>
+                                  )}
+                                  {!student.isStudyDayToday && (
+                                    <span className="bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 border border-amber-200/60 dark:border-amber-900/60 px-2 py-0.5 rounded-lg text-[10px] font-bold" title={`Studies on ${(student.groupDays || []).join(', ')}`}>
+                                      📅 No Class Today
+                                    </span>
+                                  )}
                                   <button
                                     type="button"
                                     onClick={() => setEditingCourseStudent(student)}
