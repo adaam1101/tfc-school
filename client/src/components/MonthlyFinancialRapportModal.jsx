@@ -402,7 +402,7 @@ export default function MonthlyFinancialRapportModal({
                 </div>
                 <div>
                   <h3 className="font-black text-sm text-slate-900 dark:text-white flex items-center gap-2">
-                    Teacher Compensation & Share (صافي حصة الأستاذ)
+                    Teacher Compensation & Share
                   </h3>
                   <p className="text-[11px] text-slate-500 dark:text-slate-400">
                     Mode: {commissionMode === "tiered" ? "Standard Group Size Scaling (≤7: 15k, 8-11: 20k, 20+: 40k)" : commissionMode === "percentage" ? `${customPercentage}% of Collected Tuition` : `${customPerStudent.toLocaleString()} DA / Student`}
@@ -512,7 +512,7 @@ export default function MonthlyFinancialRapportModal({
                 <div>
                   <div className="flex items-center gap-2">
                     <span className="text-xs font-black uppercase tracking-wider text-indigo-200">
-                      🧑‍🏫 Teacher Net Share (صافي الأستاذ)
+                      🧑‍🏫 Teacher Net Payout
                     </span>
                   </div>
                   <p className="text-2xl sm:text-3xl font-black mt-1 tracking-tight">
@@ -535,7 +535,7 @@ export default function MonthlyFinancialRapportModal({
                 <div>
                   <div className="flex items-center gap-2">
                     <span className="text-xs font-black uppercase tracking-wider text-emerald-200">
-                      🏫 Center / School Net (صافي المركز)
+                      🏫 Center / School Net Share
                     </span>
                   </div>
                   <p className="text-2xl sm:text-3xl font-black mt-1 tracking-tight">

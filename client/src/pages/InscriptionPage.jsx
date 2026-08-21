@@ -1,18 +1,18 @@
-import React, { useState } from "react";
+﻿import React, { useState } from "react";
 import { CheckCircle2, ChevronDown, Globe, Loader2 } from "lucide-react";
 import { api, getApiError } from "../api/http.js";
 import { schoolLogo, schoolInfo } from "../config/branding.js";
-import { COURSES } from "../config/courses.js";
-
+import { COURSES, getCourseLabel } from "../config/courses.js";
+import { useLang } from "../context/LanguageContext.jsx";
 
 const LEVELS = [
-  { id: "test",  ar: "اختبار تحديد المستوى",      fr: "Test de niveau" },
-  { id: "A1",    ar: "A1 — مبتدئ",                fr: "A1 — Starter / Beginner" },
-  { id: "A2",    ar: "A2 — أساسي",                fr: "A2 — Élémentaire" },
-  { id: "B1",    ar: "B1 — متوسط",                fr: "B1 — Intermédiaire" },
-  { id: "B1-B2", ar: "B1-B2 — فوق المتوسط",      fr: "B1-B2 — Pré-Intermédiaire" },
-  { id: "B2",    ar: "B2 — متقدم",                fr: "B2 — Upper Intermediate" },
-  { id: "C1",    ar: "C1 — متقدم جداً",           fr: "C1 — Advanced" },
+  { id: "test",  ar: "اختبار تحديد المستوى",      fr: "Test de niveau",               en: "Level Assessment Test" },
+  { id: "A1",    ar: "A1 — مبتدئ",                fr: "A1 — Starter / Beginner",       en: "A1 — Beginner" },
+  { id: "A2",    ar: "A2 — أساسي",                fr: "A2 — Élémentaire",              en: "A2 — Elementary" },
+  { id: "B1",    ar: "B1 — متوسط",                fr: "B1 — Intermédiaire",            en: "B1 — Intermediate" },
+  { id: "B1-B2", ar: "B1-B2 — فوق المتوسط",      fr: "B1-B2 — Pré-Intermédiaire",      en: "B1-B2 — Pre-Intermediate" },
+  { id: "B2",    ar: "B2 — متقدم",                fr: "B2 — Upper Intermediate",       en: "B2 — Upper Intermediate" },
+  { id: "C1",    ar: "C1 — متقدم جداً",           fr: "C1 — Advanced",                 en: "C1 — Advanced" },
 ];
 
 const T = {
@@ -32,6 +32,8 @@ const T = {
     coursePh: "— اختر الدورة —",
     level: "المستوى",
     levelPh: "— اختر مستواك —",
+    selectLevelHint: "اختر مستواك لعرض السعر",
+    hoursLabel: "المدة بالساعات",
     kidsNote: "✨ سيتم تسجيلك في فئة الأطفال تلقائياً",
     feesNote: "💡 رسوم التسجيل: 800 دج",
     feesFree: "✅ إذا سجّلت في دورتين أو لغتين، تُعفى من رسوم التسجيل",
@@ -68,6 +70,8 @@ const T = {
     coursePh: "— Sélectionner une formation —",
     level: "Niveau",
     levelPh: "— Sélectionner votre niveau —",
+    selectLevelHint: "Sélectionnez votre niveau pour voir le tarif",
+    hoursLabel: "Volume",
     kidsNote: "✨ Vous serez automatiquement inscrit(e) dans la catégorie enfants",
     feesNote: "💡 Frais d'inscription : 800 DA",
     feesFree: "✅ Inscription à 2 formations ou 2 langues → frais d'inscription offerts",
@@ -87,6 +91,44 @@ const T = {
     promoLabel: "Promotion",
     perMonth: "/ mois",
     dzd: "DA",
+  },
+  en: {
+    dir: "ltr",
+    title: "Course Enrollment",
+    subtitle: `${schoolInfo.name} — ${schoolInfo.city}`,
+    fullname: "Full Name",
+    fullnamePh: "Enter your full name",
+    gender: "Gender",
+    male: "Male",
+    female: "Female",
+    dob: "Date of Birth",
+    phone: "Phone Number",
+    phonePh: "0XXXXXXXXX",
+    course: "Select Course",
+    coursePh: "— Choose a Course —",
+    level: "Level",
+    levelPh: "— Choose Your Level —",
+    selectLevelHint: "Select your level to view course tuition",
+    hoursLabel: "Duration / Hours",
+    kidsNote: "✨ You will automatically be enrolled in the Kids Category",
+    feesNote: "💡 Registration Fee: 800 DA",
+    feesFree: "✅ Enroll in 2 courses or languages → Free registration fee",
+    feesOrphan: "🤝 Orphan students benefit from 50% discount on all courses",
+    feesNoteNM: "💡 Registration Fee: 1,000 DA",
+    feesFreeNM: "✅ Enroll in 2 courses → Free registration fee",
+    submit: "Submit Enrollment Request",
+    sending: "Sending...",
+    successTitle: "Enrollment Request Sent! 🎉",
+    successMsg: `The ${schoolInfo.short} team will contact you shortly to confirm your enrollment.`,
+    newReg: "New Enrollment",
+    required: "Please fill in all required fields",
+    errorPhone: "Phone number must be at least 10 digits",
+    priceLabel: "Tuition",
+    durationLabel: "Duration",
+    sessionsLabel: "Sessions",
+    promoLabel: "Special Promo",
+    perMonth: "/ month",
+    dzd: "DA",
   }
 };
 
@@ -96,10 +138,17 @@ function getAge(dob) {
   return Math.floor(diff / (1000 * 60 * 60 * 24 * 365.25));
 }
 
+const LANGS = [
+  { code: "ar", label: "عربي" },
+  { code: "fr", label: "FR" },
+  { code: "en", label: "EN" }
+];
+
 export default function InscriptionPage() {
-  const [lang, setLang] = useState("ar");
-  const t = T[lang];
-  const isAr = lang === "ar";
+  const { lang, setLang } = useLang();
+  const currentLang = T[lang] ? lang : "fr";
+  const t = T[currentLang];
+  const isAr = currentLang === "ar";
 
   const [form, setForm] = useState({
     name: "", gender: "", dob: "", phone: "", course: "", level: ""
@@ -114,7 +163,6 @@ export default function InscriptionPage() {
   const isKid      = isLangCourse && !courseObj?.pricePerLevel && age !== null && age >= 0 && age <= 12;
   const needsLevel = courseObj?.pricePerLevel || (isLangCourse && age !== null && age >= 13 && age <= 50);
 
-  // For courses with per-level pricing, derive the active price from selected level
   const activePrice = courseObj?.pricePerLevel
     ? (form.level && courseObj.pricePerLevel[form.level]) || null
     : courseObj?.price || null;
@@ -135,14 +183,14 @@ export default function InscriptionPage() {
       setError(t.required); return;
     }
 
-    const courseLabel = courseObj ? (isAr ? courseObj.ar : courseObj.fr) : form.course;
+    const courseLabel = getCourseLabel(courseObj, currentLang) || form.course;
     const levelLabel  = needsLevel
-      ? LEVELS.find(l => l.id === form.level)?.[lang] || form.level
-      : isKid ? (isAr ? "فئة الأطفال" : "Catégorie Enfants") : "";
+      ? LEVELS.find(l => l.id === form.level)?.[currentLang] || form.level
+      : isKid ? (currentLang === "ar" ? "فئة الأطفال" : currentLang === "fr" ? "Catégorie Enfants" : "Kids Category") : "";
 
     const messageparts = [
-      `Langue: ${lang === "ar" ? "Arabe" : "Français"}`,
-      `Genre: ${form.gender === "male" ? (isAr ? "ذكر" : "Masculin") : (isAr ? "أنثى" : "Féminin")}`,
+      `Langue: ${currentLang.toUpperCase()}`,
+      `Genre: ${form.gender === "male" ? t.male : t.female}`,
       levelLabel ? `Niveau: ${levelLabel}` : "",
     ].filter(Boolean).join(" | ");
 
@@ -155,7 +203,7 @@ export default function InscriptionPage() {
         course:    courseLabel,
         courseId:  courseObj?.id,
         price:     activePrice || courseObj?.price,
-        priceUnit: courseObj?.priceUnit ? (isAr ? courseObj.priceUnit.ar : courseObj.priceUnit.fr) : undefined,
+        priceUnit: courseObj?.priceUnit ? (courseObj.priceUnit[currentLang] || courseObj.priceUnit.fr) : undefined,
         message:   messageparts,
       });
       setDone(true);
@@ -174,14 +222,20 @@ export default function InscriptionPage() {
          dir={t.dir}>
 
       {/* Lang toggle */}
-      <div className="w-full max-w-md flex justify-end mb-4">
-        <button
-          onClick={() => setLang(l => l === "ar" ? "fr" : "ar")}
-          className="flex items-center gap-2 rounded-full border border-brand-200 bg-white px-4 py-2 text-sm font-semibold text-brand-700 shadow-sm transition hover:bg-brand-50"
-        >
-          <Globe className="h-4 w-4" />
-          {lang === "ar" ? "Français" : "عربي"}
-        </button>
+      <div className="w-full max-w-md flex justify-end mb-4 gap-1">
+        {LANGS.map(l => (
+          <button
+            key={l.code}
+            onClick={() => setLang(l.code)}
+            className={`rounded-full px-3 py-1 text-xs font-bold transition ${
+              currentLang === l.code
+                ? "bg-brand-600 text-white shadow-sm"
+                : "border border-brand-200 bg-white text-slate-600 hover:bg-brand-50"
+            }`}
+          >
+            {l.label}
+          </button>
+        ))}
       </div>
 
       {/* Card */}
@@ -240,7 +294,7 @@ export default function InscriptionPage() {
                           ? "border-brand-700 bg-brand-700 text-white"
                           : "border-brand-200 bg-white text-slate-700 hover:border-brand-400"
                       }`}>
-                      {g === "male" ? (isAr ? "👨 " : "👨 ") + t.male : (isAr ? "👩 " : "👩 ") + t.female}
+                      {g === "male" ? "👨 " + t.male : "👩 " + t.female}
                     </button>
                   ))}
                 </div>
@@ -279,7 +333,7 @@ export default function InscriptionPage() {
                     <option value="">{t.coursePh}</option>
                     {COURSES.map(c => (
                       <option key={c.id} value={c.id}>
-                        {isAr ? c.ar : c.fr}
+                        {getCourseLabel(c, currentLang)}
                       </option>
                     ))}
                   </select>
@@ -298,25 +352,25 @@ export default function InscriptionPage() {
                       )}
                       <span className="text-lg font-black text-brand-800">
                         {(activePrice || courseObj.price).toLocaleString()} {t.dzd}
-                        {courseObj.priceUnit ? <span className="text-sm font-semibold text-brand-500"> {isAr ? courseObj.priceUnit.ar : courseObj.priceUnit.fr}</span> : null}
+                        {courseObj.priceUnit ? <span className="text-sm font-semibold text-brand-500"> {courseObj.priceUnit[currentLang] || courseObj.priceUnit.fr}</span> : null}
                       </span>
                     </div>
                   </div>
                   {courseObj.duration && (
                     <div className="flex items-center justify-between text-xs text-slate-600">
                       <span className="font-semibold text-slate-500">{t.durationLabel}</span>
-                      <span className="font-bold">{isAr ? courseObj.duration.ar : courseObj.duration.fr}</span>
+                      <span className="font-bold">{courseObj.duration[currentLang] || courseObj.duration.fr}</span>
                     </div>
                   )}
                   {courseObj.sessions && (
                     <div className="flex items-center justify-between text-xs text-slate-600">
                       <span className="font-semibold text-slate-500">{t.sessionsLabel}</span>
-                      <span className="font-bold">{isAr ? courseObj.sessions.ar : courseObj.sessions.fr}</span>
+                      <span className="font-bold">{courseObj.sessions[currentLang] || courseObj.sessions.fr}</span>
                     </div>
                   )}
                   {courseObj.hours && (
                     <div className="flex items-center justify-between text-xs text-slate-600">
-                      <span className="font-semibold text-slate-500">{isAr ? "المدة" : "Volume"}</span>
+                      <span className="font-semibold text-slate-500">{t.hoursLabel}</span>
                       <span className="font-bold">{courseObj.hours}h</span>
                     </div>
                   )}
@@ -326,7 +380,7 @@ export default function InscriptionPage() {
               {/* For level-priced courses: show hint before level is chosen */}
               {courseObj?.pricePerLevel && !activePrice && (
                 <div className="animate-fade-slide-up rounded-2xl bg-slate-50 border border-slate-200 px-4 py-3 text-xs text-slate-500 text-center">
-                  {isAr ? "اختر مستواك لعرض السعر" : "Sélectionnez votre niveau pour voir le tarif"}
+                  {t.selectLevelHint}
                 </div>
               )}
 
@@ -341,7 +395,7 @@ export default function InscriptionPage() {
                             onChange={e => set("level", e.target.value)} required>
                       <option value="">{t.levelPh}</option>
                       {LEVELS.map(l => (
-                        <option key={l.id} value={l.id}>{isAr ? l.ar : l.fr}</option>
+                        <option key={l.id} value={l.id}>{l[currentLang] || l.fr}</option>
                       ))}
                     </select>
                     <ChevronDown className={`pointer-events-none absolute top-1/2 -translate-y-1/2 h-4 w-4 text-brand-400 ${isAr ? "left-4" : "right-4"}`} />
@@ -381,22 +435,28 @@ export default function InscriptionPage() {
               )}
 
               {/* Submit */}
-              <button type="submit" disabled={loading}
-                className="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-brand-600 to-brand-800 py-4 text-sm font-black text-white shadow-lg shadow-brand-300/40 transition hover:from-brand-500 hover:to-brand-700 hover:shadow-xl disabled:opacity-60 disabled:cursor-not-allowed mt-1">
-                {loading
-                  ? <><Loader2 className="h-4 w-4 animate-spin" />{t.sending}</>
-                  : t.submit}
+              <button type="submit" disabled={loading} className="btn-primary w-full py-4 text-base">
+                {loading ? (
+                  <>
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                    <span>{t.sending}</span>
+                  </>
+                ) : (
+                  <span>{t.submit}</span>
+                )}
               </button>
 
             </form>
           )}
-        </div>
 
-        {/* Footer */}
-        <div className="border-t border-brand-100 bg-brand-50/60 px-6 py-3 text-center text-xs text-slate-400">
-          {schoolInfo.short} {schoolInfo.name} · {schoolInfo.city} · {schoolInfo.phones[0]}
         </div>
       </div>
+
+      {/* Footer copyright */}
+      <p className="mt-8 text-xs text-slate-400 text-center">
+        © {new Date().getFullYear()} {schoolInfo.name}. All rights reserved.
+      </p>
+
     </div>
   );
 }

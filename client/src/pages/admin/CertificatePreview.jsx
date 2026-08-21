@@ -1,12 +1,14 @@
 import React, { useRef } from "react";
 import CertificateTemplate from "../../components/CertificateTemplate.jsx";
 import { schoolInfo } from "../../config/branding.js";
+import { useLang } from "../../context/LanguageContext.jsx";
 
 const FONTS_URL =
   "https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Cinzel:wght@400;700;900&display=swap";
 
 export default function CertificatePreview() {
   const ref = useRef();
+  const { lang } = useLang();
 
   const handlePrint = () => {
     const content = ref.current.innerHTML;
@@ -44,14 +46,14 @@ export default function CertificatePreview() {
       <div className="w-full max-w-5xl flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-black text-brand-800 dark:text-brand-300">
-            معاينة الشهادة
+            {lang === "ar" ? "معاينة الشهادة" : lang === "fr" ? "Aperçu du Certificat" : "Certificate Preview"}
           </h2>
           <p className="text-sm text-slate-500 mt-1">
-            مثال حقيقي — Ameyoud Adam — إعلام آلي
+            {lang === "ar" ? "مثال حقيقي — Ameyoud Adam — إعلام آلي" : lang === "fr" ? "Exemple — Ameyoud Adam — Informatique" : "Live Preview — Ameyoud Adam — Computer Science"}
           </p>
         </div>
         <button onClick={handlePrint} className="btn-primary">
-          طباعة / تحميل PDF
+          {lang === "ar" ? "طباعة / تحميل PDF" : lang === "fr" ? "Imprimer / Télécharger PDF" : "Print / Download PDF"}
         </button>
       </div>
 

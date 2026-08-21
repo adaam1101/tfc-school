@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import { schoolLogo, schoolInfo } from "../config/branding.js";
 import { useTheme } from "../hooks/useTheme.js";
+import { useLang } from "../context/LanguageContext.jsx";
 
 /* ── Translations ── */
 const translations = {
@@ -172,8 +173,9 @@ const LANGS = [
 ];
 
 export default function LandingPage() {
-  const [lang, setLang] = useState("fr");
-  const t = translations[lang];
+  const { lang, setLang } = useLang();
+  const currentLang = translations[lang] ? lang : "fr";
+  const t = translations[currentLang];
   const { dark, toggle: toggleDark } = useTheme();
 
   const scrollTo = (id) => document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
