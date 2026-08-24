@@ -21,7 +21,14 @@ import {
   Percent,
   Layers,
   Building2,
-  Sparkles
+  Sparkles,
+  Table as TableIcon,
+  LayoutGrid,
+  Eye,
+  FilterX,
+  ChevronDown,
+  ChevronUp,
+  Banknote
 } from "lucide-react";
 import { api, getApiError } from "../api/http.js";
 import ErrorAlert from "./ErrorAlert.jsx";
@@ -40,6 +47,9 @@ export default function MonthlyFinancialRapportModal({
   const [filterTeacher, setFilterTeacher] = useState(teacherId || "all");
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [selectedGroupFilter, setSelectedGroupFilter] = useState("all");
+  const [expandedGroup, setExpandedGroup] = useState(null);
+  const [groupViewMode, setGroupViewMode] = useState("columns"); // "columns" (rich table) vs "cards"
 
   // Teacher payout / percentage configuration
   // Modes: "tiered" (≤7: 15k, 8-11: 20k, 12-19: 30k, 20+: 40k), "percentage", "per_student"
@@ -111,9 +121,13 @@ export default function MonthlyFinancialRapportModal({
         (statusFilter === "assurance_paid" && Boolean(st?.assurancePaid)) ||
         (statusFilter === "assurance_unpaid" && !Boolean(st?.assurancePaid));
 
-      return matchSearch && matchStatus;
+      const matchGroup =
+        selectedGroupFilter === "all" ||
+        (st?.groupName || st?.course || "General") === selectedGroupFilter;
+
+      return matchSearch && matchStatus && matchGroup;
     });
-  }, [rapportData, search, statusFilter]);
+  }, [rapportData, search, statusFilter, selectedGroupFilter]);
 
   const summary = rapportData?.summary || {
     totalStudents: 0,
@@ -128,7 +142,7 @@ export default function MonthlyFinancialRapportModal({
     countAssurancePaid: 0
   };
 
-  // ── Compute Teacher Net Share & Group-by-Group Breakdown ────────────────
+  // ── Compute Teacher Net Share & Group-by-Group Breakdown with Complete Payment Details ────────────────
   const teacherCompensation = useMemo(() => {
     const students = rapportData?.students || [];
     if (students.length === 0) {
@@ -146,8 +160,17 @@ export default function MonthlyFinancialRapportModal({
     let totalTeacherNet = 0;
     const groupBreakdowns = Object.entries(groupsMap).map(([gName, gStudents]) => {
       const count = gStudents.length;
+      const expectedTuition = gStudents.reduce((acc, s) => acc + (s.tuitionFee != null ? s.tuitionFee : 7500), 0);
       const collectedTuition = gStudents.reduce((acc, s) => acc + (s.paidTuition || 0), 0);
-      const paidStudentsCount = gStudents.filter((s) => (s.paidTuition || 0) > 0).length;
+      const restTuition = gStudents.reduce((acc, s) => acc + (s.rest != null ? s.rest : Math.max(0, (s.tuitionFee || 7500) - (s.paidTuition || 0))), 0);
+      
+      const assuranceCount = gStudents.filter((s) => Boolean(s.assurancePaid)).length;
+      const assuranceCollected = assuranceCount * 800;
+      const totalGroupCash = collectedTuition + assuranceCollected;
+
+      const countPaid = gStudents.filter((s) => s.status === "paid" || (s.paidTuition || 0) >= (s.tuitionFee || 7500)).length;
+      const countPartial = gStudents.filter((s) => s.status === "partial" || ((s.paidTuition || 0) > 0 && (s.paidTuition || 0) < (s.tuitionFee || 7500))).length;
+      const countUnpaid = gStudents.filter((s) => s.status === "unpaid" || !(s.paidTuition || 0)).length;
 
       let groupTeacherPayout = 0;
 
@@ -169,22 +192,31 @@ export default function MonthlyFinancialRapportModal({
         groupTeacherPayout = Math.round(collectedTuition * rate);
       } else if (commissionMode === "per_student") {
         const rate = Number(customPerStudent) || 2000;
-        groupTeacherPayout = paidStudentsCount * rate;
+        groupTeacherPayout = (countPaid + countPartial) * rate;
       }
 
       totalTeacherNet += groupTeacherPayout;
 
-      const effectivePercentage =
-        collectedTuition > 0
-          ? ((groupTeacherPayout / collectedTuition) * 100).toFixed(1)
-          : 0;
+      const schoolNet = Math.max(0, totalGroupCash - groupTeacherPayout);
+      const collectionRate = expectedTuition > 0 ? Math.round((collectedTuition / expectedTuition) * 100) : 0;
+      const effectivePercentage = collectedTuition > 0 ? ((groupTeacherPayout / collectedTuition) * 100).toFixed(1) : 0;
 
       return {
         groupName: gName,
         totalCount: count,
-        paidCount: paidStudentsCount,
+        students: gStudents,
+        expectedTuition,
         collectedTuition,
+        restTuition,
+        assuranceCount,
+        assuranceCollected,
+        totalGroupCash,
+        countPaid,
+        countPartial,
+        countUnpaid,
         teacherPayout: groupTeacherPayout,
+        schoolNet,
+        collectionRate,
         effectivePercentage
       };
     });
@@ -571,44 +603,390 @@ export default function MonthlyFinancialRapportModal({
               </div>
             </div>
 
-            {/* Group-by-Group Roster Breakdown Cards */}
+            {/* Group-by-Group Payment & Financial Breakdown (Table & Cards View) */}
             {teacherCompensation.groupBreakdowns.length > 0 && (
-              <div className="space-y-2 pt-1">
-                <p className="text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                  Group-by-Group Payout Breakdown:
-                </p>
-                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
-                  {teacherCompensation.groupBreakdowns.map((gb) => (
-                    <div
-                      key={gb.groupName}
-                      className="rounded-2xl border border-slate-200/80 dark:border-slate-700 bg-white dark:bg-slate-800 p-3.5 space-y-2 shadow-2xs"
+              <div className="space-y-3 pt-2">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <p className="text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                      <Layers className="h-4 w-4 text-brand-600" />
+                      Group-by-Group Payment Details & Revenue Breakdown:
+                    </p>
+                    {selectedGroupFilter !== "all" && (
+                      <button
+                        type="button"
+                        onClick={() => setSelectedGroupFilter("all")}
+                        className="inline-flex items-center gap-1 rounded-full bg-brand-100 dark:bg-brand-950/80 text-brand-700 dark:text-brand-300 border border-brand-300 dark:border-brand-700 px-2.5 py-0.5 text-[11px] font-black hover:bg-brand-200 transition-all"
+                        title="Click to remove group filter"
+                      >
+                        <span>Filter: {selectedGroupFilter}</span>
+                        <FilterX className="h-3 w-3" />
+                      </button>
+                    )}
+                  </div>
+
+                  {/* View Mode Switcher: Columns Table vs Cards */}
+                  <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl border border-slate-200 dark:border-slate-700 print:hidden">
+                    <button
+                      type="button"
+                      onClick={() => setGroupViewMode("columns")}
+                      className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                        groupViewMode === "columns"
+                          ? "bg-brand-600 text-white shadow-xs"
+                          : "text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700"
+                      }`}
                     >
-                      <div className="flex items-center justify-between">
-                        <span className="font-black text-xs text-slate-900 dark:text-white flex items-center gap-1.5">
-                          <Layers className="h-3.5 w-3.5 text-indigo-500" />
-                          {gb.groupName}
-                        </span>
-                        <span className="rounded-full bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 px-2 py-0.5 text-[10px] font-black">
-                          {gb.totalCount} Students
-                        </span>
-                      </div>
-
-                      <div className="flex items-center justify-between text-xs pt-1 border-t border-slate-100 dark:border-slate-700 font-semibold">
-                        <span className="text-slate-400 text-[11px]">Collected Tuition:</span>
-                        <span className="text-emerald-600 dark:text-emerald-400 font-bold">
-                          {gb.collectedTuition.toLocaleString()} DA
-                        </span>
-                      </div>
-
-                      <div className="flex items-center justify-between text-xs font-black bg-indigo-50/50 dark:bg-indigo-950/30 p-2 rounded-xl border border-indigo-100/60 dark:border-indigo-900/40">
-                        <span className="text-indigo-900 dark:text-indigo-200 text-[11px]">Teacher Payout:</span>
-                        <span className="text-indigo-700 dark:text-indigo-300 text-sm">
-                          {gb.teacherPayout.toLocaleString()} DA
-                        </span>
-                      </div>
-                    </div>
-                  ))}
+                      <TableIcon className="h-3.5 w-3.5" /> Table (Columns)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setGroupViewMode("cards")}
+                      className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                        groupViewMode === "cards"
+                          ? "bg-brand-600 text-white shadow-xs"
+                          : "text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700"
+                      }`}
+                    >
+                      <LayoutGrid className="h-3.5 w-3.5" /> Cards
+                    </button>
+                  </div>
                 </div>
+
+                {/* ── 1. Group Columns Table View ──────────────────────────── */}
+                {groupViewMode === "columns" ? (
+                  <div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 overflow-hidden shadow-2xs">
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-left text-xs border-collapse">
+                        <thead>
+                          <tr className="border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/70 font-black text-slate-600 dark:text-slate-300 uppercase tracking-wider text-[11px]">
+                            <th className="py-3 px-3.5">Group / Level</th>
+                            <th className="py-3 px-3 text-center">Enrolled</th>
+                            <th className="py-3 px-3 text-right">Expected Tuition</th>
+                            <th className="py-3 px-3 text-right text-emerald-700 dark:text-emerald-300">Collected Tuition</th>
+                            <th className="py-3 px-3 text-right text-rose-600 dark:text-rose-400">Remaining Rest</th>
+                            <th className="py-3 px-3 text-center text-teal-700 dark:text-teal-300">Assurance (800 DA)</th>
+                            <th className="py-3 px-3 text-right font-black text-indigo-700 dark:text-indigo-300">Total Group Cash</th>
+                            <th className="py-3 px-3 text-right text-purple-700 dark:text-purple-300">Teacher Payout</th>
+                            <th className="py-3 px-3 text-right text-teal-700 dark:text-teal-300">Center Net</th>
+                            <th className="py-3 px-3 text-center">Payment Statuses</th>
+                            <th className="py-3 px-3 text-center print:hidden">Action</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100 dark:divide-slate-700/60 font-medium">
+                          {teacherCompensation.groupBreakdowns.map((gb) => {
+                            const isSelected = selectedGroupFilter === gb.groupName;
+                            const isExpanded = expandedGroup === gb.groupName;
+
+                            return (
+                              <React.Fragment key={gb.groupName}>
+                                <tr
+                                  className={`transition-colors ${
+                                    isSelected
+                                      ? "bg-brand-50/80 dark:bg-brand-950/40"
+                                      : "hover:bg-slate-50/80 dark:hover:bg-slate-750"
+                                  }`}
+                                >
+                                  <td className="py-3 px-3.5">
+                                    <div className="flex items-center gap-2">
+                                      <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-brand-100 dark:bg-brand-950 text-brand-700 dark:text-brand-300 font-black text-xs shrink-0">
+                                        <Layers className="h-3.5 w-3.5" />
+                                      </div>
+                                      <div>
+                                        <p className="font-black text-slate-900 dark:text-white text-xs">{gb.groupName}</p>
+                                        <p className="text-[10px] text-slate-400">
+                                          {gb.collectionRate}% collected
+                                        </p>
+                                      </div>
+                                    </div>
+                                  </td>
+
+                                  <td className="py-3 px-3 text-center">
+                                    <span className="rounded-full bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 px-2 py-0.5 text-[10px] font-black">
+                                      {gb.totalCount} Students
+                                    </span>
+                                  </td>
+
+                                  <td className="py-3 px-3 text-right font-bold text-slate-700 dark:text-slate-300">
+                                    {gb.expectedTuition.toLocaleString()} DA
+                                  </td>
+
+                                  <td className="py-3 px-3 text-right font-black text-emerald-600 dark:text-emerald-400">
+                                    {gb.collectedTuition.toLocaleString()} DA
+                                  </td>
+
+                                  <td className="py-3 px-3 text-right font-black">
+                                    {gb.restTuition > 0 ? (
+                                      <span className="text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/50 px-2 py-0.5 rounded-md border border-rose-200 dark:border-rose-900/60">
+                                        {gb.restTuition.toLocaleString()} DA
+                                      </span>
+                                    ) : (
+                                      <span className="text-slate-400 font-semibold">0 DA ✓</span>
+                                    )}
+                                  </td>
+
+                                  <td className="py-3 px-3 text-center">
+                                    <span className="font-bold text-teal-700 dark:text-teal-300 text-xs">
+                                      {gb.assuranceCollected.toLocaleString()} DA
+                                    </span>
+                                    <span className="text-[10px] text-slate-400 block">
+                                      ({gb.assuranceCount}/{gb.totalCount} paid)
+                                    </span>
+                                  </td>
+
+                                  <td className="py-3 px-3 text-right font-black text-slate-900 dark:text-white bg-slate-50/50 dark:bg-slate-800/40">
+                                    {gb.totalGroupCash.toLocaleString()} DA
+                                  </td>
+
+                                  <td className="py-3 px-3 text-right">
+                                    <span className="inline-block rounded-lg bg-indigo-50 dark:bg-indigo-950/60 px-2 py-1 font-black text-indigo-700 dark:text-indigo-300 border border-indigo-100 dark:border-indigo-900/50">
+                                      {gb.teacherPayout.toLocaleString()} DA
+                                    </span>
+                                  </td>
+
+                                  <td className="py-3 px-3 text-right">
+                                    <span className="inline-block rounded-lg bg-emerald-50 dark:bg-emerald-950/60 px-2 py-1 font-black text-emerald-700 dark:text-emerald-300 border border-emerald-100 dark:border-emerald-900/50">
+                                      {gb.schoolNet.toLocaleString()} DA
+                                    </span>
+                                  </td>
+
+                                  <td className="py-3 px-3 text-center">
+                                    <div className="flex items-center justify-center gap-1 text-[10px] font-bold">
+                                      <span className="rounded bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 px-1.5 py-0.5" title="Fully Paid">
+                                        {gb.countPaid} ✓
+                                      </span>
+                                      {gb.countPartial > 0 && (
+                                        <span className="rounded bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300 px-1.5 py-0.5" title="Partial with Rest">
+                                          {gb.countPartial} ⏳
+                                        </span>
+                                      )}
+                                      {gb.countUnpaid > 0 && (
+                                        <span className="rounded bg-rose-100 dark:bg-rose-950 text-rose-700 dark:text-rose-300 px-1.5 py-0.5" title="Unpaid">
+                                          {gb.countUnpaid} ✕
+                                        </span>
+                                      )}
+                                    </div>
+                                  </td>
+
+                                  <td className="py-3 px-3 text-center print:hidden">
+                                    <div className="flex items-center justify-center gap-1.5">
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          setSelectedGroupFilter(isSelected ? "all" : gb.groupName);
+                                        }}
+                                        className={`px-2 py-1 rounded-lg text-[11px] font-bold transition-all ${
+                                          isSelected
+                                            ? "bg-brand-600 text-white shadow-2xs"
+                                            : "bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 text-slate-700 dark:text-slate-200"
+                                        }`}
+                                        title={isSelected ? "Show all students" : "Filter student list to this group"}
+                                      >
+                                        {isSelected ? "Filtered ✓" : "Filter"}
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={() => setExpandedGroup(isExpanded ? null : gb.groupName)}
+                                        className="p-1 rounded-lg bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 text-slate-600 dark:text-slate-300"
+                                        title={isExpanded ? "Collapse student ledger" : "Expand student ledger"}
+                                      >
+                                        {isExpanded ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
+                                      </button>
+                                    </div>
+                                  </td>
+                                </tr>
+
+                                {/* Expanded Group Student Roster Row */}
+                                {isExpanded && (
+                                  <tr className="bg-slate-50/90 dark:bg-slate-900/80">
+                                    <td colSpan={11} className="p-3.5">
+                                      <div className="rounded-xl border border-indigo-200 dark:border-indigo-900 bg-white dark:bg-slate-800 p-3 shadow-inner space-y-2">
+                                        <div className="flex items-center justify-between">
+                                          <span className="text-xs font-black text-indigo-950 dark:text-indigo-200 flex items-center gap-1.5">
+                                            <Users className="h-3.5 w-3.5 text-indigo-600" />
+                                            Students in {gb.groupName} ({gb.students.length} students):
+                                          </span>
+                                          <span className="text-[11px] font-bold text-slate-500">
+                                            Group Total Collected: {gb.collectedTuition.toLocaleString()} DA
+                                          </span>
+                                        </div>
+
+                                        <div className="overflow-x-auto">
+                                          <table className="w-full text-left text-[11px] border-collapse">
+                                            <thead>
+                                              <tr className="border-b border-slate-200 dark:border-slate-700 text-slate-500 font-black uppercase tracking-wider">
+                                                <th className="py-1.5 px-2">#</th>
+                                                <th className="py-1.5 px-2">Student</th>
+                                                <th className="py-1.5 px-2">Parent Phone</th>
+                                                <th className="py-1.5 px-2 text-right">Tuition</th>
+                                                <th className="py-1.5 px-2 text-right text-emerald-600">Paid Amount</th>
+                                                <th className="py-1.5 px-2 text-right text-rose-600">Rest</th>
+                                                <th className="py-1.5 px-2 text-center">Assurance (800 DA)</th>
+                                                <th className="py-1.5 px-2 text-center">Status</th>
+                                              </tr>
+                                            </thead>
+                                            <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
+                                              {gb.students.map((st, sIdx) => {
+                                                const tuition = st.tuitionFee ?? 7500;
+                                                const paid = st.paidTuition ?? 0;
+                                                const rest = Math.max(0, tuition - paid);
+                                                const isPaid = paid >= tuition;
+                                                const isPartial = paid > 0 && paid < tuition;
+
+                                                return (
+                                                  <tr key={st.studentId || sIdx} className="hover:bg-slate-50 dark:hover:bg-slate-750">
+                                                    <td className="py-1 px-2 text-slate-400 font-bold">{sIdx + 1}</td>
+                                                    <td className="py-1 px-2 font-bold text-slate-800 dark:text-slate-200">{st.name}</td>
+                                                    <td className="py-1 px-2 text-slate-500">{st.parentPhone || st.phone || "—"}</td>
+                                                    <td className="py-1 px-2 text-right font-medium">{tuition.toLocaleString()} DA</td>
+                                                    <td className="py-1 px-2 text-right font-black text-emerald-600 dark:text-emerald-400">{paid.toLocaleString()} DA</td>
+                                                    <td className="py-1 px-2 text-right font-black text-rose-600 dark:text-rose-400">{rest > 0 ? `${rest.toLocaleString()} DA` : "0 DA"}</td>
+                                                    <td className="py-1 px-2 text-center">
+                                                      {st.assurancePaid ? (
+                                                        <span className="rounded bg-teal-100 dark:bg-teal-950 text-teal-800 dark:text-teal-300 px-1.5 py-0.5 text-[10px] font-black">Paid (800 DA) ✓</span>
+                                                      ) : (
+                                                        <span className="text-slate-400 text-[10px]">Unpaid</span>
+                                                      )}
+                                                    </td>
+                                                    <td className="py-1 px-2 text-center">
+                                                      <span className={`rounded-full px-2 py-0.5 text-[10px] font-black ${
+                                                        isPaid
+                                                          ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"
+                                                          : isPartial
+                                                          ? "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300"
+                                                          : "bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300"
+                                                      }`}>
+                                                        {isPaid ? "Paid ✓" : isPartial ? "Partial" : "Unpaid"}
+                                                      </span>
+                                                    </td>
+                                                  </tr>
+                                                );
+                                              })}
+                                            </tbody>
+                                          </table>
+                                        </div>
+                                      </div>
+                                    </td>
+                                  </tr>
+                                )}
+                              </React.Fragment>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                ) : (
+                  /* ── 2. Group Cards View ─────────────────────────────────── */
+                  <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                    {teacherCompensation.groupBreakdowns.map((gb) => {
+                      const isSelected = selectedGroupFilter === gb.groupName;
+                      const isExpanded = expandedGroup === gb.groupName;
+
+                      return (
+                        <div
+                          key={gb.groupName}
+                          className={`rounded-2xl border transition-all p-4 space-y-3 shadow-2xs ${
+                            isSelected
+                              ? "border-brand-500 ring-2 ring-brand-500/20 bg-brand-50/40 dark:bg-slate-800"
+                              : "border-slate-200/80 dark:border-slate-700 bg-white dark:bg-slate-800"
+                          }`}
+                        >
+                          {/* Card Top */}
+                          <div className="flex items-center justify-between">
+                            <span className="font-black text-xs text-slate-900 dark:text-white flex items-center gap-1.5">
+                              <Layers className="h-4 w-4 text-indigo-500" />
+                              {gb.groupName}
+                            </span>
+                            <span className="rounded-full bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 px-2.5 py-0.5 text-[10px] font-black">
+                              {gb.totalCount} Students
+                            </span>
+                          </div>
+
+                          {/* 4-Grid Financial Values */}
+                          <div className="grid grid-cols-2 gap-2 text-xs pt-1 border-t border-slate-100 dark:border-slate-700">
+                            <div className="bg-slate-50 dark:bg-slate-900/50 p-2 rounded-xl border border-slate-100 dark:border-slate-750">
+                              <span className="text-[10px] font-bold text-slate-400 uppercase block">Expected:</span>
+                              <span className="font-bold text-slate-700 dark:text-slate-300">{gb.expectedTuition.toLocaleString()} DA</span>
+                            </div>
+
+                            <div className="bg-emerald-50/60 dark:bg-emerald-950/30 p-2 rounded-xl border border-emerald-100 dark:border-emerald-900/40">
+                              <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-400 uppercase block">Collected:</span>
+                              <span className="font-black text-emerald-600 dark:text-emerald-400">{gb.collectedTuition.toLocaleString()} DA</span>
+                            </div>
+
+                            <div className="bg-rose-50/60 dark:bg-rose-950/30 p-2 rounded-xl border border-rose-100 dark:border-rose-900/40">
+                              <span className="text-[10px] font-bold text-rose-700 dark:text-rose-400 uppercase block">Remaining Rest:</span>
+                              <span className="font-black text-rose-600 dark:text-rose-400">{gb.restTuition.toLocaleString()} DA</span>
+                            </div>
+
+                            <div className="bg-teal-50/60 dark:bg-teal-950/30 p-2 rounded-xl border border-teal-100 dark:border-teal-900/40">
+                              <span className="text-[10px] font-bold text-teal-700 dark:text-teal-400 uppercase block">Assurance:</span>
+                              <span className="font-black text-teal-600 dark:text-teal-400">{gb.assuranceCollected.toLocaleString()} DA</span>
+                            </div>
+                          </div>
+
+                          {/* Teacher & School Share Strip */}
+                          <div className="grid grid-cols-2 gap-2 text-xs">
+                            <div className="bg-indigo-50/60 dark:bg-indigo-950/40 p-2 rounded-xl border border-indigo-100 dark:border-indigo-900/50">
+                              <span className="text-[10px] font-black text-indigo-900 dark:text-indigo-200 block">Teacher Payout:</span>
+                              <span className="text-indigo-700 dark:text-indigo-300 font-black text-sm">{gb.teacherPayout.toLocaleString()} DA</span>
+                            </div>
+
+                            <div className="bg-teal-50/60 dark:bg-teal-950/40 p-2 rounded-xl border border-teal-100 dark:border-teal-900/50">
+                              <span className="text-[10px] font-black text-teal-900 dark:text-teal-200 block">Center Net:</span>
+                              <span className="text-teal-700 dark:text-teal-300 font-black text-sm">{gb.schoolNet.toLocaleString()} DA</span>
+                            </div>
+                          </div>
+
+                          {/* Payment State Badges & Actions */}
+                          <div className="flex items-center justify-between pt-1 border-t border-slate-100 dark:border-slate-700">
+                            <div className="flex items-center gap-1 text-[10px] font-bold">
+                              <span className="text-emerald-700 dark:text-emerald-400">{gb.countPaid} Full</span> · 
+                              <span className="text-amber-700 dark:text-amber-400">{gb.countPartial} Part</span> · 
+                              <span className="text-rose-700 dark:text-rose-400">{gb.countUnpaid} Unpaid</span>
+                            </div>
+
+                            <div className="flex items-center gap-1">
+                              <button
+                                type="button"
+                                onClick={() => setSelectedGroupFilter(isSelected ? "all" : gb.groupName)}
+                                className={`px-2 py-1 rounded-lg text-[10px] font-black transition-all ${
+                                  isSelected
+                                    ? "bg-brand-600 text-white"
+                                    : "bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-200"
+                                }`}
+                              >
+                                {isSelected ? "Filtered ✓" : "Filter"}
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setExpandedGroup(isExpanded ? null : gb.groupName)}
+                                className="p-1 rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200"
+                              >
+                                {isExpanded ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
+                              </button>
+                            </div>
+                          </div>
+
+                          {/* Collapsible mini roster in card view */}
+                          {isExpanded && (
+                            <div className="pt-2 border-t border-slate-100 dark:border-slate-700 space-y-1.5 text-[11px] max-h-44 overflow-y-auto">
+                              {gb.students.map((st, i) => (
+                                <div key={i} className="flex items-center justify-between p-1.5 rounded-lg bg-slate-50 dark:bg-slate-900/60">
+                                  <span className="font-bold text-slate-800 dark:text-slate-200 truncate">{st.name}</span>
+                                  <div className="flex items-center gap-1.5 shrink-0">
+                                    <span className="font-black text-emerald-600">{(st.paidTuition || 0).toLocaleString()} DA</span>
+                                    {st.assurancePaid && <span className="text-teal-600 font-bold text-[9px] bg-teal-100 dark:bg-teal-950 px-1 rounded">🛡️ 800</span>}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             )}
           </div>

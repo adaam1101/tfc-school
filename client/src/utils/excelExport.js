@@ -1,4 +1,4 @@
-﻿import ExcelJS from "exceljs";
+import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 import { schoolInfo } from "../config/branding.js";
 
@@ -512,9 +512,9 @@ export async function exportMonthlyFinancialRapportToExcel({
 
   // Section 3: Group Breakdowns Table
   rIdx++;
-  ws1.mergeCells(rIdx, 1, rIdx, 4);
+  ws1.mergeCells(rIdx, 1, rIdx, 9);
   const grpTitle = ws1.getCell(rIdx, 1);
-  grpTitle.value = "📁  RÉPARTITION DÉTAILLÉE PAR GROUPE (GROUP BREAKDOWN)";
+  grpTitle.value = "📁  RÉPARTITION DÉTAILLÉE PAR GROUPE (GROUP PAYMENT DETAILS)";
   grpTitle.font = { name: "Calibri", size: 12, bold: true, color: { argb: COLORS.white } };
   grpTitle.alignment = { vertical: "middle", indent: 1 };
   setCellFill(grpTitle, COLORS.navyDark);
@@ -524,11 +524,16 @@ export async function exportMonthlyFinancialRapportToExcel({
   const grpHeaderRow = ws1.getRow(rIdx);
   grpHeaderRow.values = [
     "Nom du Groupe / Formation",
-    "Effectif Actif",
-    "Scolarité Encaissée",
-    "Part Enseignant (DA)"
+    "Effectif",
+    "Frais Prévus (DA)",
+    "Scolarité Encaissée (DA)",
+    "Reste à Payer (DA)",
+    "Assurance 800 DA",
+    "Total Caisse (DA)",
+    "Part Enseignant (DA)",
+    "Part Centre (DA)"
   ];
-  grpHeaderRow.height = 26;
+  grpHeaderRow.height = 28;
   grpHeaderRow.eachCell((cell) => {
     setCellFill(cell, COLORS.indigoHeader);
     cell.font = { name: "Calibri", size: 10, bold: true, color: { argb: COLORS.white } };
@@ -541,11 +546,16 @@ export async function exportMonthlyFinancialRapportToExcel({
     const row = ws1.getRow(rIdx);
     row.values = [
       gb.groupName || "General",
-      `${gb.studentCount} Élèves`,
+      `${gb.totalCount || gb.studentCount || 0} Élèves`,
+      gb.expectedTuition || (gb.totalCount ? gb.totalCount * 7500 : 0),
       gb.collectedTuition || 0,
-      gb.teacherNet || 0
+      gb.restTuition || 0,
+      gb.assuranceCollected || (gb.assuranceCount ? gb.assuranceCount * 800 : 0),
+      gb.totalGroupCash || ((gb.collectedTuition || 0) + (gb.assuranceCollected || 0)),
+      gb.teacherPayout || gb.teacherNet || 0,
+      gb.schoolNet || Math.max(0, (gb.totalGroupCash || gb.collectedTuition || 0) - (gb.teacherPayout || gb.teacherNet || 0))
     ];
-    row.height = 24;
+    row.height = 25;
 
     const bg = i % 2 === 0 ? COLORS.white : COLORS.grayZebra;
     row.eachCell({ includeEmpty: true }, (cell, colNum) => {
@@ -558,12 +568,24 @@ export async function exportMonthlyFinancialRapportToExcel({
         cell.alignment = { vertical: "middle", horizontal: "left", indent: 1 };
         cell.font = { name: "Calibri", size: 10, bold: true };
       }
-      if (colNum === 3 || colNum === 4) {
+      if (colNum >= 3 && colNum <= 9) {
         cell.numFmt = '#,##0 "DA"';
         cell.alignment = { vertical: "middle", horizontal: "right" };
-        if (colNum === 4) {
-          cell.font = { name: "Calibri", size: 10, bold: true, color: { argb: "4C1D95" } };
-        }
+      }
+      if (colNum === 4 && (gb.collectedTuition || 0) > 0) {
+        cell.font = { name: "Calibri", size: 10, bold: true, color: { argb: COLORS.emeraldDark } };
+      }
+      if (colNum === 5 && (gb.restTuition || 0) > 0) {
+        setCellFill(cell, COLORS.roseLight);
+        cell.font = { name: "Calibri", size: 10, bold: true, color: { argb: COLORS.roseDark } };
+      }
+      if (colNum === 8) {
+        setCellFill(cell, "EDE9FE");
+        cell.font = { name: "Calibri", size: 10, bold: true, color: { argb: "4C1D95" } };
+      }
+      if (colNum === 9) {
+        setCellFill(cell, COLORS.emeraldLight);
+        cell.font = { name: "Calibri", size: 10, bold: true, color: { argb: COLORS.emeraldDark } };
       }
     });
 
@@ -571,10 +593,15 @@ export async function exportMonthlyFinancialRapportToExcel({
   });
 
   ws1.columns = [
-    { width: 44 }, // Metric
-    { width: 22 }, // Value
-    { width: 22 }, // Value 2
-    { width: 36 }, // Notes
+    { width: 32 }, // Group
+    { width: 14 }, // Count
+    { width: 20 }, // Expected
+    { width: 22 }, // Collected
+    { width: 20 }, // Rest
+    { width: 20 }, // Assurance
+    { width: 22 }, // Total Cash
+    { width: 22 }, // Teacher Net
+    { width: 22 }  // School Net
   ];
 
   // ═════════════════════════════════════════════════════════════════════════════
