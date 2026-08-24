@@ -1,4 +1,4 @@
-﻿import ExcelJS from "exceljs";
+import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 import { schoolInfo } from "../config/branding.js";
 
@@ -73,17 +73,16 @@ export async function exportStudentsToExcel({
   wb.creator = `${schoolInfo.short} School Management`;
   wb.created = new Date();
 
-  // Note: views without freeze locks so user can smoothly scroll on all screen sizes
-  const ws = wb.addWorksheet("Liste des Élèves", {
+  const ws = wb.addWorksheet("Liste Complète des Élèves", {
     views: [{ showGridLines: true }]
   });
 
-  const totalCols = 13;
+  const totalCols = 16;
 
   // ── 1. Top Header Banner ──────────────────────────────────────────────────
   ws.mergeCells(1, 1, 1, totalCols);
   const r1 = ws.getCell(1, 1);
-  r1.value = `🎓  ${schoolInfo.short.toUpperCase()} SCHOOL — LISTE OFFICIELLE DES ÉLÈVES / STUDENT ROSTER`;
+  r1.value = `🎓  ${schoolInfo.short.toUpperCase()} SCHOOL — REGISTRE NOMINATIF & FINANCIER COMPLET DES ÉLÈVES`;
   r1.font = { name: "Calibri", size: 15, bold: true, color: { argb: COLORS.white } };
   r1.alignment = { vertical: "middle", horizontal: "center" };
   setCellFill(r1, COLORS.navyDark);
@@ -91,7 +90,7 @@ export async function exportStudentsToExcel({
 
   ws.mergeCells(2, 1, 2, totalCols);
   const r2 = ws.getCell(2, 1);
-  r2.value = `${schoolInfo.name} · ${schoolInfo.city} · Tél: ${schoolInfo.phones[0] || "+213 561 502 098"}   |   Enseignant: ${teacherName}   |   Groupe: ${groupName}   |   Exporté le: ${nowFormatted()}`;
+  r2.value = `${schoolInfo.name} · ${schoolInfo.city} · Tél: ${schoolInfo.phones[0] || "+213 561 502 098"}   |   Enseignant: ${teacherName}   |   Groupe: ${groupName}   |   Date: ${nowFormatted()}`;
   r2.font = { name: "Calibri", size: 10, bold: true, color: { argb: "93C5FD" } };
   r2.alignment = { vertical: "middle", horizontal: "center" };
   setCellFill(r2, COLORS.navySlate);
@@ -104,6 +103,8 @@ export async function exportStudentsToExcel({
   let totalPaid = 0;
   let totalRest = 0;
   let totalAssuranceCount = 0;
+  let activeCount = 0;
+  let stoppedCount = 0;
 
   students.forEach((s) => {
     const payment = s.currentPayment || {};
@@ -114,13 +115,16 @@ export async function exportStudentsToExcel({
     totalPaid += paid;
     totalRest += rest;
     if (payment.assurancePaid) totalAssuranceCount += 1;
+    if (s.studentProfile?.isStopped || s.status === "stopped") stoppedCount += 1;
+    else activeCount += 1;
   });
 
   const kpiCards = [
-    { title: "EFFECTIF TOTAL", val: `${students.length} Élèves`, bg: "EFF6FF", text: "1E40AF", border: "BFDBFE", startCol: 1, endCol: 3 },
-    { title: "SCOLARITÉ ENCAISSÉE", val: `${totalPaid.toLocaleString()} DA`, bg: COLORS.emeraldLight, text: COLORS.emeraldDark, border: "A7F3D0", startCol: 4, endCol: 6 },
-    { title: "RESTE GLOBAL DÛ", val: `${totalRest.toLocaleString()} DA`, bg: COLORS.roseLight, text: COLORS.roseDark, border: "FECDD3", startCol: 7, endCol: 9 },
-    { title: "ASSURANCES (800 DA)", val: `${totalAssuranceCount} Payées (${(totalAssuranceCount * 800).toLocaleString()} DA)`, bg: COLORS.cyanLight, text: COLORS.cyanDark, border: "A5F3FC", startCol: 10, endCol: 13 }
+    { title: "EFFECTIF TOTAL", val: `${students.length} Élèves (${activeCount} Actifs / ${stoppedCount} Arrêtés)`, bg: "EFF6FF", text: "1E40AF", border: "BFDBFE", startCol: 1, endCol: 3 },
+    { title: "SCOLARITÉ PRÉVUE", val: `${totalTuition.toLocaleString()} DA`, bg: COLORS.grayLight, text: "334155", border: "CBD5E1", startCol: 4, endCol: 6 },
+    { title: "SCOLARITÉ ENCAISSÉE", val: `${totalPaid.toLocaleString()} DA`, bg: COLORS.emeraldLight, text: COLORS.emeraldDark, border: "A7F3D0", startCol: 7, endCol: 9 },
+    { title: "RESTE GLOBAL DÛ", val: `${totalRest.toLocaleString()} DA`, bg: COLORS.roseLight, text: COLORS.roseDark, border: "FECDD3", startCol: 10, endCol: 12 },
+    { title: "ASSURANCES (800 DA)", val: `${totalAssuranceCount} Payées (${(totalAssuranceCount * 800).toLocaleString()} DA)`, bg: COLORS.cyanLight, text: COLORS.cyanDark, border: "A5F3FC", startCol: 13, endCol: 16 }
   ];
 
   kpiCards.forEach((c) => {
@@ -134,7 +138,7 @@ export async function exportStudentsToExcel({
     ws.mergeCells(5, c.startCol, 5, c.endCol);
     const vCell = ws.getCell(5, c.startCol);
     vCell.value = c.val;
-    vCell.font = { name: "Calibri", size: 13, bold: true, color: { argb: c.text } };
+    vCell.font = { name: "Calibri", size: 12, bold: true, color: { argb: c.text } };
     vCell.alignment = { vertical: "middle", horizontal: "center" };
     setCellFill(vCell, c.bg);
 
@@ -148,21 +152,24 @@ export async function exportStudentsToExcel({
   ws.getRow(5).height = 24;
   ws.getRow(6).height = 10; // Spacer
 
-  // ── 3. Table Headers (Row 7) ──────────────────────────────────────────────
+  // ── 3. Table Headers with ALL Details (Row 7) ─────────────────────────────
   const headers = [
     "N°",
-    "Nom et Prénom de l'Élève",
-    "Groupe / Niveau",
+    "Nom et Prénom de l'Élève (الاسم واللقب)",
+    "Groupe / Section",
+    "Formation / Niveau",
     "Téléphone Élève",
     "Téléphone Parent",
-    "Séances",
+    "Séances Faites / Total",
     "Absences",
     "Frais Scolarité (DA)",
     "Montant Payé (DA)",
     "Reste à Payer (DA)",
     "Assurance (800 DA)",
+    "Total Versé Caisse (DA)",
     "État Paiement",
-    "Statut"
+    "Statut Élève",
+    "Observations / Notes"
   ];
 
   const headerRow = ws.getRow(7);
@@ -176,13 +183,13 @@ export async function exportStudentsToExcel({
     cell.border = BORDER_HEADER;
   });
 
-  // Enable AutoFilter on Table Headers
+  // AutoFilter
   ws.autoFilter = {
     from: { row: 7, column: 1 },
     to:   { row: 7, column: totalCols }
   };
 
-  // Sort students by group name first, then student name
+  // Sort students by group, then by name
   const sortedStudents = [...students].sort((a, b) => {
     const grpA = (a.groupName || a.studentProfile?.course || "").toLowerCase();
     const grpB = (b.groupName || b.studentProfile?.course || "").toLowerCase();
@@ -199,10 +206,15 @@ export async function exportStudentsToExcel({
     const paid = payment.paidAmount ?? 0;
     const rest = Math.max(0, tuition - paid);
     const hasAssurance = Boolean(payment.assurancePaid);
+    const assuranceAmount = hasAssurance ? 800 : 0;
+    const totalCashPaid = paid + assuranceAmount;
+
     const sessions = s.sessionsAttended ?? s.studentProfile?.sessionsAttended ?? 0;
+    const maxSessions = s.targetSessions || 12;
     const absences = s.absencesCount ?? s.studentProfile?.absencesCount ?? 0;
     const isStopped = s.studentProfile?.isStopped || s.status === "stopped";
-    const currentGroup = s.groupName || s.studentProfile?.course || "General";
+    const currentGroup = s.groupName || "General";
+    const currentCourse = s.studentProfile?.course || s.course || currentGroup;
 
     let payStatusText = "Unpaid";
     let payStatusBg = COLORS.roseLight;
@@ -223,16 +235,19 @@ export async function exportStudentsToExcel({
       idx + 1,
       s.name || "—",
       currentGroup,
+      currentCourse,
       s.phone || s.studentProfile?.phone || "—",
-      s.studentProfile?.parentPhone || "—",
-      `${sessions}/${s.targetSessions || 12}`,
+      s.studentProfile?.parentPhone || s.parentPhone || "—",
+      `${sessions} / ${maxSessions}`,
       absences,
       tuition,
       paid,
       rest,
-      hasAssurance ? "Paid ✓" : "Unpaid",
+      hasAssurance ? "Payée (800 DA) ✓" : "Non Payée",
+      totalCashPaid,
       payStatusText,
-      isStopped ? "Stopped ⛔" : "Active 🟢"
+      isStopped ? "Arrêté ⛔" : "Actif 🟢",
+      s.notes || s.studentProfile?.notes || payment.notes || ""
     ];
 
     row.height = 24;
@@ -249,33 +264,36 @@ export async function exportStudentsToExcel({
         cell.alignment = { vertical: "middle", horizontal: "left", indent: 1 };
         cell.font = { name: "Calibri", size: 10, bold: true, color: { argb: "0F172A" } };
       }
-      if (colNum === 3) {
+      if (colNum === 3 || colNum === 4 || colNum === 16) {
         cell.alignment = { vertical: "middle", horizontal: "left", indent: 1 };
       }
-      if (colNum === 8 || colNum === 9 || colNum === 10) {
+      if (colNum === 9 || colNum === 10 || colNum === 11 || colNum === 13) {
         cell.numFmt = '#,##0 "DA"';
         cell.alignment = { vertical: "middle", horizontal: "right" };
-        if (colNum === 9 && paid > 0) {
+        if (colNum === 10 && paid > 0) {
           cell.font = { name: "Calibri", size: 10, bold: true, color: { argb: COLORS.emeraldDark } };
         }
-        if (colNum === 10 && rest > 0) {
+        if (colNum === 11 && rest > 0) {
           setCellFill(cell, COLORS.roseLight);
           cell.font = { name: "Calibri", size: 10, bold: true, color: { argb: COLORS.roseDark } };
         }
+        if (colNum === 13) {
+          cell.font = { name: "Calibri", size: 10, bold: true, color: { argb: COLORS.navyDark } };
+        }
       }
-      if (colNum === 7 && absences > 2) {
+      if (colNum === 8 && absences > 2) {
         setCellFill(cell, COLORS.roseLight);
         cell.font = { name: "Calibri", size: 10, bold: true, color: { argb: COLORS.roseDark } };
       }
-      if (colNum === 11 && hasAssurance) {
+      if (colNum === 12 && hasAssurance) {
         setCellFill(cell, COLORS.cyanLight);
         cell.font = { name: "Calibri", size: 10, bold: true, color: { argb: COLORS.cyanDark } };
       }
-      if (colNum === 12) {
+      if (colNum === 14) {
         setCellFill(cell, payStatusBg);
         cell.font = { name: "Calibri", size: 10, bold: true, color: { argb: payStatusColor } };
       }
-      if (colNum === 13) {
+      if (colNum === 15) {
         if (isStopped) {
           setCellFill(cell, COLORS.roseLight);
           cell.font = { name: "Calibri", size: 10, bold: true, color: { argb: COLORS.roseDark } };
@@ -291,21 +309,24 @@ export async function exportStudentsToExcel({
 
   const endDataRow = rowIdx - 1;
 
-  // ── 4. Grand Totals Row with Formulas ──────────────────────────────────────
+  // ── 4. Grand Totals Row with Dynamic Formulas ──────────────────────────────
   const totalRow = ws.getRow(rowIdx);
   totalRow.values = [
     "TOTALS",
-    `${students.length} Élèves Total`,
+    `${students.length} Élèves au Total`,
     "",
     "",
     "",
     "",
     "",
-    { formula: `SUM(H${startDataRow}:H${endDataRow})` },
+    "",
     { formula: `SUM(I${startDataRow}:I${endDataRow})` },
     { formula: `SUM(J${startDataRow}:J${endDataRow})` },
+    { formula: `SUM(K${startDataRow}:K${endDataRow})` },
     `${totalAssuranceCount} Payées`,
+    { formula: `SUM(M${startDataRow}:M${endDataRow})` },
     totalRest === 0 ? "Complet 100% ✓" : `Reste: ${totalRest.toLocaleString()} DA`,
+    `${activeCount} Actifs`,
     ""
   ];
 
@@ -316,7 +337,7 @@ export async function exportStudentsToExcel({
     cell.border = BORDER_HEADER;
     cell.alignment = { vertical: "middle", horizontal: "center" };
 
-    if (colNum === 8 || colNum === 9 || colNum === 10) {
+    if (colNum === 9 || colNum === 10 || colNum === 11 || colNum === 13) {
       cell.numFmt = '#,##0 "DA"';
       cell.alignment = { vertical: "middle", horizontal: "right" };
     }
@@ -326,16 +347,19 @@ export async function exportStudentsToExcel({
     { width: 7 },   // N°
     { width: 28 },  // Nom
     { width: 20 },  // Groupe
+    { width: 20 },  // Formation
     { width: 16 },  // Tél
     { width: 16 },  // Tél Parent
-    { width: 12 },  // Séances
+    { width: 14 },  // Séances
     { width: 12 },  // Absences
     { width: 18 },  // Scolarité
     { width: 18 },  // Payé
     { width: 18 },  // Reste
     { width: 18 },  // Assurance
+    { width: 20 },  // Total Versé
     { width: 16 },  // État
-    { width: 16 }   // Statut
+    { width: 14 },  // Statut
+    { width: 26 }   // Notes
   ];
 
   const buffer = await wb.xlsx.writeBuffer();
@@ -366,15 +390,15 @@ export async function exportMonthlyFinancialRapportToExcel({
   // SHEET 1: SYNTHÈSE FINANCIÈRE & DÉTAIL PAR GROUPE
   // ═════════════════════════════════════════════════════════════════════════════
   const ws1 = wb.addWorksheet("Synthèse Financière", {
-    views: [{ showGridLines: true }] // No freeze lock so user can smoothly scroll
+    views: [{ showGridLines: true }]
   });
 
-  const totalCols1 = 9;
+  const totalCols1 = 12;
 
   // ── 1. Header Banner ──────────────────────────────────────────────────────
   ws1.mergeCells(1, 1, 1, totalCols1);
   const r1 = ws1.getCell(1, 1);
-  r1.value = `🎓  ${schoolInfo.short.toUpperCase()} SCHOOL — RAPPORT FINANCIER MENSUEL (${periodName.toUpperCase()})`;
+  r1.value = `🎓  ${schoolInfo.short.toUpperCase()} SCHOOL — RAPPORT FINANCIER MENSUEL & ENCAISSEMENTS (${periodName.toUpperCase()})`;
   r1.font = { name: "Calibri", size: 15, bold: true, color: { argb: COLORS.white } };
   r1.alignment = { vertical: "middle", horizontal: "center" };
   setCellFill(r1, COLORS.navyDark);
@@ -390,14 +414,15 @@ export async function exportMonthlyFinancialRapportToExcel({
 
   ws1.getRow(3).height = 8; // Spacer
 
-  // ── 2. Top KPI Summary Tiles ──────────────────────────────────────────────
+  // ── 2. Top KPI Summary Tiles (Rows 4-5) ───────────────────────────────────
   const kpis = [
-    { title: "TOTAL ÉLÈVES", val: `${summary.totalStudents || students.length} Inscrits`, bg: "EFF6FF", text: "1E40AF", border: "BFDBFE", startCol: 1, endCol: 1 },
-    { title: "SCOLARITÉ ENCAISSÉE", val: `${(summary.totalCollectedTuition || 0).toLocaleString()} DA`, bg: COLORS.emeraldLight, text: COLORS.emeraldDark, border: "A7F3D0", startCol: 2, endCol: 3 },
-    { title: "RESTE À RECOUVRER", val: `${(summary.totalRest || 0).toLocaleString()} DA`, bg: COLORS.roseLight, text: COLORS.roseDark, border: "FECDD3", startCol: 4, endCol: 5 },
-    { title: "ASSURANCES (800 DA)", val: `${(summary.totalAssuranceCollected || 0).toLocaleString()} DA`, bg: COLORS.cyanLight, text: COLORS.cyanDark, border: "A5F3FC", startCol: 6, endCol: 6 },
-    { title: "PART ENSEIGNANT", val: `${(teacherCompensation?.totalTeacherNet || 0).toLocaleString()} DA`, bg: COLORS.purpleLight, text: COLORS.purpleDark, border: "DDD6FE", startCol: 7, endCol: 7 },
-    { title: "PART NETTE CENTRE", val: `${(teacherCompensation?.totalSchoolNet || 0).toLocaleString()} DA`, bg: "ECFDF5", text: "047857", border: "A7F3D0", startCol: 8, endCol: 9 },
+    { title: "TOTAL ÉLÈVES", val: `${summary.totalStudents || students.length} Inscrits`, bg: "EFF6FF", text: "1E40AF", border: "BFDBFE", startCol: 1, endCol: 2 },
+    { title: "SCOLARITÉ PRÉVUE", val: `${(summary.totalExpectedTuition || 0).toLocaleString()} DA`, bg: COLORS.grayLight, text: "334155", border: "CBD5E1", startCol: 3, endCol: 4 },
+    { title: "SCOLARITÉ ENCAISSÉE", val: `${(summary.totalCollectedTuition || 0).toLocaleString()} DA`, bg: COLORS.emeraldLight, text: COLORS.emeraldDark, border: "A7F3D0", startCol: 5, endCol: 6 },
+    { title: "RESTE À RECOUVRER", val: `${(summary.totalRest || 0).toLocaleString()} DA`, bg: COLORS.roseLight, text: COLORS.roseDark, border: "FECDD3", startCol: 7, endCol: 8 },
+    { title: "ASSURANCES (800 DA)", val: `${(summary.totalAssuranceCollected || 0).toLocaleString()} DA`, bg: COLORS.cyanLight, text: COLORS.cyanDark, border: "A5F3FC", startCol: 9, endCol: 9 },
+    { title: "PART ENSEIGNANT", val: `${(teacherCompensation?.totalTeacherNet || 0).toLocaleString()} DA`, bg: COLORS.purpleLight, text: COLORS.purpleDark, border: "DDD6FE", startCol: 10, endCol: 10 },
+    { title: "PART NETTE CENTRE", val: `${(teacherCompensation?.totalSchoolNet || 0).toLocaleString()} DA`, bg: "ECFDF5", text: "047857", border: "A7F3D0", startCol: 11, endCol: 12 },
   ];
 
   kpis.forEach((k) => {
@@ -428,7 +453,7 @@ export async function exportMonthlyFinancialRapportToExcel({
   // ── 3. Group Breakdown Table (Row 7) ──────────────────────────────────────
   ws1.mergeCells(7, 1, 7, totalCols1);
   const grpTitle = ws1.getCell(7, 1);
-  grpTitle.value = `📊  RÉPARTITION DÉTAILLÉE DES PAIEMENTS PAR GROUPE (MODE: ${commissionMode.toUpperCase()})`;
+  grpTitle.value = `📊  RÉPARTITION DÉTAILLÉE DES PAIEMENTS PAR GROUPE (MODE DE CALCUL: ${commissionMode.toUpperCase()})`;
   grpTitle.font = { name: "Calibri", size: 11, bold: true, color: { argb: COLORS.white } };
   grpTitle.alignment = { vertical: "middle", indent: 1 };
   setCellFill(grpTitle, COLORS.navySlate);
@@ -441,9 +466,12 @@ export async function exportMonthlyFinancialRapportToExcel({
     "Scolarité Encaissée (DA)",
     "Reste à Payer (DA)",
     "Assurance 800 DA",
-    "Total Caisse (DA)",
+    "Total Caisse Groupe (DA)",
     "Part Enseignant (DA)",
-    "Part Centre (DA)"
+    "Part Centre (DA)",
+    "Taux Recouvrement",
+    "Détail Paiements (P/Part/Imp)",
+    "Statut Recouvrement"
   ];
 
   const grpHeaderRow = ws1.getRow(8);
@@ -457,6 +485,8 @@ export async function exportMonthlyFinancialRapportToExcel({
   });
 
   let gRowIdx = 9;
+  const startGrpRow = gRowIdx;
+
   (teacherCompensation?.groupBreakdowns || []).forEach((gb, idx) => {
     const row = ws1.getRow(gRowIdx);
     const count = gb.totalCount || gb.studentCount || 0;
@@ -467,6 +497,9 @@ export async function exportMonthlyFinancialRapportToExcel({
     const totalCash = gb.totalGroupCash || (collected + assurance);
     const teacherPayout = gb.teacherPayout || gb.teacherNet || 0;
     const schoolNet = gb.schoolNet || Math.max(0, totalCash - teacherPayout);
+    const rate = expected > 0 ? `${Math.round((collected / expected) * 100)}%` : "100%";
+    const pDetail = `${gb.countPaid || 0} Payés · ${gb.countPartial || 0} Part · ${gb.countUnpaid || 0} Imp`;
+    const statusText = rest === 0 ? "Complet 100% ✓" : `Reste: ${rest.toLocaleString()} DA`;
 
     row.values = [
       gb.groupName || "General",
@@ -477,7 +510,10 @@ export async function exportMonthlyFinancialRapportToExcel({
       assurance,
       totalCash,
       teacherPayout,
-      schoolNet
+      schoolNet,
+      rate,
+      pDetail,
+      statusText
     ];
 
     row.height = 24;
@@ -512,9 +548,50 @@ export async function exportMonthlyFinancialRapportToExcel({
         setCellFill(cell, COLORS.emeraldLight);
         cell.font = { name: "Calibri", size: 9.5, bold: true, color: { argb: COLORS.emeraldDark } };
       }
+      if (colNum === 12) {
+        if (rest === 0) {
+          setCellFill(cell, COLORS.emeraldLight);
+          cell.font = { name: "Calibri", size: 9.5, bold: true, color: { argb: COLORS.emeraldDark } };
+        } else {
+          setCellFill(cell, COLORS.roseLight);
+          cell.font = { name: "Calibri", size: 9.5, bold: true, color: { argb: COLORS.roseDark } };
+        }
+      }
     });
 
     gRowIdx++;
+  });
+
+  const endGrpRow = gRowIdx - 1;
+
+  // Totals Row for Group Summary
+  const grpTotalRow = ws1.getRow(gRowIdx);
+  grpTotalRow.values = [
+    "TOTALS GÉNÉRAUX",
+    `${summary.totalStudents || students.length} Élèves`,
+    { formula: `SUM(C${startGrpRow}:C${endGrpRow})` },
+    { formula: `SUM(D${startGrpRow}:D${endGrpRow})` },
+    { formula: `SUM(E${startGrpRow}:E${endGrpRow})` },
+    { formula: `SUM(F${startGrpRow}:F${endGrpRow})` },
+    { formula: `SUM(G${startGrpRow}:G${endGrpRow})` },
+    { formula: `SUM(H${startGrpRow}:H${endGrpRow})` },
+    { formula: `SUM(I${startGrpRow}:I${endGrpRow})` },
+    "",
+    "",
+    ""
+  ];
+
+  grpTotalRow.height = 28;
+  grpTotalRow.eachCell({ includeEmpty: true }, (cell, colNum) => {
+    setCellFill(cell, COLORS.navyDark);
+    cell.font = { name: "Calibri", size: 9.5, bold: true, color: { argb: COLORS.white } };
+    cell.border = BORDER_HEADER;
+    cell.alignment = { vertical: "middle", horizontal: "center" };
+
+    if (colNum >= 3 && colNum <= 9) {
+      cell.numFmt = '#,##0 "DA"';
+      cell.alignment = { vertical: "middle", horizontal: "right" };
+    }
   });
 
   ws1.columns = [
@@ -524,24 +601,27 @@ export async function exportMonthlyFinancialRapportToExcel({
     { width: 22 }, // Encaissé
     { width: 18 }, // Reste
     { width: 18 }, // Assurance
-    { width: 20 }, // Total Caisse
+    { width: 22 }, // Total Caisse
     { width: 20 }, // Part Prof
-    { width: 20 }  // Part Centre
+    { width: 20 }, // Part Centre
+    { width: 18 }, // Taux
+    { width: 24 }, // Détail
+    { width: 20 }  // Statut
   ];
 
   // ═════════════════════════════════════════════════════════════════════════════
-  // SHEET 2: DÉTAIL PAR ÉLÈVE (Complete Student-by-Student Ledger)
+  // SHEET 2: DÉTAIL COMPLET PAR ÉLÈVE (All Payment & Academic Columns)
   // ═════════════════════════════════════════════════════════════════════════════
-  const ws2 = wb.addWorksheet("Détail par Élève", {
-    views: [{ showGridLines: true }] // Smooth scrolling without freeze locks
+  const ws2 = wb.addWorksheet("Détail Nominatif Élèves", {
+    views: [{ showGridLines: true }]
   });
 
-  const totalCols2 = 11;
+  const totalCols2 = 14;
 
   // ── Header Banner on Sheet 2 ──────────────────────────────────────────────
   ws2.mergeCells(1, 1, 1, totalCols2);
   const r2_1 = ws2.getCell(1, 1);
-  r2_1.value = `🎓  ${schoolInfo.short.toUpperCase()} SCHOOL — DÉTAIL NOMINATIF DES PAIEMENTS PAR ÉLÈVE (${students.length} ÉLÈVES)`;
+  r2_1.value = `🎓  ${schoolInfo.short.toUpperCase()} SCHOOL — DÉTAIL NOMINATIF & FINANCIER PAR ÉLÈVE (${students.length} ÉLÈVES INSCRITS)`;
   r2_1.font = { name: "Calibri", size: 14, bold: true, color: { argb: COLORS.white } };
   r2_1.alignment = { vertical: "middle", horizontal: "center" };
   setCellFill(r2_1, COLORS.navyDark);
@@ -549,7 +629,7 @@ export async function exportMonthlyFinancialRapportToExcel({
 
   ws2.mergeCells(2, 1, 2, totalCols2);
   const r2_2 = ws2.getCell(2, 1);
-  r2_2.value = `Enseignant: ${teacher?.name || "Ameyoud Adam"}   |   Mois: ${periodName} (${month})   |   Export: ${nowFormatted()}`;
+  r2_2.value = `Enseignant: ${teacher?.name || "Ameyoud Adam"}   |   Mois: ${periodName} (${month})   |   Exporté le: ${nowFormatted()}`;
   r2_2.font = { name: "Calibri", size: 10, bold: true, color: { argb: "93C5FD" } };
   r2_2.alignment = { vertical: "middle", horizontal: "center" };
   setCellFill(r2_2, COLORS.navySlate);
@@ -561,14 +641,17 @@ export async function exportMonthlyFinancialRapportToExcel({
   const studentCols = [
     "N°",
     "Nom et Prénom de l'Élève",
-    "Groupe / Formation",
+    "Groupe / Section",
+    "Formation / Niveau",
     "Téléphone Parent",
     "Frais Scolarité (DA)",
     "Montant Payé (DA)",
     "Reste à Payer (DA)",
     "Assurance (800 DA)",
+    "Total Versé (DA)",
     "État Paiement",
     "Statut Élève",
+    "Part Enseignant (DA)",
     "Observations / Notes"
   ];
 
@@ -599,16 +682,17 @@ export async function exportMonthlyFinancialRapportToExcel({
     return (a.name || "").localeCompare(b.name || "");
   });
 
-  let sumAssurance = 0;
-
   sortedStudents.forEach((s, idx) => {
     const tuition = s.tuitionFee ?? (s.currentPayment?.amount ?? 7500);
     const paid = s.paidTuition ?? (s.currentPayment?.paidAmount ?? 0);
     const rest = s.rest != null ? s.rest : Math.max(0, tuition - paid);
     const hasAssurance = Boolean(s.assurancePaid || s.currentPayment?.assurancePaid);
+    const assuranceAmount = hasAssurance ? 800 : 0;
+    const totalCashPaid = paid + assuranceAmount;
     const isStopped = s.studentProfile?.isStopped || s.status === "stopped";
-
-    if (hasAssurance) sumAssurance += 800;
+    const group = s.groupName || s.studentProfile?.course || s.course || "General";
+    const course = s.course || s.studentProfile?.course || group;
+    const teacherShare = s.teacherShare || 0;
 
     let payStatusText = "Unpaid";
     let payStatusBg = COLORS.roseLight;
@@ -628,14 +712,17 @@ export async function exportMonthlyFinancialRapportToExcel({
     row.values = [
       idx + 1,
       s.name || "—",
-      s.groupName || s.studentProfile?.course || s.course || "General",
+      group,
+      course,
       s.parentPhone || s.studentProfile?.parentPhone || s.phone || "—",
       tuition,
       paid,
       rest,
-      hasAssurance ? "Paid (800 DA) ✓" : "Unpaid",
+      hasAssurance ? "Payée (800 DA) ✓" : "Non Payée",
+      totalCashPaid,
       payStatusText,
-      isStopped ? "Stopped ⛔" : "Active 🟢",
+      isStopped ? "Arrêté ⛔" : "Actif 🟢",
+      teacherShare,
       s.notes || s.currentPayment?.notes || ""
     ];
 
@@ -653,29 +740,32 @@ export async function exportMonthlyFinancialRapportToExcel({
         cell.alignment = { vertical: "middle", horizontal: "left", indent: 1 };
         cell.font = { name: "Calibri", size: 10, bold: true, color: { argb: "0F172A" } };
       }
-      if (colNum === 3) {
+      if (colNum === 3 || colNum === 4 || colNum === 14) {
         cell.alignment = { vertical: "middle", horizontal: "left", indent: 1 };
       }
-      if (colNum === 5 || colNum === 6 || colNum === 7) {
+      if (colNum === 6 || colNum === 7 || colNum === 8 || colNum === 10 || colNum === 13) {
         cell.numFmt = '#,##0 "DA"';
         cell.alignment = { vertical: "middle", horizontal: "right" };
-        if (colNum === 6 && paid > 0) {
+        if (colNum === 7 && paid > 0) {
           cell.font = { name: "Calibri", size: 10, bold: true, color: { argb: COLORS.emeraldDark } };
         }
-        if (colNum === 7 && rest > 0) {
+        if (colNum === 8 && rest > 0) {
           setCellFill(cell, COLORS.roseLight);
           cell.font = { name: "Calibri", size: 10, bold: true, color: { argb: COLORS.roseDark } };
         }
+        if (colNum === 10) {
+          cell.font = { name: "Calibri", size: 10, bold: true, color: { argb: COLORS.navyDark } };
+        }
       }
-      if (colNum === 8 && hasAssurance) {
+      if (colNum === 9 && hasAssurance) {
         setCellFill(cell, COLORS.cyanLight);
         cell.font = { name: "Calibri", size: 10, bold: true, color: { argb: COLORS.cyanDark } };
       }
-      if (colNum === 9) {
+      if (colNum === 11) {
         setCellFill(cell, payStatusBg);
         cell.font = { name: "Calibri", size: 10, bold: true, color: { argb: payStatusColor } };
       }
-      if (colNum === 10) {
+      if (colNum === 12) {
         if (isStopped) {
           setCellFill(cell, COLORS.roseLight);
           cell.font = { name: "Calibri", size: 10, bold: true, color: { argb: COLORS.roseDark } };
@@ -698,12 +788,15 @@ export async function exportMonthlyFinancialRapportToExcel({
     `${students.length} Élèves Total`,
     "",
     "",
-    { formula: `SUM(E${studentStartRow}:E${studentEndRow})` },
+    "",
     { formula: `SUM(F${studentStartRow}:F${studentEndRow})` },
     { formula: `SUM(G${studentStartRow}:G${studentEndRow})` },
-    `${sumAssurance.toLocaleString()} DA`,
+    { formula: `SUM(H${studentStartRow}:H${studentEndRow})` },
+    `${summary.countAssurancePaid || 0} Payées`,
+    { formula: `SUM(J${studentStartRow}:J${studentEndRow})` },
     (summary.totalRest || 0) === 0 ? "Complet 100% ✓" : `Reste: ${(summary.totalRest || 0).toLocaleString()} DA`,
     "",
+    { formula: `SUM(M${studentStartRow}:M${studentEndRow})` },
     ""
   ];
 
@@ -714,7 +807,7 @@ export async function exportMonthlyFinancialRapportToExcel({
     cell.border = BORDER_HEADER;
     cell.alignment = { vertical: "middle", horizontal: "center" };
 
-    if (colNum === 5 || colNum === 6 || colNum === 7) {
+    if (colNum === 6 || colNum === 7 || colNum === 8 || colNum === 10 || colNum === 13) {
       cell.numFmt = '#,##0 "DA"';
       cell.alignment = { vertical: "middle", horizontal: "right" };
     }
@@ -724,13 +817,16 @@ export async function exportMonthlyFinancialRapportToExcel({
     { width: 7 },   // N°
     { width: 28 },  // Nom
     { width: 22 },  // Groupe
+    { width: 20 },  // Formation
     { width: 16 },  // Tél Parent
     { width: 18 },  // Scolarité
     { width: 18 },  // Payé
     { width: 18 },  // Reste
     { width: 20 },  // Assurance
+    { width: 20 },  // Total Versé
     { width: 18 },  // État Paiement
-    { width: 16 },  // Statut
+    { width: 14 },  // Statut Élève
+    { width: 20 },  // Part Enseignant
     { width: 26 }   // Notes
   ];
 
