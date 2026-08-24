@@ -60,7 +60,7 @@ const setCellFill = (cell, argbColor) => {
 
 /**
  * ─────────────────────────────────────────────────────────────────────────────
- * 1. EXPORT STUDENTS ROSTER TO EXCEL (Clean, Useful, Filterable, Formatted)
+ * 1. EXPORT STUDENTS ROSTER TO EXCEL (Smooth Scrolling & Filterable)
  * ─────────────────────────────────────────────────────────────────────────────
  */
 export async function exportStudentsToExcel({
@@ -73,8 +73,9 @@ export async function exportStudentsToExcel({
   wb.creator = `${schoolInfo.short} School Management`;
   wb.created = new Date();
 
+  // Note: views without freeze locks so user can smoothly scroll on all screen sizes
   const ws = wb.addWorksheet("Liste des Élèves", {
-    views: [{ state: "frozen", xSplit: 0, ySplit: 8, showGridLines: true }]
+    views: [{ showGridLines: true }]
   });
 
   const totalCols = 13;
@@ -96,8 +97,7 @@ export async function exportStudentsToExcel({
   setCellFill(r2, COLORS.navySlate);
   ws.getRow(2).height = 22;
 
-  // Row 3: Spacer
-  ws.getRow(3).height = 8;
+  ws.getRow(3).height = 8; // Spacer
 
   // ── 2. KPI Summary Cards (Rows 4-5) ───────────────────────────────────────
   let totalTuition = 0;
@@ -148,7 +148,7 @@ export async function exportStudentsToExcel({
   ws.getRow(5).height = 24;
   ws.getRow(6).height = 10; // Spacer
 
-  // ── 3. Table Headers (Row 8) ──────────────────────────────────────────────
+  // ── 3. Table Headers (Row 7) ──────────────────────────────────────────────
   const headers = [
     "N°",
     "Nom et Prénom de l'Élève",
@@ -165,7 +165,7 @@ export async function exportStudentsToExcel({
     "Statut"
   ];
 
-  const headerRow = ws.getRow(8);
+  const headerRow = ws.getRow(7);
   headerRow.values = headers;
   headerRow.height = 30;
 
@@ -178,8 +178,8 @@ export async function exportStudentsToExcel({
 
   // Enable AutoFilter on Table Headers
   ws.autoFilter = {
-    from: { row: 8, column: 1 },
-    to:   { row: 8, column: totalCols }
+    from: { row: 7, column: 1 },
+    to:   { row: 7, column: totalCols }
   };
 
   // Sort students by group name first, then student name
@@ -190,7 +190,7 @@ export async function exportStudentsToExcel({
     return (a.name || "").localeCompare(b.name || "");
   });
 
-  let rowIdx = 9;
+  let rowIdx = 8;
   const startDataRow = rowIdx;
 
   sortedStudents.forEach((s, idx) => {
@@ -267,11 +267,9 @@ export async function exportStudentsToExcel({
         setCellFill(cell, COLORS.roseLight);
         cell.font = { name: "Calibri", size: 10, bold: true, color: { argb: COLORS.roseDark } };
       }
-      if (colNum === 11) {
-        if (hasAssurance) {
-          setCellFill(cell, COLORS.cyanLight);
-          cell.font = { name: "Calibri", size: 10, bold: true, color: { argb: COLORS.cyanDark } };
-        }
+      if (colNum === 11 && hasAssurance) {
+        setCellFill(cell, COLORS.cyanLight);
+        cell.font = { name: "Calibri", size: 10, bold: true, color: { argb: COLORS.cyanDark } };
       }
       if (colNum === 12) {
         setCellFill(cell, payStatusBg);
@@ -347,7 +345,7 @@ export async function exportStudentsToExcel({
 
 /**
  * ─────────────────────────────────────────────────────────────────────────────
- * 2. EXPORT MONTHLY FINANCIAL RAPPORT (Executive Dashboard & Complete Ledger)
+ * 2. EXPORT MONTHLY FINANCIAL RAPPORT (2 Clean Dedicated Sheets, Smooth Scroll)
  * ─────────────────────────────────────────────────────────────────────────────
  */
 export async function exportMonthlyFinancialRapportToExcel({
@@ -365,104 +363,102 @@ export async function exportMonthlyFinancialRapportToExcel({
   wb.created = new Date();
 
   // ═════════════════════════════════════════════════════════════════════════════
-  // SHEET 1: RAPPORT FINANCIER & COMPTABILITÉ (One Comprehensive Sheet)
+  // SHEET 1: SYNTHÈSE FINANCIÈRE & DÉTAIL PAR GROUPE
   // ═════════════════════════════════════════════════════════════════════════════
-  const ws = wb.addWorksheet("Rapport Financier", {
-    views: [{ state: "frozen", xSplit: 0, ySplit: 18, showGridLines: true }]
+  const ws1 = wb.addWorksheet("Synthèse Financière", {
+    views: [{ showGridLines: true }] // No freeze lock so user can smoothly scroll
   });
 
-  const totalCols = 11;
+  const totalCols1 = 9;
 
-  // ── 1. Top Header Banner ──────────────────────────────────────────────────
-  ws.mergeCells(1, 1, 1, totalCols);
-  const r1 = ws.getCell(1, 1);
-  r1.value = `🎓  ${schoolInfo.short.toUpperCase()} SCHOOL — RAPPORT FINANCIER MENSUEL & ENCAISSEMENTS`;
-  r1.font = { name: "Calibri", size: 16, bold: true, color: { argb: COLORS.white } };
+  // ── 1. Header Banner ──────────────────────────────────────────────────────
+  ws1.mergeCells(1, 1, 1, totalCols1);
+  const r1 = ws1.getCell(1, 1);
+  r1.value = `🎓  ${schoolInfo.short.toUpperCase()} SCHOOL — RAPPORT FINANCIER MENSUEL (${periodName.toUpperCase()})`;
+  r1.font = { name: "Calibri", size: 15, bold: true, color: { argb: COLORS.white } };
   r1.alignment = { vertical: "middle", horizontal: "center" };
   setCellFill(r1, COLORS.navyDark);
-  ws.getRow(1).height = 38;
+  ws1.getRow(1).height = 36;
 
-  ws.mergeCells(2, 1, 2, totalCols);
-  const r2 = ws.getCell(2, 1);
-  r2.value = `${schoolInfo.name} · ${schoolInfo.city} · ${schoolInfo.address}   |   Période: ${periodName} (${month})   |   Enseignant: ${teacher?.name || "Ameyoud Adam"}   |   Généré le: ${nowFormatted()}`;
+  ws1.mergeCells(2, 1, 2, totalCols1);
+  const r2 = ws1.getCell(2, 1);
+  r2.value = `${schoolInfo.name} · ${schoolInfo.city} · ${schoolInfo.address}   |   Enseignant: ${teacher?.name || "Ameyoud Adam"}   |   Mois: ${month}   |   Généré le: ${nowFormatted()}`;
   r2.font = { name: "Calibri", size: 10, bold: true, color: { argb: "93C5FD" } };
   r2.alignment = { vertical: "middle", horizontal: "center" };
   setCellFill(r2, COLORS.navySlate);
-  ws.getRow(2).height = 22;
+  ws1.getRow(2).height = 22;
 
-  ws.getRow(3).height = 8; // Spacer
+  ws1.getRow(3).height = 8; // Spacer
 
-  // ── 2. Top Executive KPI Metric Blocks (Rows 4-5) ──────────────────────────
+  // ── 2. Top KPI Summary Tiles ──────────────────────────────────────────────
   const kpis = [
-    { title: "TOTAL ÉLÈVES", val: `${summary.totalStudents || students.length} Inscrits`, bg: "EFF6FF", text: "1E40AF", border: "BFDBFE", startCol: 1, endCol: 2 },
-    { title: "SCOLARITÉ ENCAISSÉE", val: `${(summary.totalCollectedTuition || 0).toLocaleString()} DA`, bg: COLORS.emeraldLight, text: COLORS.emeraldDark, border: "A7F3D0", startCol: 3, endCol: 4 },
-    { title: "RESTE À RECOUVRER", val: `${(summary.totalRest || 0).toLocaleString()} DA`, bg: COLORS.roseLight, text: COLORS.roseDark, border: "FECDD3", startCol: 5, endCol: 6 },
-    { title: "ASSURANCES (800 DA)", val: `${(summary.totalAssuranceCollected || 0).toLocaleString()} DA`, bg: COLORS.cyanLight, text: COLORS.cyanDark, border: "A5F3FC", startCol: 7, endCol: 7 },
-    { title: "PART ENSEIGNANT", val: `${(teacherCompensation?.totalTeacherNet || 0).toLocaleString()} DA`, bg: COLORS.purpleLight, text: COLORS.purpleDark, border: "DDD6FE", startCol: 8, endCol: 9 },
-    { title: "PART NETTE CENTRE", val: `${(teacherCompensation?.totalSchoolNet || 0).toLocaleString()} DA`, bg: "ECFDF5", text: "047857", border: "A7F3D0", startCol: 10, endCol: 11 },
+    { title: "TOTAL ÉLÈVES", val: `${summary.totalStudents || students.length} Inscrits`, bg: "EFF6FF", text: "1E40AF", border: "BFDBFE", startCol: 1, endCol: 1 },
+    { title: "SCOLARITÉ ENCAISSÉE", val: `${(summary.totalCollectedTuition || 0).toLocaleString()} DA`, bg: COLORS.emeraldLight, text: COLORS.emeraldDark, border: "A7F3D0", startCol: 2, endCol: 3 },
+    { title: "RESTE À RECOUVRER", val: `${(summary.totalRest || 0).toLocaleString()} DA`, bg: COLORS.roseLight, text: COLORS.roseDark, border: "FECDD3", startCol: 4, endCol: 5 },
+    { title: "ASSURANCES (800 DA)", val: `${(summary.totalAssuranceCollected || 0).toLocaleString()} DA`, bg: COLORS.cyanLight, text: COLORS.cyanDark, border: "A5F3FC", startCol: 6, endCol: 6 },
+    { title: "PART ENSEIGNANT", val: `${(teacherCompensation?.totalTeacherNet || 0).toLocaleString()} DA`, bg: COLORS.purpleLight, text: COLORS.purpleDark, border: "DDD6FE", startCol: 7, endCol: 7 },
+    { title: "PART NETTE CENTRE", val: `${(teacherCompensation?.totalSchoolNet || 0).toLocaleString()} DA`, bg: "ECFDF5", text: "047857", border: "A7F3D0", startCol: 8, endCol: 9 },
   ];
 
   kpis.forEach((k) => {
-    ws.mergeCells(4, k.startCol, 4, k.endCol);
-    const tCell = ws.getCell(4, k.startCol);
+    ws1.mergeCells(4, k.startCol, 4, k.endCol);
+    const tCell = ws1.getCell(4, k.startCol);
     tCell.value = k.title;
-    tCell.font = { name: "Calibri", size: 9, bold: true, color: { argb: "64748B" } };
+    tCell.font = { name: "Calibri", size: 8.5, bold: true, color: { argb: "64748B" } };
     tCell.alignment = { vertical: "middle", horizontal: "center" };
     setCellFill(tCell, k.bg);
 
-    ws.mergeCells(5, k.startCol, 5, k.endCol);
-    const vCell = ws.getCell(5, k.startCol);
+    ws1.mergeCells(5, k.startCol, 5, k.endCol);
+    const vCell = ws1.getCell(5, k.startCol);
     vCell.value = k.val;
     vCell.font = { name: "Calibri", size: 12, bold: true, color: { argb: k.text } };
     vCell.alignment = { vertical: "middle", horizontal: "center" };
     setCellFill(vCell, k.bg);
 
     for (let col = k.startCol; col <= k.endCol; col++) {
-      ws.getCell(4, col).border = { top: { style: "thin", color: { argb: k.border } }, left: { style: "thin", color: { argb: k.border } }, right: { style: "thin", color: { argb: k.border } } };
-      ws.getCell(5, col).border = { bottom: { style: "thin", color: { argb: k.border } }, left: { style: "thin", color: { argb: k.border } }, right: { style: "thin", color: { argb: k.border } } };
+      ws1.getCell(4, col).border = { top: { style: "thin", color: { argb: k.border } }, left: { style: "thin", color: { argb: k.border } }, right: { style: "thin", color: { argb: k.border } } };
+      ws1.getCell(5, col).border = { bottom: { style: "thin", color: { argb: k.border } }, left: { style: "thin", color: { argb: k.border } }, right: { style: "thin", color: { argb: k.border } } };
     }
   });
 
-  ws.getRow(4).height = 18;
-  ws.getRow(5).height = 26;
-  ws.getRow(6).height = 10; // Spacer
+  ws1.getRow(4).height = 18;
+  ws1.getRow(5).height = 26;
+  ws1.getRow(6).height = 10; // Spacer
 
-  // ── 3. Group-by-Group Summary Breakdown Table (Rows 7-14) ──────────────────
-  ws.mergeCells(7, 1, 7, totalCols);
-  const grpTitle = ws.getCell(7, 1);
-  grpTitle.value = `📊  RÉSUMÉ ET DÉTAIL DES PAIEMENTS PAR GROUPE (MODE DE CALCUL: ${commissionMode.toUpperCase()})`;
+  // ── 3. Group Breakdown Table (Row 7) ──────────────────────────────────────
+  ws1.mergeCells(7, 1, 7, totalCols1);
+  const grpTitle = ws1.getCell(7, 1);
+  grpTitle.value = `📊  RÉPARTITION DÉTAILLÉE DES PAIEMENTS PAR GROUPE (MODE: ${commissionMode.toUpperCase()})`;
   grpTitle.font = { name: "Calibri", size: 11, bold: true, color: { argb: COLORS.white } };
   grpTitle.alignment = { vertical: "middle", indent: 1 };
   setCellFill(grpTitle, COLORS.navySlate);
-  ws.getRow(7).height = 24;
+  ws1.getRow(7).height = 24;
 
   const grpHeaders = [
-    "Nom du Groupe",
+    "Nom du Groupe / Formation",
     "Effectif",
-    "Scolarité Prévue (DA)",
+    "Frais Prévus (DA)",
     "Scolarité Encaissée (DA)",
     "Reste à Payer (DA)",
-    "Assurance (800 DA)",
+    "Assurance 800 DA",
     "Total Caisse (DA)",
     "Part Enseignant (DA)",
-    "Part Centre (DA)",
-    "Taux Recouvrement",
-    "Statuts Paiements"
+    "Part Centre (DA)"
   ];
 
-  const grpHeaderRow = ws.getRow(8);
+  const grpHeaderRow = ws1.getRow(8);
   grpHeaderRow.values = grpHeaders;
   grpHeaderRow.height = 26;
   grpHeaderRow.eachCell((cell) => {
     setCellFill(cell, COLORS.indigoHeader);
-    cell.font = { name: "Calibri", size: 9, bold: true, color: { argb: COLORS.white } };
+    cell.font = { name: "Calibri", size: 9.5, bold: true, color: { argb: COLORS.white } };
     cell.alignment = { vertical: "middle", horizontal: "center" };
     cell.border = BORDER_HEADER;
   });
 
   let gRowIdx = 9;
   (teacherCompensation?.groupBreakdowns || []).forEach((gb, idx) => {
-    const row = ws.getRow(gRowIdx);
+    const row = ws1.getRow(gRowIdx);
     const count = gb.totalCount || gb.studentCount || 0;
     const expected = gb.expectedTuition || (count * 7500);
     const collected = gb.collectedTuition || 0;
@@ -471,8 +467,6 @@ export async function exportMonthlyFinancialRapportToExcel({
     const totalCash = gb.totalGroupCash || (collected + assurance);
     const teacherPayout = gb.teacherPayout || gb.teacherNet || 0;
     const schoolNet = gb.schoolNet || Math.max(0, totalCash - teacherPayout);
-    const rate = expected > 0 ? `${Math.round((collected / expected) * 100)}%` : "100%";
-    const statsStr = `${gb.countPaid || 0} Payés · ${gb.countPartial || 0} Part · ${gb.countUnpaid || 0} Impayés`;
 
     row.values = [
       gb.groupName || "General",
@@ -483,62 +477,87 @@ export async function exportMonthlyFinancialRapportToExcel({
       assurance,
       totalCash,
       teacherPayout,
-      schoolNet,
-      rate,
-      statsStr
+      schoolNet
     ];
 
-    row.height = 22;
+    row.height = 24;
     const bg = idx % 2 === 0 ? COLORS.white : COLORS.grayZebra;
 
     row.eachCell({ includeEmpty: true }, (cell, colNum) => {
       cell.border = BORDER_THIN;
       setCellFill(cell, bg);
-      cell.font = { name: "Calibri", size: 9, color: { argb: "1E293B" } };
+      cell.font = { name: "Calibri", size: 9.5, color: { argb: "1E293B" } };
       cell.alignment = { vertical: "middle", horizontal: "center" };
 
       if (colNum === 1) {
         cell.alignment = { vertical: "middle", horizontal: "left", indent: 1 };
-        cell.font = { name: "Calibri", size: 9, bold: true };
+        cell.font = { name: "Calibri", size: 9.5, bold: true };
       }
       if (colNum >= 3 && colNum <= 9) {
         cell.numFmt = '#,##0 "DA"';
         cell.alignment = { vertical: "middle", horizontal: "right" };
       }
       if (colNum === 4) {
-        cell.font = { name: "Calibri", size: 9, bold: true, color: { argb: COLORS.emeraldDark } };
+        cell.font = { name: "Calibri", size: 9.5, bold: true, color: { argb: COLORS.emeraldDark } };
       }
       if (colNum === 5 && rest > 0) {
         setCellFill(cell, COLORS.roseLight);
-        cell.font = { name: "Calibri", size: 9, bold: true, color: { argb: COLORS.roseDark } };
+        cell.font = { name: "Calibri", size: 9.5, bold: true, color: { argb: COLORS.roseDark } };
       }
       if (colNum === 8) {
         setCellFill(cell, COLORS.purpleLight);
-        cell.font = { name: "Calibri", size: 9, bold: true, color: { argb: COLORS.purpleDark } };
+        cell.font = { name: "Calibri", size: 9.5, bold: true, color: { argb: COLORS.purpleDark } };
       }
       if (colNum === 9) {
         setCellFill(cell, COLORS.emeraldLight);
-        cell.font = { name: "Calibri", size: 9, bold: true, color: { argb: COLORS.emeraldDark } };
+        cell.font = { name: "Calibri", size: 9.5, bold: true, color: { argb: COLORS.emeraldDark } };
       }
     });
 
     gRowIdx++;
   });
 
-  // Spacer between tables
-  ws.getRow(gRowIdx).height = 12;
-  gRowIdx++;
+  ws1.columns = [
+    { width: 28 }, // Groupe
+    { width: 14 }, // Effectif
+    { width: 18 }, // Prévu
+    { width: 22 }, // Encaissé
+    { width: 18 }, // Reste
+    { width: 18 }, // Assurance
+    { width: 20 }, // Total Caisse
+    { width: 20 }, // Part Prof
+    { width: 20 }  // Part Centre
+  ];
 
-  // ── 4. Complete Student Payment Ledger Table (Row gRowIdx) ─────────────────
-  ws.mergeCells(gRowIdx, 1, gRowIdx, totalCols);
-  const stLedgerTitle = ws.getCell(gRowIdx, 1);
-  stLedgerTitle.value = `👥  DÉTAIL NOMINATIF DES PAIEMENTS PAR ÉLÈVE (${students.length} ÉLÈVES INSCRITS)`;
-  stLedgerTitle.font = { name: "Calibri", size: 11, bold: true, color: { argb: COLORS.white } };
-  stLedgerTitle.alignment = { vertical: "middle", indent: 1 };
-  setCellFill(stLedgerTitle, COLORS.navyDark);
-  ws.getRow(gRowIdx).height = 26;
-  gRowIdx++;
+  // ═════════════════════════════════════════════════════════════════════════════
+  // SHEET 2: DÉTAIL PAR ÉLÈVE (Complete Student-by-Student Ledger)
+  // ═════════════════════════════════════════════════════════════════════════════
+  const ws2 = wb.addWorksheet("Détail par Élève", {
+    views: [{ showGridLines: true }] // Smooth scrolling without freeze locks
+  });
 
+  const totalCols2 = 11;
+
+  // ── Header Banner on Sheet 2 ──────────────────────────────────────────────
+  ws2.mergeCells(1, 1, 1, totalCols2);
+  const r2_1 = ws2.getCell(1, 1);
+  r2_1.value = `🎓  ${schoolInfo.short.toUpperCase()} SCHOOL — DÉTAIL NOMINATIF DES PAIEMENTS PAR ÉLÈVE (${students.length} ÉLÈVES)`;
+  r2_1.font = { name: "Calibri", size: 14, bold: true, color: { argb: COLORS.white } };
+  r2_1.alignment = { vertical: "middle", horizontal: "center" };
+  setCellFill(r2_1, COLORS.navyDark);
+  ws2.getRow(1).height = 34;
+
+  ws2.mergeCells(2, 1, 2, totalCols2);
+  const r2_2 = ws2.getCell(2, 1);
+  r2_2.value = `Enseignant: ${teacher?.name || "Ameyoud Adam"}   |   Mois: ${periodName} (${month})   |   Export: ${nowFormatted()}`;
+  r2_2.font = { name: "Calibri", size: 10, bold: true, color: { argb: "93C5FD" } };
+  r2_2.alignment = { vertical: "middle", horizontal: "center" };
+  setCellFill(r2_2, COLORS.navySlate);
+  ws2.getRow(2).height = 20;
+
+  ws2.getRow(3).height = 8; // Spacer
+
+  // ── Table Headers on Sheet 2 (Row 4) ──────────────────────────────────────
   const studentCols = [
     "N°",
     "Nom et Prénom de l'Élève",
@@ -553,7 +572,7 @@ export async function exportMonthlyFinancialRapportToExcel({
     "Observations / Notes"
   ];
 
-  const stHeadRow = ws.getRow(gRowIdx);
+  const stHeadRow = ws2.getRow(4);
   stHeadRow.values = studentCols;
   stHeadRow.height = 28;
   stHeadRow.eachCell((cell) => {
@@ -563,13 +582,13 @@ export async function exportMonthlyFinancialRapportToExcel({
     cell.border = BORDER_HEADER;
   });
 
-  // AutoFilter for the student ledger
-  ws.autoFilter = {
-    from: { row: gRowIdx, column: 1 },
-    to:   { row: gRowIdx, column: totalCols }
+  // Enable AutoFilter for student ledger
+  ws2.autoFilter = {
+    from: { row: 4, column: 1 },
+    to:   { row: 4, column: totalCols2 }
   };
 
-  const studentStartRow = gRowIdx + 1;
+  const studentStartRow = 5;
   let sRowIdx = studentStartRow;
 
   // Sort students by group, then by name
@@ -605,7 +624,7 @@ export async function exportMonthlyFinancialRapportToExcel({
       payStatusColor = COLORS.amberDark;
     }
 
-    const row = ws.getRow(sRowIdx);
+    const row = ws2.getRow(sRowIdx);
     row.values = [
       idx + 1,
       s.name || "—",
@@ -672,9 +691,9 @@ export async function exportMonthlyFinancialRapportToExcel({
 
   const studentEndRow = sRowIdx - 1;
 
-  // ── 5. Total Row with Dynamic SUM Formulas ────────────────────────────────
-  const totalRow = ws.getRow(sRowIdx);
-  totalRow.values = [
+  // ── Totals Row with Dynamic Formulas on Sheet 2 ───────────────────────────
+  const totalRow2 = ws2.getRow(sRowIdx);
+  totalRow2.values = [
     "TOTALS",
     `${students.length} Élèves Total`,
     "",
@@ -688,8 +707,8 @@ export async function exportMonthlyFinancialRapportToExcel({
     ""
   ];
 
-  totalRow.height = 30;
-  totalRow.eachCell({ includeEmpty: true }, (cell, colNum) => {
+  totalRow2.height = 30;
+  totalRow2.eachCell({ includeEmpty: true }, (cell, colNum) => {
     setCellFill(cell, COLORS.navyDark);
     cell.font = { name: "Calibri", size: 10, bold: true, color: { argb: COLORS.white } };
     cell.border = BORDER_HEADER;
@@ -701,8 +720,7 @@ export async function exportMonthlyFinancialRapportToExcel({
     }
   });
 
-  // Set calibrated column widths for Excel
-  ws.columns = [
+  ws2.columns = [
     { width: 7 },   // N°
     { width: 28 },  // Nom
     { width: 22 },  // Groupe
