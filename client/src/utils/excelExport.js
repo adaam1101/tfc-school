@@ -386,6 +386,28 @@ export async function exportMonthlyFinancialRapportToExcel({
   wb.creator = `${schoolInfo.short} Financial Center`;
   wb.created = new Date();
 
+  // Compute fallback sums directly from students & group breakdowns to ensure 100% accuracy
+  const totalStudentsCount = summary.totalStudents || students.length;
+  const groups = teacherCompensation?.groupBreakdowns || [];
+
+  let sumExpected = groups.reduce((acc, g) => acc + (g.expectedTuition || (g.totalCount || 0) * 7500), 0);
+  let sumCollected = groups.reduce((acc, g) => acc + (g.collectedTuition || 0), 0);
+  let sumRest = groups.reduce((acc, g) => acc + (g.restTuition || 0), 0);
+  let sumAssurance = groups.reduce((acc, g) => acc + (g.assuranceCollected || (g.assuranceCount || 0) * 800), 0);
+  let sumTotalCash = groups.reduce((acc, g) => acc + (g.totalGroupCash || (g.collectedTuition || 0) + (g.assuranceCollected || 0)), 0);
+  let sumTeacherPayout = teacherCompensation?.totalTeacherNet || groups.reduce((acc, g) => acc + (g.teacherPayout || g.teacherNet || 0), 0);
+  let sumSchoolNet = teacherCompensation?.totalSchoolNet || Math.max(0, sumTotalCash - sumTeacherPayout);
+
+  // If groups were empty, fallback to student list aggregation
+  if (groups.length === 0 && students.length > 0) {
+    sumExpected = students.reduce((acc, s) => acc + (s.tuitionFee ?? 7500), 0);
+    sumCollected = students.reduce((acc, s) => acc + (s.paidTuition ?? 0), 0);
+    sumRest = students.reduce((acc, s) => acc + (s.rest != null ? s.rest : Math.max(0, (s.tuitionFee ?? 7500) - (s.paidTuition ?? 0))), 0);
+    sumAssurance = students.filter(s => Boolean(s.assurancePaid)).length * 800;
+    sumTotalCash = sumCollected + sumAssurance;
+    sumSchoolNet = Math.max(0, sumTotalCash - sumTeacherPayout);
+  }
+
   // ═════════════════════════════════════════════════════════════════════════════
   // SHEET 1: SYNTHÈSE FINANCIÈRE & DÉTAIL PAR GROUPE
   // ═════════════════════════════════════════════════════════════════════════════
@@ -414,15 +436,14 @@ export async function exportMonthlyFinancialRapportToExcel({
 
   ws1.getRow(3).height = 8; // Spacer
 
-  // ── 2. Top KPI Summary Tiles (Rows 4-5) ───────────────────────────────────
+  // ── 2. Top 6 Balanced KPI Summary Tiles (2 Columns Each Across 12 Columns) ─
   const kpis = [
-    { title: "TOTAL ÉLÈVES", val: `${summary.totalStudents || students.length} Inscrits`, bg: "EFF6FF", text: "1E40AF", border: "BFDBFE", startCol: 1, endCol: 2 },
-    { title: "SCOLARITÉ PRÉVUE", val: `${(summary.totalExpectedTuition || 0).toLocaleString()} DA`, bg: COLORS.grayLight, text: "334155", border: "CBD5E1", startCol: 3, endCol: 4 },
-    { title: "SCOLARITÉ ENCAISSÉE", val: `${(summary.totalCollectedTuition || 0).toLocaleString()} DA`, bg: COLORS.emeraldLight, text: COLORS.emeraldDark, border: "A7F3D0", startCol: 5, endCol: 6 },
-    { title: "RESTE À RECOUVRER", val: `${(summary.totalRest || 0).toLocaleString()} DA`, bg: COLORS.roseLight, text: COLORS.roseDark, border: "FECDD3", startCol: 7, endCol: 8 },
-    { title: "ASSURANCES (800 DA)", val: `${(summary.totalAssuranceCollected || 0).toLocaleString()} DA`, bg: COLORS.cyanLight, text: COLORS.cyanDark, border: "A5F3FC", startCol: 9, endCol: 9 },
-    { title: "PART ENSEIGNANT", val: `${(teacherCompensation?.totalTeacherNet || 0).toLocaleString()} DA`, bg: COLORS.purpleLight, text: COLORS.purpleDark, border: "DDD6FE", startCol: 10, endCol: 10 },
-    { title: "PART NETTE CENTRE", val: `${(teacherCompensation?.totalSchoolNet || 0).toLocaleString()} DA`, bg: "ECFDF5", text: "047857", border: "A7F3D0", startCol: 11, endCol: 12 },
+    { title: "EFFECTIF TOTAL", val: `${totalStudentsCount} Inscrits`, bg: "EFF6FF", text: "1E40AF", border: "BFDBFE", startCol: 1, endCol: 2 },
+    { title: "SCOLARITÉ PRÉVUE", val: `${sumExpected.toLocaleString()} DA`, bg: COLORS.grayLight, text: "334155", border: "CBD5E1", startCol: 3, endCol: 4 },
+    { title: "ENCAISSEMENT TOTAL", val: `${sumTotalCash.toLocaleString()} DA`, bg: COLORS.emeraldLight, text: COLORS.emeraldDark, border: "A7F3D0", startCol: 5, endCol: 6 },
+    { title: "RESTE GLOBAL DÛ", val: `${sumRest.toLocaleString()} DA`, bg: sumRest > 0 ? COLORS.roseLight : COLORS.emeraldLight, text: sumRest > 0 ? COLORS.roseDark : COLORS.emeraldDark, border: sumRest > 0 ? "FECDD3" : "A7F3D0", startCol: 7, endCol: 8 },
+    { title: "PART ENSEIGNANT", val: `${sumTeacherPayout.toLocaleString()} DA`, bg: COLORS.purpleLight, text: COLORS.purpleDark, border: "DDD6FE", startCol: 9, endCol: 10 },
+    { title: "PART NETTE CENTRE", val: `${sumSchoolNet.toLocaleString()} DA`, bg: "ECFDF5", text: "047857", border: "A7F3D0", startCol: 11, endCol: 12 },
   ];
 
   kpis.forEach((k) => {
@@ -487,7 +508,7 @@ export async function exportMonthlyFinancialRapportToExcel({
   let gRowIdx = 9;
   const startGrpRow = gRowIdx;
 
-  (teacherCompensation?.groupBreakdowns || []).forEach((gb, idx) => {
+  groups.forEach((gb, idx) => {
     const row = ws1.getRow(gRowIdx);
     const count = gb.totalCount || gb.studentCount || 0;
     const expected = gb.expectedTuition || (count * 7500);
@@ -564,21 +585,21 @@ export async function exportMonthlyFinancialRapportToExcel({
 
   const endGrpRow = gRowIdx - 1;
 
-  // Totals Row for Group Summary
+  // Totals Row for Group Summary with fallback calculated values (visible in Protected View!)
   const grpTotalRow = ws1.getRow(gRowIdx);
   grpTotalRow.values = [
     "TOTALS GÉNÉRAUX",
-    `${summary.totalStudents || students.length} Élèves`,
-    { formula: `SUM(C${startGrpRow}:C${endGrpRow})` },
-    { formula: `SUM(D${startGrpRow}:D${endGrpRow})` },
-    { formula: `SUM(E${startGrpRow}:E${endGrpRow})` },
-    { formula: `SUM(F${startGrpRow}:F${endGrpRow})` },
-    { formula: `SUM(G${startGrpRow}:G${endGrpRow})` },
-    { formula: `SUM(H${startGrpRow}:H${endGrpRow})` },
-    { formula: `SUM(I${startGrpRow}:I${endGrpRow})` },
+    `${totalStudentsCount} Élèves`,
+    { formula: `SUM(C${startGrpRow}:C${endGrpRow})`, result: sumExpected },
+    { formula: `SUM(D${startGrpRow}:D${endGrpRow})`, result: sumCollected },
+    { formula: `SUM(E${startGrpRow}:E${endGrpRow})`, result: sumRest },
+    { formula: `SUM(F${startGrpRow}:F${endGrpRow})`, result: sumAssurance },
+    { formula: `SUM(G${startGrpRow}:G${endGrpRow})`, result: sumTotalCash },
+    { formula: `SUM(H${startGrpRow}:H${endGrpRow})`, result: sumTeacherPayout },
+    { formula: `SUM(I${startGrpRow}:I${endGrpRow})`, result: sumSchoolNet },
+    sumExpected > 0 ? `${Math.round((sumCollected / sumExpected) * 100)}%` : "100%",
     "",
-    "",
-    ""
+    sumRest === 0 ? "Complet 100% ✓" : `Reste: ${sumRest.toLocaleString()} DA`
   ];
 
   grpTotalRow.height = 28;
@@ -682,6 +703,13 @@ export async function exportMonthlyFinancialRapportToExcel({
     return (a.name || "").localeCompare(b.name || "");
   });
 
+  let stSumTuition = 0;
+  let stSumPaid = 0;
+  let stSumRest = 0;
+  let stSumAssuranceCount = 0;
+  let stSumTotalCash = 0;
+  let stSumTeacherShare = 0;
+
   sortedStudents.forEach((s, idx) => {
     const tuition = s.tuitionFee ?? (s.currentPayment?.amount ?? 7500);
     const paid = s.paidTuition ?? (s.currentPayment?.paidAmount ?? 0);
@@ -693,6 +721,13 @@ export async function exportMonthlyFinancialRapportToExcel({
     const group = s.groupName || s.studentProfile?.course || s.course || "General";
     const course = s.course || s.studentProfile?.course || group;
     const teacherShare = s.teacherShare || 0;
+
+    stSumTuition += tuition;
+    stSumPaid += paid;
+    stSumRest += rest;
+    if (hasAssurance) stSumAssuranceCount += 1;
+    stSumTotalCash += totalCashPaid;
+    stSumTeacherShare += teacherShare;
 
     let payStatusText = "Unpaid";
     let payStatusBg = COLORS.roseLight;
@@ -781,7 +816,7 @@ export async function exportMonthlyFinancialRapportToExcel({
 
   const studentEndRow = sRowIdx - 1;
 
-  // ── Totals Row with Dynamic Formulas on Sheet 2 ───────────────────────────
+  // ── Totals Row with Dynamic Formulas and fallback values on Sheet 2 ────────
   const totalRow2 = ws2.getRow(sRowIdx);
   totalRow2.values = [
     "TOTALS",
@@ -789,14 +824,14 @@ export async function exportMonthlyFinancialRapportToExcel({
     "",
     "",
     "",
-    { formula: `SUM(F${studentStartRow}:F${studentEndRow})` },
-    { formula: `SUM(G${studentStartRow}:G${studentEndRow})` },
-    { formula: `SUM(H${studentStartRow}:H${studentEndRow})` },
-    `${summary.countAssurancePaid || 0} Payées`,
-    { formula: `SUM(J${studentStartRow}:J${studentEndRow})` },
-    (summary.totalRest || 0) === 0 ? "Complet 100% ✓" : `Reste: ${(summary.totalRest || 0).toLocaleString()} DA`,
+    { formula: `SUM(F${studentStartRow}:F${studentEndRow})`, result: stSumTuition },
+    { formula: `SUM(G${studentStartRow}:G${studentEndRow})`, result: stSumPaid },
+    { formula: `SUM(H${studentStartRow}:H${studentEndRow})`, result: stSumRest },
+    `${stSumAssuranceCount} Payées (${(stSumAssuranceCount * 800).toLocaleString()} DA)`,
+    { formula: `SUM(J${studentStartRow}:J${studentEndRow})`, result: stSumTotalCash },
+    stSumRest === 0 ? "Complet 100% ✓" : `Reste: ${stSumRest.toLocaleString()} DA`,
     "",
-    { formula: `SUM(M${studentStartRow}:M${studentEndRow})` },
+    { formula: `SUM(M${studentStartRow}:M${studentEndRow})`, result: stSumTeacherShare },
     ""
   ];
 
