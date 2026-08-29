@@ -6,7 +6,9 @@ import {
   Pin,
   Plus,
   RefreshCcw,
-  Users
+  Users,
+  Search,
+  X
 } from "lucide-react";
 import { api, getApiError } from "../../api/http.js";
 import ErrorAlert from "../../components/ErrorAlert.jsx";
@@ -48,6 +50,7 @@ export default function SousAdminDashboard() {
   const [form, setForm] = useState(emptyForm);
   const [editingId, setEditingId] = useState(null);
   const [tab, setTab] = useState("students");
+  const [search, setSearch] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -55,6 +58,19 @@ export default function SousAdminDashboard() {
 
   const teachers = useMemo(() => users.filter((u) => u.role === "teacher"), [users]);
   const students = useMemo(() => users.filter((u) => u.role === "student"), [users]);
+
+  const currentList = useMemo(() => {
+    const list = tab === "students" ? students : teachers;
+    const q = search.trim().toLowerCase();
+    if (!q) return list;
+    return list.filter((u) => {
+      const name = (u.name || "").toLowerCase();
+      const email = (u.email || "").toLowerCase();
+      const phone = (u.phone || "").toLowerCase();
+      const course = (u.studentProfile?.course || u.teacherProfile?.subject || "").toLowerCase();
+      return name.includes(q) || email.includes(q) || phone.includes(q) || course.includes(q);
+    });
+  }, [tab, students, teachers, search]);
 
   const loadUsers = async () => {
     setError("");
@@ -175,8 +191,6 @@ export default function SousAdminDashboard() {
       setError(getApiError(err));
     }
   };
-
-  const currentList = tab === "students" ? students : tab === "teachers" ? teachers : [];
 
   return (
     <AppLayout title={t.sousAdminTitle} subtitle={t.sousAdminSubtitle}>
@@ -511,10 +525,32 @@ export default function SousAdminDashboard() {
                     <p className="text-sm text-slate-500">{currentList.length} {t.records}</p>
                   </div>
                 </div>
-                <button type="button" className="btn-secondary" onClick={loadUsers}>
-                  <RefreshCcw className="h-4 w-4" aria-hidden="true" />
-                  {t.refresh}
-                </button>
+
+                <div className="flex flex-1 sm:flex-initial items-center gap-2">
+                  <div className="relative flex-1 sm:w-64">
+                    <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                    <input
+                      type="text"
+                      className="input pl-9 pr-8 text-xs py-2 w-full"
+                      placeholder={`Search ${tab === "students" ? "students" : "teachers"}…`}
+                      value={search}
+                      onChange={(e) => setSearch(e.target.value)}
+                    />
+                    {search && (
+                      <button
+                        type="button"
+                        onClick={() => setSearch("")}
+                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5"
+                      >
+                        <X className="h-3.5 w-3.5" />
+                      </button>
+                    )}
+                  </div>
+                  <button type="button" className="btn-secondary text-xs" onClick={loadUsers}>
+                    <RefreshCcw className="h-4 w-4" aria-hidden="true" />
+                    {t.refresh}
+                  </button>
+                </div>
               </div>
 
               {loading ? (

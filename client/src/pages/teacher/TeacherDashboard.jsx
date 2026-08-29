@@ -23,7 +23,8 @@ import {
   TrendingUp,
   BarChart2,
   UserPlus,
-  FileSpreadsheet
+  FileSpreadsheet,
+  Search
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import TeacherGroupsPanel, { GroupBroadcastModal } from "../../components/TeacherGroupsPanel.jsx";
@@ -101,6 +102,7 @@ export default function TeacherDashboard() {
   // Filtering states
   const [selectedGroup, setSelectedGroup] = useState("all");
   const [selectedCourse, setSelectedCourse] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
   const [expandedNotes, setExpandedNotes] = useState({});
   const [showFilterGroupBroadcast, setShowFilterGroupBroadcast] = useState(false);
   const [editingSessionsStudent, setEditingSessionsStudent] = useState(null);
@@ -156,6 +158,7 @@ export default function TeacherDashboard() {
   }, [students]);
 
   const filteredStudents = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
     return students.filter((s) => {
       if (selectedGroup !== "all") {
         const group = groups.find((g) => g._id === selectedGroup);
@@ -171,9 +174,29 @@ export default function TeacherDashboard() {
         if (selectedStatus === "stopped" && !isStopped) return false;
         if (selectedStatus === "active" && isStopped) return false;
       }
+      if (query) {
+        const name = (s.name || "").toLowerCase();
+        const email = (s.email || "").toLowerCase();
+        const course = (s.studentProfile?.course || "").toLowerCase();
+        const phone = (s.studentProfile?.phone || "").toLowerCase();
+        const parentPhone = (s.studentProfile?.parentPhone || "").toLowerCase();
+        const username = (s.username || "").toLowerCase();
+        const groupName = (s.groupName || "").toLowerCase();
+        if (
+          !name.includes(query) &&
+          !email.includes(query) &&
+          !course.includes(query) &&
+          !phone.includes(query) &&
+          !parentPhone.includes(query) &&
+          !username.includes(query) &&
+          !groupName.includes(query)
+        ) {
+          return false;
+        }
+      }
       return true;
     });
-  }, [students, groups, selectedGroup, selectedCourse, selectedStatus]);
+  }, [students, groups, selectedGroup, selectedCourse, selectedStatus, searchQuery]);
 
   const presentCount = countStatus(students, "Present");
   const absentCount = countStatus(students, "Absent");
@@ -559,7 +582,38 @@ export default function TeacherDashboard() {
               <>
                 {/* Filter Bar */}
                 <div className="flex flex-wrap gap-4 items-center bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 p-4 rounded-2xl mb-6 shadow-sm">
-                  <div className="flex-1 min-w-[200px]">
+                  <div className="flex-1 min-w-[220px]">
+                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5 flex items-center justify-between">
+                      <span>Search Student</span>
+                      {searchQuery && (
+                        <span className="text-[10px] text-brand-600 dark:text-brand-400 font-semibold lowercase">
+                          filtering
+                        </span>
+                      )}
+                    </label>
+                    <div className="relative">
+                      <Search className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                      <input
+                        type="text"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        placeholder="Search name, course, phone..."
+                        className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 pl-10 pr-9 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/20 text-slate-700 dark:text-slate-250 font-bold placeholder:font-normal placeholder:text-slate-400"
+                      />
+                      {searchQuery && (
+                        <button
+                          type="button"
+                          onClick={() => setSearchQuery("")}
+                          className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700"
+                          title="Clear search"
+                        >
+                          <X className="h-3.5 w-3.5" />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex-1 min-w-[180px]">
                     <label className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">
                       Filter by Group
                     </label>
@@ -577,7 +631,7 @@ export default function TeacherDashboard() {
                     </select>
                   </div>
 
-                  <div className="flex-1 min-w-[200px]">
+                  <div className="flex-1 min-w-[180px]">
                     <label className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">
                       Filter by Course / Level
                     </label>
@@ -595,7 +649,7 @@ export default function TeacherDashboard() {
                     </select>
                   </div>
 
-                  <div className="flex-1 min-w-[170px]">
+                  <div className="flex-1 min-w-[160px]">
                     <label className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">
                       Status Marker
                     </label>
@@ -656,10 +710,10 @@ export default function TeacherDashboard() {
                         <Megaphone className="h-4 w-4" /> Group Broadcast
                       </button>
                     )}
-                    {(selectedGroup !== "all" || selectedCourse !== "all" || selectedStatus !== "all") && (
+                    {(selectedGroup !== "all" || selectedCourse !== "all" || selectedStatus !== "all" || searchQuery.trim() !== "") && (
                       <button
                         type="button"
-                        onClick={() => { setSelectedGroup("all"); setSelectedCourse("all"); setSelectedStatus("all"); }}
+                        onClick={() => { setSelectedGroup("all"); setSelectedCourse("all"); setSelectedStatus("all"); setSearchQuery(""); }}
                         className="rounded-xl border border-rose-250 bg-rose-50/50 hover:bg-rose-50 text-rose-700 dark:border-rose-900 dark:bg-rose-950/20 dark:text-rose-455 px-3.5 py-2 text-xs font-bold transition-all active:scale-95"
                       >
                         Reset Filters
@@ -671,8 +725,19 @@ export default function TeacherDashboard() {
                 {filteredStudents.length === 0 ? (
                   <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-700 py-14 text-center">
                     <Users className="h-12 w-12 text-slate-350 dark:text-slate-650 mb-3 animate-pulse" />
-                    <p className="font-bold text-slate-500 dark:text-slate-400">No students match filters</p>
-                    <p className="text-xs text-slate-400 mt-1">Try resetting filters to show all students.</p>
+                    <p className="font-bold text-slate-500 dark:text-slate-400">
+                      {searchQuery ? `No students found matching "${searchQuery}"` : "No students match filters"}
+                    </p>
+                    <p className="text-xs text-slate-400 mt-1">Try clearing search or resetting filters to show all students.</p>
+                    {(selectedGroup !== "all" || selectedCourse !== "all" || selectedStatus !== "all" || searchQuery.trim() !== "") && (
+                      <button
+                        type="button"
+                        onClick={() => { setSelectedGroup("all"); setSelectedCourse("all"); setSelectedStatus("all"); setSearchQuery(""); }}
+                        className="mt-3 inline-flex items-center gap-1.5 rounded-xl bg-brand-50 hover:bg-brand-100 text-brand-700 dark:bg-brand-950/30 dark:text-brand-300 dark:hover:bg-brand-900/40 px-3.5 py-1.5 text-xs font-bold transition-all"
+                      >
+                        Clear All Filters
+                      </button>
+                    )}
                   </div>
                 ) : (
                   <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">

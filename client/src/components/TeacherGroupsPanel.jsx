@@ -997,6 +997,7 @@ export default function TeacherGroupsPanel() {
   const [myStudents, setMyStudents] = useState([]);
   const [groups, setGroups]         = useState([]);
   const [loading, setLoading]       = useState(true);
+  const [studentSearch, setStudentSearch] = useState("");
   const [subTab, setSubTab]         = useState("students"); // "students" | "groups"
   const [showAddStudent, setShowAddStudent]       = useState(false);
   const [showGroupForm, setShowGroupForm]   = useState(false);
@@ -1007,6 +1008,27 @@ export default function TeacherGroupsPanel() {
   const [trackingStudent, setTrackingStudent] = useState(null);
   const [movingStudent, setMovingStudent] = useState(null);
   const [observationsStudent, setObservationsStudent] = useState(null);
+
+  const filteredMyStudents = useMemo(() => {
+    const q = studentSearch.trim().toLowerCase();
+    if (!q) return myStudents;
+    return myStudents.filter((s) => {
+      const name = (s.name || "").toLowerCase();
+      const email = (s.email || "").toLowerCase();
+      const course = (s.studentProfile?.course || "").toLowerCase();
+      const phone = (s.studentProfile?.phone || "").toLowerCase();
+      const parentPhone = (s.studentProfile?.parentPhone || "").toLowerCase();
+      const username = (s.username || "").toLowerCase();
+      return (
+        name.includes(q) ||
+        email.includes(q) ||
+        course.includes(q) ||
+        phone.includes(q) ||
+        parentPhone.includes(q) ||
+        username.includes(q)
+      );
+    });
+  }, [myStudents, studentSearch]);
 
   const showToast = (msg, type = "success") => {
     setToast({ msg, type });
@@ -1145,80 +1167,110 @@ export default function TeacherGroupsPanel() {
       {/* ── Students tab ──────────────────────────────────────────────────────── */}
       {subTab === "students" && (
         <div className="space-y-4">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <p className="text-sm text-slate-500 dark:text-slate-400">
-              {myStudents.length === 0 ? "No students yet." : `${myStudents.length} student${myStudents.length > 1 ? "s" : ""} in your class`}
-            </p>
-            <div className="flex gap-2">
+          <div className="flex flex-wrap items-center justify-between gap-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 p-3.5 rounded-2xl shadow-sm">
+            <div className="relative flex-1 min-w-[220px] max-w-md">
+              <Search className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+              <input
+                type="text"
+                value={studentSearch}
+                onChange={(e) => setStudentSearch(e.target.value)}
+                placeholder="Search students by name, course, phone..."
+                className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 pl-10 pr-9 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/20 text-slate-800 dark:text-slate-200 font-medium placeholder:text-slate-400"
+              />
+              {studentSearch && (
+                <button
+                  type="button"
+                  onClick={() => setStudentSearch("")}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700"
+                  title="Clear search"
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              )}
+            </div>
+
+            <div className="flex items-center gap-2">
               <button
                 onClick={() => {
                   exportStudentsToExcel({
-                    students: myStudents,
-                    groupName: "All My Students",
+                    students: filteredMyStudents,
+                    groupName: studentSearch ? "Filtered Students" : "All My Students",
                     teacherName: user?.name || "Teacher"
                   });
                 }}
-                className="inline-flex items-center gap-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100 px-3.5 py-2 text-xs font-bold shadow-sm transition-all active:scale-95"
-                title="Export all students to Excel (.xlsx)"
+                className="inline-flex items-center gap-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100 px-3.5 py-2 text-xs font-bold shadow-sm transition-all active:scale-95 cursor-pointer"
+                title="Export students to Excel (.xlsx)"
               >
-                <FileSpreadsheet className="h-4 w-4 text-emerald-400 dark:text-emerald-600" /> Export Excel ({myStudents.length})
+                <FileSpreadsheet className="h-4 w-4 text-emerald-400 dark:text-emerald-600" /> Export Excel ({filteredMyStudents.length})
               </button>
               <button
                 onClick={() => setShowAddStudent(true)}
-                className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-brand-600 to-brand-700 px-4 py-2 text-sm font-bold text-white shadow-sm hover:from-brand-700 hover:to-brand-800 transition-all"
+                className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-brand-600 to-brand-700 px-4 py-2 text-xs font-bold text-white shadow-sm hover:from-brand-700 hover:to-brand-800 transition-all active:scale-95"
               >
                 <UserPlus className="h-4 w-4" /> Add existing
               </button>
             </div>
           </div>
 
-          {myStudents.length === 0 && (
+          {myStudents.length === 0 ? (
             <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-700 py-14 text-center">
               <Users className="h-12 w-12 text-slate-300 dark:text-slate-600 mb-3" />
               <p className="font-bold text-slate-500 dark:text-slate-400">No students in your class</p>
               <p className="text-xs text-slate-400 mt-1">Click "Add student" to assign students to your class.</p>
             </div>
-          )}
-
-          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-            {myStudents.map((s) => (
-              <div key={s._id} className="flex items-start gap-3 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 shadow-sm">
-                <Avatar student={s} size="md" />
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between">
-                    <p className="font-bold text-slate-900 dark:text-slate-100 truncate">{s.name}</p>
-                    <button
-                      onClick={() => handleRemoveStudent(s)}
-                      disabled={removingId === s._id}
-                      className="shrink-0 flex h-7 w-7 items-center justify-center rounded-xl hover:bg-rose-50 dark:hover:bg-rose-950/40 text-slate-400 hover:text-rose-600 transition-colors disabled:opacity-50"
-                      title="Remove from class"
-                    >
-                      {removingId === s._id
-                        ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                        : <UserMinus className="h-3.5 w-3.5" />
-                      }
-                    </button>
-                  </div>
-                  <p className="text-xs text-slate-400 truncate">
-                    {s.studentProfile?.course || "–"} · Age {s.studentProfile?.age || "–"} · <span className="font-bold text-emerald-600 dark:text-emerald-400">📖 {s.sessionsAttended ?? 0} Sessions</span>
-                    {(s.studentProfile?.isStopped || s.status === "stopped") && (
-                      <span className="ml-1.5 font-bold text-rose-500 font-black">⛔ Stopped</span>
-                    )}
-                  </p>
-                  <div className="mt-2">
-                    <StudentPaymentRowWidget 
-                      compact 
-                      student={s} 
-                      initialPayment={s.currentPayment}
-                      onPaymentUpdated={(updated) => {
-                        s.currentPayment = updated;
-                      }}
-                    />
+          ) : filteredMyStudents.length === 0 ? (
+            <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-700 py-14 text-center">
+              <Users className="h-12 w-12 text-slate-300 dark:text-slate-600 mb-3 animate-pulse" />
+              <p className="font-bold text-slate-500 dark:text-slate-400">No students found matching "{studentSearch}"</p>
+              <button
+                type="button"
+                onClick={() => setStudentSearch("")}
+                className="mt-3 inline-flex items-center gap-1.5 rounded-xl bg-brand-50 hover:bg-brand-100 text-brand-700 dark:bg-brand-950/30 dark:text-brand-300 dark:hover:bg-brand-900/40 px-3.5 py-1.5 text-xs font-bold transition-all"
+              >
+                Clear Search
+              </button>
+            </div>
+          ) : (
+            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+              {filteredMyStudents.map((s) => (
+                <div key={s._id} className="flex items-start gap-3 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 shadow-sm">
+                  <Avatar student={s} size="md" />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between">
+                      <p className="font-bold text-slate-900 dark:text-slate-100 truncate">{s.name}</p>
+                      <button
+                        onClick={() => handleRemoveStudent(s)}
+                        disabled={removingId === s._id}
+                        className="shrink-0 flex h-7 w-7 items-center justify-center rounded-xl hover:bg-rose-50 dark:hover:bg-rose-950/40 text-slate-400 hover:text-rose-600 transition-colors disabled:opacity-50"
+                        title="Remove from class"
+                      >
+                        {removingId === s._id
+                          ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                          : <UserMinus className="h-3.5 w-3.5" />
+                        }
+                      </button>
+                    </div>
+                    <p className="text-xs text-slate-400 truncate">
+                      {s.studentProfile?.course || "–"} · Age {s.studentProfile?.age || "–"} · <span className="font-bold text-emerald-600 dark:text-emerald-400">📖 {s.sessionsAttended ?? 0} Sessions</span>
+                      {(s.studentProfile?.isStopped || s.status === "stopped") && (
+                        <span className="ml-1.5 font-bold text-rose-500 font-black">⛔ Stopped</span>
+                      )}
+                    </p>
+                    <div className="mt-2">
+                      <StudentPaymentRowWidget 
+                        compact 
+                        student={s} 
+                        initialPayment={s.currentPayment}
+                        onPaymentUpdated={(updated) => {
+                          s.currentPayment = updated;
+                        }}
+                      />
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
