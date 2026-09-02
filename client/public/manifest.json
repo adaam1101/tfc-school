@@ -18,14 +18,26 @@
   "prefer_related_applications": false,
   "icons": [
     {
-      "src": "/tfc-logo.png",
+      "src": "/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/tfc-logo.png",
+      "src": "/icon-192.png",
       "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
     },
@@ -33,13 +45,7 @@
       "src": "/tfc-logo.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/tfc-logo.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable"
+      "purpose": "any maskable"
     }
   ],
   "shortcuts": [
@@ -48,21 +54,21 @@
       "short_name": "Élève",
       "description": "Accéder à l'espace étudiant",
       "url": "/student",
-      "icons": [{ "src": "/tfc-logo.png", "sizes": "192x192" }]
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
     },
     {
       "name": "Espace Enseignant",
       "short_name": "Enseignant",
       "description": "Accéder à l'espace formateur",
       "url": "/teacher/app",
-      "icons": [{ "src": "/tfc-logo.png", "sizes": "192x192" }]
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
     },
     {
       "name": "Connexion",
       "short_name": "Connexion",
       "description": "Se connecter à la plateforme",
       "url": "/login",
-      "icons": [{ "src": "/tfc-logo.png", "sizes": "192x192" }]
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
     }
   ]
 }
