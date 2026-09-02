@@ -1,24 +1,68 @@
-﻿{
+{
+  "id": "https://tfc-school.onrender.com/",
   "name": "TFC School - Espace Scolaire",
   "short_name": "TFC School",
-  "description": "Application officielle de gestion scolaire et espace élèves/enseignants TFC",
+  "description": "Application officielle de gestion scolaire et espace interactif pour élèves et enseignants TFC",
+  "lang": "fr",
+  "dir": "ltr",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
-  "orientation": "portrait",
+  "orientation": "any",
   "background_color": "#0f172a",
   "theme_color": "#2563eb",
+  "categories": [
+    "education",
+    "productivity"
+  ],
+  "prefer_related_applications": false,
   "icons": [
     {
       "src": "/tfc-logo.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "/tfc-logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
     },
     {
       "src": "/tfc-logo.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "/tfc-logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Espace Élève",
+      "short_name": "Élève",
+      "description": "Accéder à l'espace étudiant",
+      "url": "/student",
+      "icons": [{ "src": "/tfc-logo.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Espace Enseignant",
+      "short_name": "Enseignant",
+      "description": "Accéder à l'espace formateur",
+      "url": "/teacher/app",
+      "icons": [{ "src": "/tfc-logo.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Connexion",
+      "short_name": "Connexion",
+      "description": "Se connecter à la plateforme",
+      "url": "/login",
+      "icons": [{ "src": "/tfc-logo.png", "sizes": "192x192" }]
     }
   ]
 }

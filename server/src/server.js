@@ -82,6 +82,20 @@ const clientDistCandidates = [
 const clientDist = clientDistCandidates.find((candidate) => existsSync(candidate));
 
 if (clientDist) {
+  // Explicit PWA Manifest and Service Worker routes with exact headers
+  app.get(["/manifest.json", "/manifest.webmanifest"], (_req, res) => {
+    res.setHeader("Content-Type", "application/manifest+json; charset=utf-8");
+    res.setHeader("Cache-Control", "public, max-age=0, must-revalidate");
+    res.sendFile(path.join(clientDist, "manifest.json"));
+  });
+
+  app.get(["/sw.js", "/service-worker.js"], (_req, res) => {
+    res.setHeader("Content-Type", "application/javascript; charset=utf-8");
+    res.setHeader("Service-Worker-Allowed", "/");
+    res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+    res.sendFile(path.join(clientDist, "sw.js"));
+  });
+
   app.use(express.static(clientDist));
   app.get("*", (req, res, next) => { if (req.path.startsWith("/api")) return next(); res.sendFile(path.join(clientDist, "index.html")); });
 }
