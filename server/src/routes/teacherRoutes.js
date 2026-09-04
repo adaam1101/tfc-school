@@ -239,7 +239,7 @@ teacherRouter.get("/dashboard", async (req, res, next) => {
         const isStudyDayToday = groupDays.length === 0 || groupDays.includes(selectedWeekday);
 
         return {
-          ...student.toJSON(),
+          ...(student.toJSON ? student.toJSON() : student),
           todayAttendance: attendanceByStudent.get(String(student._id)) || null,
           currentPayment: paymentsByStudent.get(String(student._id)) || null,
           sessionsAttended: totalAttended,
