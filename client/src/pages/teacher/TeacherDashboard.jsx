@@ -747,182 +747,207 @@ export default function TeacherDashboard() {
                       const initials = student.name?.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase() || "?";
                       const avatarGradient = getAvatarGradient(student.name);
 
-                      const statusBorder = isStopped
-                        ? "border-rose-250/70 dark:border-rose-900/60 bg-rose-50/20 dark:bg-rose-950/10 opacity-85"
-                        : status === "Present" ? "border-emerald-500/30 shadow-emerald-500/10 dark:shadow-emerald-500/5 bg-gradient-to-b from-white to-emerald-50/20 dark:from-slate-900 dark:to-emerald-950/10"
-                        : status === "Absent" ? "border-rose-500/30 shadow-rose-500/10 dark:shadow-rose-500/5 bg-gradient-to-b from-white to-rose-50/20 dark:from-slate-900 dark:to-rose-950/10"
-                        : "border-slate-200/70 dark:border-slate-800/70 hover:border-brand-500/40 hover:shadow-brand-500/5 dark:hover:border-brand-500/30";
-
                       const noteHasContent = notes[student._id]?.trim().length > 0;
                       const noteOpen = expandedNotes[student._id] || noteHasContent;
 
                       return (
                         <div
                           key={student._id}
-                          className={`card relative overflow-hidden transition-all duration-300 backdrop-blur-md hover:scale-[1.02] hover:-translate-y-0.5 shadow-sm hover:shadow-md animate-fade-slide-up opacity-0 ${statusBorder}`}
+                          className={`group relative flex flex-col justify-between rounded-3xl border bg-white/95 dark:bg-slate-900/90 p-5 shadow-sm hover:shadow-xl dark:shadow-black/40 transition-all duration-300 animate-fade-slide-up backdrop-blur-md ${
+                            isStopped
+                              ? "border-rose-300/80 dark:border-rose-900/60 bg-rose-50/20 dark:bg-rose-950/20"
+                              : status === "Present"
+                              ? "border-emerald-500/40 dark:border-emerald-500/30 shadow-emerald-500/5 ring-1 ring-emerald-500/20"
+                              : status === "Absent"
+                              ? "border-rose-500/40 dark:border-rose-500/30 shadow-rose-500/5 ring-1 ring-rose-500/20"
+                              : "border-slate-200/80 dark:border-slate-800 hover:border-brand-500/40 dark:hover:border-brand-500/40"
+                          }`}
                           style={{
                             animationFillMode: 'forwards',
-                            animationDelay: `${index * 40}ms`
+                            animationDelay: `${index * 30}ms`
                           }}
                         >
-                          {/* Accent status strip */}
-                          <div className={`absolute left-0 top-0 bottom-0 w-1 transition-all duration-300 ${
-                            isStopped ? "bg-rose-600 shadow-[0_0_8px_rgba(225,29,72,0.5)]"
-                            : status === "Present" ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"
-                            : status === "Absent" ? "bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.5)]"
-                            : "bg-slate-200 dark:bg-slate-800"
-                          }`} />
+                          {/* Top Accent Strip */}
+                          <div
+                            className={`absolute top-0 left-6 right-6 h-1 rounded-full transition-all duration-300 ${
+                              isStopped
+                                ? "bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.6)]"
+                                : status === "Present"
+                                ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)]"
+                                : status === "Absent"
+                                ? "bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.6)]"
+                                : "bg-transparent"
+                            }`}
+                          />
 
-                          {isStopped && (
-                            <div className="bg-rose-500/15 border-b border-rose-200/50 dark:border-rose-900/50 px-4 py-1.5 text-[11px] font-black text-rose-700 dark:text-rose-300 flex items-center justify-between">
-                              <span className="flex items-center gap-1">
-                                ⛔ Student Has Stopped Studying
-                              </span>
+                          <div>
+                            {/* Student Header */}
+                            <div className="flex items-start justify-between gap-3 mb-3.5">
+                              <div className="flex items-center gap-3 min-w-0">
+                                <div className="relative shrink-0">
+                                  <div className={`flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br ${avatarGradient} text-white font-black text-sm shadow-md`}>
+                                    {initials}
+                                  </div>
+                                  {status === "Present" && (
+                                    <div className="absolute -bottom-1 -right-1 flex h-4.5 w-4.5 items-center justify-center rounded-full bg-emerald-500 text-white ring-2 ring-white dark:ring-slate-900 shadow-sm">
+                                      <CheckCircle2 className="h-3 w-3" />
+                                    </div>
+                                  )}
+                                  {status === "Absent" && (
+                                    <div className="absolute -bottom-1 -right-1 flex h-4.5 w-4.5 items-center justify-center rounded-full bg-rose-500 text-white ring-2 ring-white dark:ring-slate-900 shadow-sm">
+                                      <XCircle className="h-3 w-3" />
+                                    </div>
+                                  )}
+                                </div>
+
+                                <div className="min-w-0">
+                                  <h3 className="font-black text-slate-900 dark:text-white text-base leading-snug truncate tracking-tight">
+                                    {student.name}
+                                  </h3>
+                                  <div className="flex flex-wrap items-center gap-1.5 mt-1 text-xs">
+                                    <span className="inline-flex items-center gap-1 font-bold text-brand-700 dark:text-brand-300 bg-brand-50 dark:bg-brand-950/60 px-2 py-0.5 rounded-lg text-[11px]">
+                                      🎓 {student.studentProfile?.course || "Course"}
+                                    </span>
+                                    {student.groupName && (
+                                      <span className="font-semibold text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-lg text-[11px]">
+                                        📁 {student.groupName}
+                                      </span>
+                                    )}
+                                    {student.studentProfile?.age && (
+                                      <span className="text-slate-400 text-[11px] font-medium">
+                                        • {student.studentProfile.age} yrs
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Live Status Chip */}
+                              <div className="shrink-0">
+                                <span
+                                  className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-black tracking-wide uppercase shadow-2xs ${
+                                    status === "Present"
+                                      ? "bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800"
+                                      : status === "Absent"
+                                      ? "bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800"
+                                      : "bg-slate-100 dark:bg-slate-800/80 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700"
+                                  }`}
+                                >
+                                  <span className={`h-1.5 w-1.5 rounded-full ${
+                                    status === "Present" ? "bg-emerald-500 animate-pulse" : status === "Absent" ? "bg-rose-500" : "bg-slate-400"
+                                  }`} />
+                                  {status === "Present" ? t.present : status === "Absent" ? t.absent : "Not marked"}
+                                </span>
+                              </div>
+                            </div>
+
+                            {/* Session Cycle Progress & Test Readiness Bar */}
+                            <div className="mb-3.5 rounded-2xl bg-slate-50/80 dark:bg-slate-800/50 p-2.5 border border-slate-100 dark:border-slate-800">
+                              <div className="flex items-center justify-between text-xs mb-1.5">
+                                <div className="flex items-center gap-1.5 font-bold text-slate-700 dark:text-slate-300">
+                                  <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">Sessions:</span>
+                                  <span>{student.sessionsAttended ?? 0} / {student.targetSessions || 12}</span>
+                                  {(student.absencesCount ?? 0) > 0 && (
+                                    <span className="text-rose-600 dark:text-rose-400 text-[10px] font-black bg-rose-50 dark:bg-rose-950/50 px-1.5 py-0.5 rounded-md">
+                                      🔴 {student.absencesCount} abs
+                                    </span>
+                                  )}
+                                </div>
+
+                                {student.sessionsAttended >= 11 ? (
+                                  <span className="inline-flex items-center gap-1 bg-gradient-to-r from-amber-500 to-emerald-500 text-white font-black px-2 py-0.5 rounded-lg text-[10px] shadow-xs animate-pulse">
+                                    🎯 Test Ready
+                                  </span>
+                                ) : (student.sessionsAttended ?? 0) >= 8 ? (
+                                  <span className="text-blue-600 dark:text-blue-400 text-[10px] font-bold">
+                                    ⏳ Test in {(student.targetSessions || 12) - (student.sessionsAttended ?? 0)}
+                                  </span>
+                                ) : null}
+                              </div>
+
+                              {/* Progress Track */}
+                              <div className="w-full bg-slate-200 dark:bg-slate-700/60 h-1.5 rounded-full overflow-hidden">
+                                <div
+                                  className={`h-full rounded-full transition-all duration-500 ${
+                                    student.sessionsAttended >= 11
+                                      ? "bg-gradient-to-r from-amber-400 to-emerald-500"
+                                      : "bg-gradient-to-r from-brand-500 to-teal-500"
+                                  }`}
+                                  style={{
+                                    width: `${Math.min(100, Math.round(((student.sessionsAttended ?? 0) / (student.targetSessions || 12)) * 100))}%`
+                                  }}
+                                />
+                              </div>
+                            </div>
+
+                            {/* Quick Action Dock */}
+                            <div className="flex flex-wrap items-center gap-1.5 mb-3.5">
+                              <button
+                                type="button"
+                                onClick={() => setObservationsStudent(student)}
+                                className="inline-flex items-center gap-1.5 bg-purple-50 dark:bg-purple-950/40 hover:bg-purple-100 dark:hover:bg-purple-900/60 text-purple-700 dark:text-purple-300 border border-purple-200/60 dark:border-purple-800/60 px-2.5 py-1 rounded-xl text-xs font-bold transition-all active:scale-95 cursor-pointer shadow-2xs"
+                                title="Notes & Attached Files"
+                              >
+                                <span>📝 Notes & Files</span>
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={() => setBulletinStudent(student)}
+                                className="inline-flex items-center gap-1.5 bg-indigo-50 dark:bg-indigo-950/40 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200/60 dark:border-indigo-800/60 px-2.5 py-1 rounded-xl text-xs font-bold transition-all active:scale-95 cursor-pointer shadow-2xs"
+                                title="Bulletin Numérique"
+                              >
+                                <span>🎓 Bulletin</span>
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={() => setEditingCourseStudent(student)}
+                                className="inline-flex items-center gap-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 px-2 py-1 rounded-xl text-xs font-bold transition-all active:scale-95 cursor-pointer shadow-2xs"
+                                title="Changer de niveau (A1, A2, etc.)"
+                              >
+                                <span>Level</span>
+                                <Pencil className="h-2.5 w-2.5 opacity-60" />
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={() => setEditingSessionsStudent(student)}
+                                className="inline-flex items-center gap-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 px-2 py-1 rounded-xl text-xs font-bold transition-all active:scale-95 cursor-pointer shadow-2xs"
+                                title="Modifier les séances"
+                              >
+                                <span>Sessions</span>
+                                <Pencil className="h-2.5 w-2.5 opacity-60" />
+                              </button>
+
                               <button
                                 type="button"
                                 onClick={() => handleToggleStatus(student)}
-                                className="underline text-[10px] hover:text-rose-900 font-bold"
+                                className={`inline-flex items-center gap-1 px-2 py-1 rounded-xl text-xs font-bold transition-all active:scale-95 cursor-pointer shadow-2xs ${
+                                  isStopped
+                                    ? "bg-rose-100 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border border-rose-300 dark:border-rose-800"
+                                    : "bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-rose-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700"
+                                }`}
+                                title={isStopped ? "Cliquez pour réactiver l'élève" : "Marquer comme Arrêté"}
                               >
-                                Reactivate
+                                {isStopped ? "⛔ Arrêté" : "Actif"}
                               </button>
-                            </div>
-                          )}
 
-                          <div className="p-4 pl-5">
-                            {/* Student info */}
-                            <div className="mb-4 flex items-center gap-3">
-                              <div className="relative">
-                                <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br text-sm font-black text-white shadow-sm ${avatarGradient}`}>
-                                  {initials}
-                                </div>
-                                {status === "Present" && (
-                                  <div className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500 text-white ring-2 ring-white dark:ring-slate-900 shadow-sm animate-scale-up">
-                                    <CheckCircle2 className="h-3 w-3" />
-                                  </div>
-                                )}
-                                {status === "Absent" && (
-                                  <div className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-rose-500 text-white ring-2 ring-white dark:ring-slate-900 shadow-sm animate-scale-up">
-                                    <XCircle className="h-3 w-3" />
-                                  </div>
-                                )}
-                              </div>
-                              <div className="min-w-0 flex-1">
-                                <div className="flex flex-wrap items-center gap-2">
-                                  <h3 className="font-bold text-slate-900 dark:text-slate-100 truncate text-sm">{student.name}</h3>
-                                  <StatusBadge value={status} />
-                                </div>
-                                
-                                <div className="mt-1.5 flex flex-wrap gap-1.5 items-center">
-                                  {student.groupName && (
-                                    <span className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-2 py-0.5 rounded-lg text-[10px] font-bold">
-                                      📁 {student.groupName}
-                                    </span>
-                                  )}
-                                  {!student.isStudyDayToday && (
-                                    <span className="bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 border border-amber-200/60 dark:border-amber-900/60 px-2 py-0.5 rounded-lg text-[10px] font-bold" title={`Studies on ${(student.groupDays || []).join(', ')}`}>
-                                      📅 No Class Today
-                                    </span>
-                                  )}
-                                  <button
-                                    type="button"
-                                    onClick={() => setEditingCourseStudent(student)}
-                                    className="inline-flex items-center gap-1 bg-brand-50 dark:bg-brand-950/40 hover:bg-brand-100 dark:hover:bg-brand-900/60 text-brand-700 dark:text-brand-300 border border-brand-200/60 dark:border-brand-800/60 px-2 py-0.5 rounded-lg text-[10px] font-bold transition-all active:scale-95 cursor-pointer shadow-2xs group"
-                                    title="Click to switch or promote level (e.g. A1 -> A2)"
-                                  >
-                                    <span>🎓 {student.studentProfile?.course || "Course"}</span>
-                                    <Pencil className="h-2.5 w-2.5 opacity-60 group-hover:opacity-100 ml-0.5" />
-                                  </button>
-                                  {student.studentProfile?.age && (
-                                    <span className="bg-slate-100 dark:bg-slate-800 text-slate-650 dark:text-slate-350 px-2 py-0.5 rounded-lg text-[10px] font-bold">
-                                      Age {student.studentProfile.age}
-                                    </span>
-                                  )}
-
-                                  {/* Sessions & Absences Quick Button */}
-                                  <button
-                                    type="button"
-                                    onClick={() => setEditingSessionsStudent(student)}
-                                    className="inline-flex items-center gap-1 bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 text-emerald-700 dark:text-emerald-350 border border-emerald-200/60 dark:border-emerald-800/60 px-2 py-0.5 rounded-lg text-[10px] font-bold transition-all active:scale-95 cursor-pointer shadow-2xs group"
-                                    title="Click to edit sessions attended, absences, and cycle target"
-                                  >
-                                    <span>📖 {student.sessionsAttended ?? 0}/{student.targetSessions || 12} Sessions</span>
-                                    <Pencil className="h-2.5 w-2.5 opacity-60 group-hover:opacity-100 ml-0.5" />
-                                  </button>
-
-                                  {/* Absences Badge */}
-                                  {(student.absencesCount ?? 0) > 0 && (
-                                    <span 
-                                      className="inline-flex items-center gap-1 bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border border-rose-200/60 dark:border-rose-800/60 px-2 py-0.5 rounded-lg text-[10px] font-black shadow-2xs"
-                                      title="Total absences counted against the student"
-                                    >
-                                      <span>🔴 {student.absencesCount} {student.absencesCount === 1 ? "Absence" : "Absences"}</span>
-                                    </span>
-                                  )}
-
-                                  {/* Level Test Readiness Badge (11-12 max 16 sessions) */}
-                                  {(student.sessionsAttended ?? 0) >= 11 ? (
-                                    <span 
-                                      className="inline-flex items-center gap-1 bg-gradient-to-r from-amber-500 to-emerald-500 text-white font-black px-2.5 py-0.5 rounded-lg text-[10px] shadow-xs animate-pulse"
-                                      title="Student has completed 11+ sessions (11-16 max) and is ready for the Level Test to advance to the next level!"
-                                    >
-                                      <span>🎯 Ready for Level Test!</span>
-                                    </span>
-                                  ) : (student.sessionsAttended ?? 0) >= 8 ? (
-                                    <span 
-                                      className="inline-flex items-center gap-1 bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 border border-blue-200/60 dark:border-blue-800/60 px-2 py-0.5 rounded-lg text-[10px] font-bold"
-                                      title="Approaching level test (11-12 sessions needed)"
-                                    >
-                                      <span>⏳ Test Soon ({(student.targetSessions || 12) - (student.sessionsAttended ?? 0)} left)</span>
-                                    </span>
-                                  ) : null}
-
-                                  <button
-                                    type="button"
-                                    onClick={() => handleToggleStatus(student)}
-                                    className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-black transition-all active:scale-95 cursor-pointer shadow-2xs ${
-                                      isStopped
-                                        ? "bg-rose-100 dark:bg-rose-950/60 hover:bg-rose-200 text-rose-700 dark:text-rose-300 border border-rose-300 dark:border-rose-800"
-                                        : "bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700"
-                                    }`}
-                                    title={isStopped ? "Click to set status to Active" : "Click to mark student as Stopped"}
-                                  >
-                                    {isStopped ? "⛔ Stopped" : "🟢 Active"}
-                                  </button>
-
-                                  <button
-                                    type="button"
-                                    onClick={() => setObservationsStudent(student)}
-                                    className="inline-flex items-center gap-1 bg-purple-50 dark:bg-purple-950/40 hover:bg-purple-100 dark:hover:bg-purple-900/60 text-purple-700 dark:text-purple-300 border border-purple-200/60 dark:border-purple-800/60 px-2 py-0.5 rounded-lg text-[10px] font-bold transition-all active:scale-95 cursor-pointer shadow-2xs group"
-                                    title="Upload pictures, PDF files, homework or write teacher observations"
-                                  >
-                                    <span>📝 Files & Notes</span>
-                                  </button>
-
-                                  <button
-                                    type="button"
-                                    onClick={() => setBulletinStudent(student)}
-                                    className="inline-flex items-center gap-1 bg-indigo-50 dark:bg-indigo-950/40 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200/60 dark:border-indigo-800/60 px-2 py-0.5 rounded-lg text-[10px] font-bold transition-all active:scale-95 cursor-pointer shadow-2xs group"
-                                    title="Générer et envoyer le bulletin numérique"
-                                  >
-                                    <span>🎓 Bulletin</span>
-                                  </button>
-                                </div>
-
-                                {student.studentProfile?.parentPhone && (
-                                  <a 
-                                    href={`https://wa.me/${student.studentProfile.parentPhone.replace(/[^0-9]/g, "")}`}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    className="mt-1.5 inline-flex items-center gap-1 text-[10px] font-bold text-slate-400 hover:text-emerald-500 transition-colors"
-                                  >
-                                    💬 Parent: {student.studentProfile.parentPhone}
-                                  </a>
-                                )}
-                              </div>
+                              {student.studentProfile?.parentPhone && (
+                                <a
+                                  href={`https://wa.me/${student.studentProfile.parentPhone.replace(/[^0-9]/g, "")}`}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="inline-flex items-center gap-1 bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200/60 dark:border-emerald-800/60 px-2 py-1 rounded-xl text-xs font-bold transition-all"
+                                  title="Contacter le parent sur WhatsApp"
+                                >
+                                  💬 Parent
+                                </a>
+                              )}
                             </div>
 
-                            {/* Student Monthly Payment, Rest & Assurance row widget */}
-                            <div className="mb-3">
+                            {/* Financial Tuition Widget */}
+                            <div className="mb-3.5">
                               <StudentPaymentRowWidget
                                 student={student}
                                 month={selectedDate?.slice(0, 7)}
@@ -937,26 +962,14 @@ export default function TeacherDashboard() {
                                 }}
                               />
                             </div>
+                          </div>
 
-                            {/* Note Section header & toggle */}
-                            <div className="flex items-center justify-between mb-2">
-                              <span className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 font-semibold">
-                                <MessageSquareText className="h-3.5 w-3.5" />
-                                {t.optionalNote}
-                              </span>
-                              <button
-                                type="button"
-                                onClick={() => setExpandedNotes(prev => ({ ...prev, [student._id]: !prev[student._id] }))}
-                                className="text-xs font-bold text-brand-600 hover:text-brand-700 dark:text-brand-400 dark:hover:text-brand-300 transition-colors"
-                              >
-                                {noteOpen ? "Collapse" : noteHasContent ? "Edit Note" : "+ Add Note"}
-                              </button>
-                            </div>
-
-                            {/* Collapsible Textarea */}
-                            <div className={`transition-all duration-300 overflow-hidden ${noteOpen ? "max-h-[100px] opacity-100 mb-4" : "max-h-0 opacity-0 mb-0 pointer-events-none"}`}>
+                          {/* Attendance Slider & Note Section at Bottom */}
+                          <div className="space-y-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+                            {/* Collapsible Note */}
+                            {noteOpen && (
                               <textarea
-                                className="input text-xs resize-none w-full bg-slate-50/50 dark:bg-slate-900/50 focus:bg-white dark:focus:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 min-h-[64px]"
+                                className="input text-xs resize-none w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 min-h-[50px] mb-2"
                                 value={notes[student._id] ?? ""}
                                 onChange={(event) =>
                                   setNotes((current) => ({ ...current, [student._id]: event.target.value }))
@@ -964,49 +977,62 @@ export default function TeacherDashboard() {
                                 placeholder={t.noteReason}
                                 rows={2}
                               />
-                            </div>
+                            )}
 
-                            {/* Dynamic Segmented Sliding Controller */}
-                            <div className="relative flex rounded-2xl bg-slate-100/80 dark:bg-slate-800/80 p-1 select-none w-full border border-slate-200/30 dark:border-slate-700/20">
-                              {/* Sliding capsule background */}
-                              <div 
-                                className={`absolute top-1 bottom-1 rounded-xl transition-all duration-300 ease-out shadow-sm ${
-                                  status === "Present" 
-                                    ? "left-1 w-[48%] bg-gradient-to-r from-emerald-500 to-teal-600" 
-                                    : status === "Absent" 
-                                    ? "left-[51%] w-[48%] bg-gradient-to-r from-rose-500 to-red-600" 
-                                    : "opacity-0 pointer-events-none"
-                                }`}
-                              />
-                              
+                            {/* Segmented Tactile Attendance Capsule */}
+                            <div className="flex items-center gap-2">
+                              <div className="relative flex-1 flex rounded-2xl bg-slate-100 dark:bg-slate-800/90 p-1 select-none border border-slate-200/60 dark:border-slate-700/50">
+                                <div
+                                  className={`absolute top-1 bottom-1 rounded-xl transition-all duration-300 ease-out shadow-sm ${
+                                    status === "Present"
+                                      ? "left-1 w-[48%] bg-gradient-to-r from-emerald-500 to-teal-600 shadow-emerald-500/30"
+                                      : status === "Absent"
+                                      ? "left-[51%] w-[48%] bg-gradient-to-r from-rose-500 to-red-600 shadow-rose-500/30"
+                                      : "opacity-0 pointer-events-none"
+                                  }`}
+                                />
+
+                                <button
+                                  type="button"
+                                  disabled={savingId === student._id}
+                                  onClick={() => markAttendance(student, "Present")}
+                                  className={`relative z-10 flex-1 text-center py-2 text-xs font-black transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                                    status === "Present" ? "text-white" : "text-slate-600 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400"
+                                  }`}
+                                >
+                                  <CheckCircle2 className="h-4 w-4" />
+                                  {t.present}
+                                </button>
+
+                                <button
+                                  type="button"
+                                  disabled={savingId === student._id}
+                                  onClick={() => markAttendance(student, "Absent")}
+                                  className={`relative z-10 flex-1 text-center py-2 text-xs font-black transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                                    status === "Absent" ? "text-white" : "text-slate-600 dark:text-slate-400 hover:text-rose-600 dark:hover:text-rose-400"
+                                  }`}
+                                >
+                                  <XCircle className="h-4 w-4" />
+                                  {t.absent}
+                                </button>
+                              </div>
+
                               <button
                                 type="button"
-                                disabled={savingId === student._id}
-                                onClick={() => markAttendance(student, "Present")}
-                                className={`relative z-10 flex-1 text-center py-2.5 text-xs font-bold transition-all duration-300 flex items-center justify-center gap-1.5 ${
-                                  status === "Present" ? "text-white scale-102" : "text-slate-600 dark:text-slate-400 hover:text-brand-500"
+                                onClick={() => setExpandedNotes(prev => ({ ...prev, [student._id]: !prev[student._id] }))}
+                                className={`h-9 w-9 rounded-2xl flex items-center justify-center border transition-all cursor-pointer ${
+                                  noteHasContent
+                                    ? "bg-amber-50 dark:bg-amber-950/50 border-amber-300 dark:border-amber-700 text-amber-700 dark:text-amber-300 shadow-xs"
+                                    : "bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
                                 }`}
+                                title={noteHasContent ? "Modifier la note" : "Ajouter une note"}
                               >
-                                <CheckCircle2 className={`h-4 w-4 transition-transform duration-300 ${status === "Present" ? "scale-110" : ""}`} />
-                                {t.present}
-                              </button>
-                              
-                              <button
-                                type="button"
-                                disabled={savingId === student._id}
-                                onClick={() => markAttendance(student, "Absent")}
-                                className={`relative z-10 flex-1 text-center py-2.5 text-xs font-bold transition-all duration-300 flex items-center justify-center gap-1.5 ${
-                                  status === "Absent" ? "text-white scale-102" : "text-slate-600 dark:text-slate-400 hover:text-rose-500"
-                                }`}
-                              >
-                                <XCircle className={`h-4 w-4 transition-transform duration-300 ${status === "Absent" ? "scale-110" : ""}`} />
-                                {t.absent}
+                                <MessageSquareText className="h-4 w-4" />
                               </button>
                             </div>
 
-                            {/* Notification status */}
                             {status === "Absent" && (
-                              <p className="mt-2 text-center text-[10px] text-slate-450 dark:text-slate-500 font-semibold animate-pulse">
+                              <p className="text-center text-[10px] text-slate-400 font-semibold pt-1">
                                 WhatsApp Alert:{" "}
                                 {student.todayAttendance?.parentNotification?.sent
                                   ? "Sent ✓"
