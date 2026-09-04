@@ -41,6 +41,7 @@ import StatusBadge from "../../components/StatusBadge.jsx";
 import AppLayout from "../../layouts/AppLayout.jsx";
 import { useLang } from "../../context/LanguageContext.jsx";
 import { useAuth } from "../../context/AuthContext.jsx";
+import { useTheme } from "../../hooks/useTheme.js";
 import AnnouncementsCard from "../../components/AnnouncementsCard.jsx";
 import IDCardModal from "../../components/IDCardModal.jsx";
 import TimetableGrid from "../../components/TimetableGrid.jsx";
@@ -58,6 +59,7 @@ const payStatusBadge = {
 export default function StudentDashboard() {
   const { lang, setLang } = useLang();
   const { logout } = useAuth();
+  const { dark: isDark, toggle: toggleTheme } = useTheme();
 
   const [profile, setProfile] = useState(null);
   const [payments, setPayments] = useState([]);
@@ -70,25 +72,6 @@ export default function StudentDashboard() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
-
-  // Dark mode state
-  const [isDark, setIsDark] = useState(() => {
-    return document.documentElement.classList.contains("dark") || localStorage.getItem("tfc_theme") === "dark";
-  });
-
-  const toggleTheme = () => {
-    setIsDark((prev) => {
-      const next = !prev;
-      if (next) {
-        document.documentElement.classList.add("dark");
-        localStorage.setItem("tfc_theme", "dark");
-      } else {
-        document.documentElement.classList.remove("dark");
-        localStorage.setItem("tfc_theme", "light");
-      }
-      return next;
-    });
-  };
 
   // 5 Tabs: "home" | "courses" | "create" (modal) | "payments" | "profile"
   const [activeTab, setActiveTab] = useState("home");
