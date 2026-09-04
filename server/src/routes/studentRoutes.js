@@ -13,9 +13,12 @@ studentRouter.get("/profile", async (req, res, next) => {
       Attendance.find({ student: req.user._id })
         .sort({ date: -1 })
         .limit(90)
-        .populate("teacher", "name teacherProfile.subject"),
+        .populate("teacher", "name teacherProfile.subject")
+        .lean(),
       req.user.studentProfile?.teacher
-        ? User.findById(req.user.studentProfile.teacher).select("name email phone teacherProfile.subject teacherProfile.contactInfo")
+        ? User.findById(req.user.studentProfile.teacher)
+            .select("name email phone teacherProfile.subject teacherProfile.contactInfo")
+            .lean()
         : null
     ]);
 

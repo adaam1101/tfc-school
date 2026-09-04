@@ -62,6 +62,10 @@ paymentSchema.pre("save", function derivePaymentFields(next) {
   next();
 });
 
+paymentSchema.index({ student: 1, month: 1 });
+paymentSchema.index({ teacher: 1, month: 1 });
+paymentSchema.index({ month: 1, status: 1 });
+
 // Static helper to compute overdue on existing docs
 paymentSchema.statics.computeStatus = function (payment) {
   if (payment.paidAmount >= payment.amount && payment.amount > 0) return "paid";

@@ -22,7 +22,10 @@ const getAssignedStudents = async (teacher) => {
   return User.find({
     role: "student",
     $or: [{ "studentProfile.teacher": teacher._id }, { _id: { $in: assignedIds } }]
-  }).sort({ name: 1 });
+  })
+    .select("name email username phone photo status studentProfile createdAt")
+    .sort({ name: 1 })
+    .lean();
 };
 
 // ── Teacher: Create a new student account ──
@@ -152,8 +155,8 @@ teacherRouter.get("/dashboard", async (req, res, next) => {
     }).format(new Date(selectedDate + "T12:00:00"));
 
     const [groups, todayRecords, weekStats, sessionCounts, absenceCounts, monthlyPayments] = await Promise.all([
-      Group.find({ teacher: req.user._id }),
-      Attendance.find({ date: selectedDate, student: { $in: studentIds } }),
+      Group.find({ teacher: req.user._id }).lean(),
+      Attendance.find({ date: selectedDate, student: { $in: studentIds } }).lean(),
       Attendance.aggregate([
         {
           $match: {
@@ -184,7 +187,7 @@ teacherRouter.get("/dashboard", async (req, res, next) => {
       Payment.find({
         student: { $in: studentIds },
         month: currentMonth
-      })
+      }).lean()
     ]);
 
     const studentGroupMap = new Map();

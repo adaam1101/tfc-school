@@ -167,6 +167,10 @@ userSchema.methods.createPasswordResetToken = function createPasswordResetToken(
   return rawToken;
 };
 
+userSchema.index({ role: 1, status: 1 });
+userSchema.index({ "studentProfile.teacher": 1 });
+userSchema.index({ "teacherProfile.assignedStudents": 1 });
+
 userSchema.statics.hashResetToken = (rawToken) => sha256(rawToken);
 
 userSchema.set("toJSON", {

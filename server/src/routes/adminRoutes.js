@@ -93,6 +93,7 @@ adminRouter.get("/dashboard", adminOrSousAdmin, async (_req, res, next) => {
           .limit(8)
           .populate("student", "name studentProfile")
           .populate("teacher", "name teacherProfile.subject")
+          .lean()
       ]);
 
     res.json({
@@ -121,7 +122,8 @@ adminRouter.get("/users", async (req, res, next) => {
       .select(selectUserFields)
       .populate("studentProfile.teacher", "name email teacherProfile.subject")
       .populate("teacherProfile.assignedStudents", "name email studentProfile.course")
-      .sort({ role: 1, name: 1 });
+      .sort({ role: 1, name: 1 })
+      .lean();
 
     res.json({ users });
   } catch (error) {
