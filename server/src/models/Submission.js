@@ -30,4 +30,7 @@ const submissionSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+submissionSchema.index({ teacher: 1, status: 1 });
+submissionSchema.index({ student: 1, coursework: 1 });
+
 export const Submission = mongoose.model("Submission", submissionSchema);

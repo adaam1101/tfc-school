@@ -114,7 +114,8 @@ submissionRouter.get("/teacher", allowRoles("teacher"), async (req, res, next) =
     const submissions = await Submission.find(filter)
       .sort({ createdAt: -1 })
       .populate("student", "name email phone studentProfile photo")
-      .populate("coursework", "title type dueDate course");
+      .populate("coursework", "title type dueDate course")
+      .lean();
 
     const pendingCount = await Submission.countDocuments({
       teacher: req.user._id,
