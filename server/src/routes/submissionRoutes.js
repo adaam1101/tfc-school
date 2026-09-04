@@ -111,18 +111,20 @@ submissionRouter.get("/teacher", allowRoles("teacher"), async (req, res, next) =
     if (courseworkId) filter.coursework = courseworkId;
     if (status && status !== "all") filter.status = status;
 
-    const submissions = await Submission.find(filter)
-      .sort({ createdAt: -1 })
-      .populate("student", "name email phone studentProfile photo")
-      .populate("coursework", "title type dueDate course")
-      .lean();
+    const [submissions, pendingCount] = await Promise.all([
+      Submission.find(filter)
+        .sort({ createdAt: -1 })
+        .limit(100)
+        .populate("student", "name email phone studentProfile photo")
+        .populate("coursework", "title type dueDate course")
+        .lean(),
+      Submission.countDocuments({
+        teacher: req.user._id,
+        status: "submitted"
+      })
+    ]);
 
-    const pendingCount = await Submission.countDocuments({
-      teacher: req.user._id,
-      status: "submitted"
-    });
-
-    res.json({ submissions, pendingCount });
+    res.json({ submissions: submissions || [], pendingCount: pendingCount || 0 });
   } catch (error) {
     next(error);
   }

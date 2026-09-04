@@ -16,14 +16,14 @@ courseworkRouter.get("/mine", allowRoles("student"), async (req, res, next) => {
       teacher: teacherId,
       $or: [{ course: { $exists: false } }, { course: "" }, { course }]
     };
-    const items = await Coursework.find(filter).sort({ createdAt: -1 }).limit(100);
+    const items = await Coursework.find(filter).sort({ createdAt: -1 }).limit(100).lean();
     res.json({ items });
   } catch (error) { next(error); }
 });
 
 courseworkRouter.get("/", allowRoles("teacher"), async (req, res, next) => {
   try {
-    const items = await Coursework.find({ teacher: req.user._id }).sort({ createdAt: -1 }).limit(100);
+    const items = await Coursework.find({ teacher: req.user._id }).sort({ createdAt: -1 }).limit(100).lean();
     res.json({ items });
   } catch (error) { next(error); }
 });
