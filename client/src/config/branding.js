@@ -1,7 +1,9 @@
-export const schoolLogo = import.meta.env.VITE_SCHOOL_LOGO || "/tfc-logo.png";
+import tfcLogo from "../assets/tfc-logo.png";
+
+export const schoolLogo = import.meta.env.VITE_SCHOOL_LOGO || tfcLogo;
 
 export const schoolInfo = {
-  logo: import.meta.env.VITE_SCHOOL_LOGO || "/tfc-logo.png",
+  logo: import.meta.env.VITE_SCHOOL_LOGO || tfcLogo,
   name:        import.meta.env.VITE_SCHOOL_NAME        || "Training Formation Center",
   short:       import.meta.env.VITE_SCHOOL_SHORT       || "TFC",
   tagline:     import.meta.env.VITE_SCHOOL_TAGLINE     || "Shaping Futures, Building Excellence",
