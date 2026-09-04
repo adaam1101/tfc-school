@@ -1,3 +1,4 @@
+import compression from "compression";
 import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
@@ -36,6 +37,15 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 // Render (and most hosts) put the app behind a reverse proxy. Trusting the first
 // proxy hop lets express-rate-limit read the real client IP from X-Forwarded-For.
 app.set("trust proxy", 1);
+
+// Enable gzip / brotli compression for ultra-fast API and asset transfers
+app.use(compression({
+  threshold: 1024,
+  filter: (req, res) => {
+    if (req.headers["x-no-compression"]) return false;
+    return compression.filter(req, res);
+  }
+}));
 
 const allowedOrigins = [
   process.env.CLIENT_URL,
@@ -96,8 +106,22 @@ if (clientDist) {
     res.sendFile(path.join(clientDist, "sw.js"));
   });
 
-  app.use(express.static(clientDist));
-  app.get("*", (req, res, next) => { if (req.path.startsWith("/api")) return next(); res.sendFile(path.join(clientDist, "index.html")); });
+  // Serve static assets with smart caching
+  app.use(express.static(clientDist, {
+    maxAge: "1d",
+    setHeaders: (res, filePath) => {
+      // Fingerprinted JS and CSS assets in dist/assets can be cached for 1 year
+      if (filePath.includes(`${path.sep}assets${path.sep}`) || filePath.includes("/assets/")) {
+        res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+      }
+    }
+  }));
+
+  app.get("*", (req, res, next) => {
+    if (req.path.startsWith("/api")) return next();
+    res.setHeader("Cache-Control", "no-cache");
+    res.sendFile(path.join(clientDist, "index.html"));
+  });
 }
 
 app.use(notFound);
