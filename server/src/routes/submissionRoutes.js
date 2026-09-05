@@ -74,15 +74,73 @@ submissionRouter.post("/", allowRoles("student"), async (req, res, next) => {
   }
 });
 
+// ── Get Single Attachment / Stream File ──
+submissionRouter.get("/:id/attachment/:attId", async (req, res, next) => {
+  try {
+    const submission = await Submission.findById(req.params.id);
+    if (!submission) return res.status(404).send("Submission not found");
+
+    if (
+      req.user.role !== "admin" &&
+      String(submission.teacher) !== String(req.user._id) &&
+      String(submission.student) !== String(req.user._id)
+    ) {
+      return res.status(403).send("Unauthorized");
+    }
+
+    const att = (submission.attachments || []).find(
+      (a) => String(a._id) === String(req.params.attId)
+    ) || submission.attachments?.[Number(req.params.attId)];
+
+    if (!att || !att.fileData) {
+      return res.status(404).send("Attachment not found");
+    }
+
+    if (att.fileData.startsWith("data:")) {
+      const matches = att.fileData.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
+      if (matches && matches.length === 3) {
+        const mimeType = matches[1];
+        const buffer = Buffer.from(matches[2], "base64");
+        res.setHeader("Content-Type", mimeType);
+        res.setHeader("Content-Disposition", `inline; filename="${encodeURIComponent(att.fileName || "attachment")}"`);
+        res.setHeader("Cache-Control", "public, max-age=86400");
+        return res.send(buffer);
+      }
+    }
+
+    if (att.fileData.startsWith("http://") || att.fileData.startsWith("https://")) {
+      return res.redirect(att.fileData);
+    }
+
+    res.send(att.fileData);
+  } catch (error) {
+    next(error);
+  }
+});
+
 // ── Student: Get own submissions ──
 submissionRouter.get("/mine", allowRoles("student"), async (req, res, next) => {
   try {
     const submissions = await Submission.find({ student: req.user._id })
       .sort({ createdAt: -1 })
       .populate("teacher", "name email teacherProfile.subject")
-      .populate("coursework", "title type dueDate");
+      .populate("coursework", "title type dueDate")
+      .lean();
 
-    res.json({ submissions });
+    const optimized = (submissions || []).map((sub) => ({
+      ...sub,
+      attachments: (sub.attachments || []).map((att) => ({
+        _id: att._id,
+        fileName: att.fileName,
+        fileType: att.fileType,
+        fileSize: att.fileSize,
+        fileData: att.fileData && att.fileData.length > 120 * 1024
+          ? `/api/submissions/${sub._id}/attachment/${att._id}`
+          : att.fileData
+      }))
+    }));
+
+    res.json({ submissions: optimized });
   } catch (error) {
     next(error);
   }
@@ -124,7 +182,20 @@ submissionRouter.get("/teacher", allowRoles("teacher"), async (req, res, next) =
       })
     ]);
 
-    res.json({ submissions: submissions || [], pendingCount: pendingCount || 0 });
+    const optimized = (submissions || []).map((sub) => ({
+      ...sub,
+      attachments: (sub.attachments || []).map((att) => ({
+        _id: att._id,
+        fileName: att.fileName,
+        fileType: att.fileType,
+        fileSize: att.fileSize,
+        fileData: att.fileData && att.fileData.length > 120 * 1024
+          ? `/api/submissions/${sub._id}/attachment/${att._id}`
+          : att.fileData
+      }))
+    }));
+
+    res.json({ submissions: optimized, pendingCount: pendingCount || 0 });
   } catch (error) {
     next(error);
   }

@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { api, getApiError } from "../api/http.js";
 import ErrorAlert from "./ErrorAlert.jsx";
+import { compressImageFile } from "../utils/fileUpload.js";
 
 export default function StudentSubmissionModal({
   coursework,
@@ -25,21 +26,20 @@ export default function StudentSubmissionModal({
   const [error, setError] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
 
-  const handleFileSelect = (e) => {
+  const handleFileSelect = async (e) => {
     const files = Array.from(e.target.files || []);
-    files.forEach((file) => {
-      if (file.size > 10 * 1024 * 1024) {
-        setError(`File "${file.name}" exceeds 10MB limit.`);
-        return;
+    for (const file of files) {
+      if (file.size > 15 * 1024 * 1024) {
+        setError(`File "${file.name}" exceeds 15MB limit.`);
+        continue;
       }
 
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const fileData = event.target.result;
-        const isImage = file.type.startsWith("image/");
-        const isPdf = file.type === "application/pdf" || file.name.endsWith(".pdf");
-        const fileType = isImage ? "image" : isPdf ? "pdf" : "file";
+      const isImage = file.type.startsWith("image/");
+      const isPdf = file.type === "application/pdf" || file.name.endsWith(".pdf");
+      const fileType = isImage ? "image" : isPdf ? "pdf" : "file";
 
+      try {
+        const fileData = await compressImageFile(file, 1280, 1280, 0.82);
         setAttachments((prev) => [
           ...prev,
           {
@@ -49,9 +49,10 @@ export default function StudentSubmissionModal({
             fileSize: file.size
           }
         ]);
-      };
-      reader.readAsDataURL(file);
-    });
+      } catch (err) {
+        console.error("File read error:", err);
+      }
+    }
     e.target.value = "";
   };
 

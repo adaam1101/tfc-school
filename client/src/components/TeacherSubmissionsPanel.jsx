@@ -37,9 +37,7 @@ export default function TeacherSubmissionsPanel() {
     setLoading(true);
     setError("");
     try {
-      const { data } = await api.get(`/submissions/teacher?status=${statusFilter}`, {
-        timeout: 10000
-      });
+      const { data } = await api.get(`/submissions/teacher?status=${statusFilter}`);
       setSubmissions(data.submissions || []);
     } catch (err) {
       setError(getApiError(err) || "Could not load submissions. Please click Refresh to try again.");
