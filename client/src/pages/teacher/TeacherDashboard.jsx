@@ -539,6 +539,15 @@ export default function TeacherDashboard() {
 
                     <button
                       type="button"
+                      onClick={() => setShowMonthlyRapport(true)}
+                      className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 px-3.5 py-2 text-xs font-black shadow-md transition-all active:scale-95 cursor-pointer"
+                      title="View complete group payment records, past months, and export reports"
+                    >
+                      <Wallet className="h-3.5 w-3.5" />
+                      <span>💰 Payments & Reports</span>
+                    </button>
+                    <button
+                      type="button"
                       onClick={() => setShowCreateStudentModal(true)}
                       className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-emerald-400 to-teal-500 hover:from-emerald-300 hover:to-teal-400 text-slate-950 px-3.5 py-2 text-xs font-black shadow-md transition-all active:scale-95 cursor-pointer"
                       title="Créer un nouveau compte élève"

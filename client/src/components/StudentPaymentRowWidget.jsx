@@ -112,6 +112,17 @@ export default function StudentPaymentRowWidget({
     setShowReceipt(true);
   };
 
+  const monthLabel = useMemo(() => {
+    try {
+      const [y, m] = (currentMonth || "").split("-");
+      if (!y || !m) return "";
+      const d = new Date(Number(y), Number(m) - 1, 1);
+      return d.toLocaleDateString("en-GB", { month: "short", year: "numeric" });
+    } catch {
+      return currentMonth;
+    }
+  }, [currentMonth]);
+
   const isFullyPaid = numPaid >= tuitionFee && tuitionFee > 0;
   const isPartial = numPaid > 0 && numPaid < tuitionFee;
 
@@ -210,7 +221,7 @@ export default function StudentPaymentRowWidget({
       <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
         <div className="flex items-center gap-1.5 text-slate-700 dark:text-slate-200 font-bold">
           <Wallet className="h-3.5 w-3.5 text-brand-600" />
-          <span>Tuition: <strong className="text-slate-900 dark:text-white font-black">{tuitionFee.toLocaleString()} DA</strong></span>
+          <span>Tuition {monthLabel && <span className="text-[10px] text-slate-400 font-normal">({monthLabel})</span>}: <strong className="text-slate-900 dark:text-white font-black">{tuitionFee.toLocaleString()} DA</strong></span>
         </div>
 
         {/* Assurance Pill */}
